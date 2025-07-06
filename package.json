@@ -12,6 +12,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@tanstack/vue-query": "^5.81.5",
     "firebase": "^11.10.0",
     "pinia": "^3.0.3",
     "sass-embedded": "^1.89.2",
