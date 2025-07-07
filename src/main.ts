@@ -9,10 +9,10 @@ import 'vue3-toastify/dist/index.css'
 import App from './App.vue'
 import router from './router'
 import { useAuthStore } from './stores/auth'
+import { queryClient } from './configs/react-query'
 
 const app = createApp(App)
 
-const queryClient = new QueryClient()
 app.use(VueQueryPlugin, { queryClient })
 
 app.use(createPinia())

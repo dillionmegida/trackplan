@@ -1,5 +1,5 @@
 import { Timestamp } from 'firebase/firestore'
-import { ChecklistTemplateCategoryType, ChecklistTemplateItemType } from './ChecklistTemplate'
+import type { ChecklistTemplateCategoryType, ChecklistTemplateItemType } from './ChecklistTemplate'
 
 export type ProgramChecklistType = {
   id: string
@@ -8,7 +8,10 @@ export type ProgramChecklistType = {
   createdAt: Timestamp
 }
 
-export type ProgramChecklistCategoryType = ChecklistTemplateCategoryType
+export type ProgramChecklistCategoryType = ChecklistTemplateCategoryType & {
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
 
 export type ProgramChecklistItemType = ChecklistTemplateItemType & {
   isCompleted: boolean

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { format } from 'date-fns'
 import { useProgram } from '@/query/usePrograms'
@@ -7,11 +7,19 @@ import Layout from '@/components/Layout.vue'
 import EditIcon from '@/components/icons/EditIcon.vue'
 import { LINKS } from '@/constants/links'
 import BackIcon from '@/components/icons/BackIcon.vue'
+import { useProgramChecklists } from '@/query/useProgramChecklists'
+
+import CategoriesSection from '@/components/DashboardProgram/CategoriesSection.vue'
 
 const route = useRoute()
 const programId = route.params.id as string
 
 const { data: program, isLoading, error } = useProgram(programId)
+const {
+  data: checklists,
+  isLoading: checklistsLoading,
+  error: checklistsError,
+} = useProgramChecklists(programId)
 
 const formatDate = (timestamp: any) => {
   return format(timestamp.toDate(), 'MMMM d, yyyy')
@@ -36,6 +44,8 @@ const formatDate = (timestamp: any) => {
         <p class="program-date">{{ formatDate(program.date) }}</p>
 
         <p class="program-description">{{ program.description }}</p>
+
+        <CategoriesSection />
       </div>
     </div>
   </Layout>
@@ -97,6 +107,10 @@ const formatDate = (timestamp: any) => {
     font-weight: 300;
     color: #64748b;
     margin-bottom: 1rem;
+  }
+
+  .program-description {
+    margin-bottom: 2.5rem;
   }
 }
 
