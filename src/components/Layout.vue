@@ -149,9 +149,9 @@ const handleLogout = async () => {
 }
 
 @media (max-width: 768px) {
-  .header {
+  /* .header {
     padding: 1rem;
-  }
+  } */
 
   .user-name {
     display: none;

@@ -72,7 +72,7 @@ form {
   gap: 0.5rem;
 
   input {
-    padding: 0.25rem 0.5rem;
+    padding: 0.3rem 0.5rem;
     border-radius: 6px;
     border: 1px solid #d1d5db;
     font-size: 0.9rem;
@@ -90,7 +90,7 @@ form {
   }
 
   button {
-    padding: 0.25rem 0.5rem;
+    padding: 0.3rem 0.5rem;
     border-radius: 6px;
     border: 1px solid #d1d5db;
     font-size: 0.9rem;
@@ -101,6 +101,25 @@ form {
     &:hover {
       background-color: #d5dee7;
       color: #1e293b;
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.5rem;
+
+    input {
+      width: 100%;
+      padding: 0.5rem;
+    }
+
+    .v-select {
+      max-width: 100%;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.5rem;
     }
   }
 }

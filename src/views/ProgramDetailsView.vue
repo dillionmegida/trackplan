@@ -38,7 +38,7 @@ const howManyChecked = computed(() => {
 
 <template>
   <Layout>
-    <div class="program-details">
+    <div class="program-details container">
       <div v-if="isLoading" class="loading">Loading program details...</div>
 
       <div v-else-if="error" class="error">Error loading program: {{ error }}</div>
@@ -74,9 +74,7 @@ const howManyChecked = computed(() => {
 
 <style lang="scss" scoped>
 .program-details {
-  padding: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
+  
 }
 
 .back-link {
