@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/vue-query'
 import { db } from '@/configs/firebase'
-import { collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore'
+import { addDoc, collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore'
 import { useMutation } from '@tanstack/vue-query'
 import type { ProgramType } from '@/types/Program'
 
@@ -15,21 +15,23 @@ export const useProgramsForUser = (userId: string) => {
         id: doc.id,
         ...doc.data(),
       }))
-      return programs
+      return programs as ProgramType[]
     },
     enabled: !!userId,
   })
 }
 
 type UseCreateProgramArgs = {
-  data: ProgramType
+  data: Omit<ProgramType, 'id'>
 }
 
 export const useCreateProgram = () => {
   return useMutation({
-    mutationFn: async ({ data }: UseCreateProgramArgs) => {
-      const programRef = doc(db, 'programs', data.id)
-      await setDoc(programRef, data)
+    mutationFn: async ({ data }: UseCreateProgramArgs): Promise<{ id: string }> => {
+      const programRef = collection(db, 'programs')
+      await addDoc(programRef, data)
+
+      return { id: programRef.id }
     },
   })
 }
