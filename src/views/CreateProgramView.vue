@@ -15,16 +15,7 @@ const { mutateAsync: createProgram, isPending, error: createProgramError } = use
 const program = ref({
   title: '',
   date: '',
-})
-
-const formattedDate = computed(() => {
-  if (!program.value.date) return ''
-  const date = new Date(program.value.date)
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  description: '',
 })
 
 const submit = async () => {
@@ -36,9 +27,12 @@ const submit = async () => {
   const programData = {
     title: program.value.title.trim(),
     date: Timestamp.fromDate(new Date(program.value.date)),
+    description: program.value.description.trim(),
     organizationId: authStore.user.uid,
     createdAt: serverTimestamp() as Timestamp,
     createdBy: authStore.user.uid,
+    updatedAt: serverTimestamp() as Timestamp,
+    updatedBy: authStore.user.uid,
   }
 
   try {
@@ -66,6 +60,10 @@ const allFieldsFilled = computed(() => {
           <div class="input-group">
             <label for="title">Program Title</label>
             <input type="text" v-model="program.title" placeholder="Program Title" />
+          </div>
+          <div class="input-group">
+            <label for="description">Description</label>
+            <input type="text" v-model="program.description" placeholder="Description" />
           </div>
           <div class="input-group">
             <label for="date">Program Date</label>

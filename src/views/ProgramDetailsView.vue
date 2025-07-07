@@ -6,6 +6,7 @@ import { useProgram } from '@/query/usePrograms'
 import Layout from '@/components/Layout.vue'
 import EditIcon from '@/components/icons/EditIcon.vue'
 import { LINKS } from '@/constants/links'
+import BackIcon from '@/components/icons/BackIcon.vue'
 
 const route = useRoute()
 const programId = route.params.id as string
@@ -25,6 +26,7 @@ const formatDate = (timestamp: any) => {
       <div v-else-if="error" class="error">Error loading program: {{ error }}</div>
 
       <div v-else-if="program" class="program-content">
+        <RouterLink class="back-link" :to="LINKS.home"><BackIcon /> Back to Programs</RouterLink>
         <div class="title-block">
           <h1>{{ program.title }}</h1>
           <RouterLink :to="LINKS.program_edit(program.id)" class="edit-program">
@@ -46,9 +48,25 @@ const formatDate = (timestamp: any) => {
   margin: 0 auto;
 }
 
+.back-link {
+  align-items: center;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  border: 1px solid #d1d5db;
+  display: inline-flex;
+  padding: 0.2rem 0.4rem 0.2rem 0.2rem;
+  color: #64748b;
+  gap: 0.2rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background-color: #d5dee7;
+    color: #1e293b;
+  }
+}
+
 .loading {
-  text-align: center;
-  padding: 2rem;
   color: #64748b;
 }
 
