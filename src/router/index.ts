@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import OnboardingView from '../views/OnboardingView.vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { LINKS } from '@/constants/links'
+import CreateProgramView from '../views/CreateProgramView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,6 +13,12 @@ const router = createRouter({
       path: LINKS.home,
       name: 'home',
       component: HomeView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: LINKS.createProgram,
+      name: 'createProgram',
+      component: CreateProgramView,
       meta: { requiresAuth: true },
     },
     {
