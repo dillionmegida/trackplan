@@ -7,6 +7,7 @@ import { LINKS } from '@/constants/links'
 import CreateProgramView from '../views/CreateProgramView.vue'
 import ProgramDetailsView from '../views/ProgramDetailsView.vue'
 import ProgramDetailsEditView from '../views/ProgramDetailsEditView.vue'
+import TrashView from '@/views/TrashView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +47,12 @@ const router = createRouter({
       name: 'login',
       component: LoginView,
       meta: { requiresAuth: false },
+    },
+    {
+      path: LINKS.trash,
+      name: 'trash',
+      component: TrashView,
+      meta: { requiresAuth: true },
     },
   ],
 })

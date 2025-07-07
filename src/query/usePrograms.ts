@@ -41,6 +41,27 @@ export const useProgramsForUser = (userId: string) => {
   })
 }
 
+export const useTrashedProgramsForUser = (userId: string) => {
+  return useQuery({
+    queryKey: ['programs-trash', userId],
+    queryFn: async () => {
+      const programsRef = collection(db, 'programs')
+      const q = query(
+        programsRef,
+        where('organizationId', '==', userId),
+        where('trashDate', '!=', null),
+      )
+      const programsSnapshot = await getDocs(q)
+      const programs = programsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      return programs as ProgramType[]
+    },
+    enabled: !!userId,
+  })
+}
+
 export const useProgram = (programId: string) => {
   return useQuery({
     queryKey: ['program', programId],
@@ -111,7 +132,7 @@ export const useUpdateProgram = () => {
   })
 }
 
-export const useDeleteProgram = () => {
+export const useAddProgramToTrash = () => {
   return useMutation({
     mutationFn: async ({ programId, userId }: { programId: string; userId: string }) => {
       const programRef = doc(db, 'programs', programId)
@@ -131,9 +152,64 @@ export const useDeleteProgram = () => {
     onSuccess: ({ userId }) => {
       toast.success('Program deleted successfully')
       queryClient.invalidateQueries({ queryKey: ['programs', userId] })
+      queryClient.invalidateQueries({ queryKey: ['programs-trash', userId] })
     },
     onError: (error) => {
       toast.error('Failed to delete program. Please try again.')
+    },
+  })
+}
+
+export const useDeleteProgram = () => {
+  return useMutation({
+    mutationFn: async ({ programId, userId }: { programId: string; userId: string }) => {
+      const programRef = doc(db, 'programs', programId)
+      const programDoc = await getDoc(programRef)
+      if (!programDoc.exists()) {
+        throw new Error('Program not found')
+      }
+
+      const programData = programDoc.data()
+      if (programData.organizationId !== userId) {
+        throw new Error('You are not authorized to delete this program')
+      }
+
+      await deleteDoc(programRef)
+      return { userId }
+    },
+    onSuccess: ({ userId }) => {
+      toast.success('Program deleted successfully')
+      queryClient.invalidateQueries({ queryKey: ['programs', userId] })
+    },
+    onError: (error) => {
+      toast.error('Failed to delete program. Please try again.')
+    },
+  })
+}
+
+export const useRestoreProgramFromTrash = () => {
+  return useMutation({
+    mutationFn: async ({ programId, userId }: { programId: string; userId: string }) => {
+      const programRef = doc(db, 'programs', programId)
+      const programDoc = await getDoc(programRef)
+      if (!programDoc.exists()) {
+        throw new Error('Program not found')
+      }
+
+      const programData = programDoc.data()
+      if (programData.organizationId !== userId) {
+        throw new Error('You are not authorized to restore this program')
+      }
+
+      await updateDoc(programRef, { trashDate: null })
+      return { userId }
+    },
+    onSuccess: ({ userId }) => {
+      toast.success('Program restored successfully')
+      queryClient.invalidateQueries({ queryKey: ['programs', userId] })
+    },
+    onError: (error) => {
+      toast.error('Failed to restore program. Please try again.')
     },
   })
 }

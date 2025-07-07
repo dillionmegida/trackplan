@@ -6,6 +6,8 @@ import { auth } from '@/configs/firebase'
 import { LINKS } from '@/constants/links'
 import { toast } from 'vue3-toastify'
 import LogoutIcon from '@/components/icons/LogoutIcon.vue'
+import { RouterLink } from 'vue-router'
+import TrashIcon from '@/components/icons/TrashIcon.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -28,6 +30,9 @@ const handleLogout = async () => {
       <div class="container">
         <RouterLink to="/" class="logo">🗓️</RouterLink>
         <div class="user-menu">
+          <RouterLink :to="LINKS.trash" class="trash-link">
+            <TrashIcon />
+          </RouterLink>
           <div class="user-info">
             <img
               v-if="user?.photoURL"
@@ -85,6 +90,10 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.trash-link {
+  color: rgb(138, 51, 51);
 }
 
 .user-info {

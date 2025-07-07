@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { format } from 'date-fns'
-import { useDeleteProgram, useProgram } from '@/query/usePrograms'
+import { useAddProgramToTrash, useProgram } from '@/query/usePrograms'
 import Layout from '@/components/Layout.vue'
 import EditIcon from '@/components/icons/EditIcon.vue'
 import { LINKS } from '@/constants/links'
@@ -38,14 +38,14 @@ const howManyChecked = computed(() => {
   return checklists.value.filter((checklist) => checklist.isCompleted).length
 })
 
-const { mutateAsync: deleteProgramMutation, isPending: deleteProgramPending } = useDeleteProgram()
+const { mutateAsync: addProgramToTrashMutation, isPending: addProgramToTrashPending } = useAddProgramToTrash()
 const authStore = useAuthStore()
 
 const deleteProgram = async (id: string) => {
   if (!authStore.user) {
     return toast.error('You must be logged in to delete a program')
   }
-  await deleteProgramMutation({ programId: id, userId: authStore.user.uid })
+  await addProgramToTrashMutation({ programId: id, userId: authStore.user.uid })
   toast.success('Program deleted successfully')
   router.push(LINKS.home)
 }
@@ -70,7 +70,7 @@ const deleteProgram = async (id: string) => {
               <button
                 class="delete-program"
                 @click="deleteProgram(program.id)"
-                :disabled="deleteProgramPending"
+                :disabled="addProgramToTrashPending"
               >
                 <TrashIcon />
               </button>
