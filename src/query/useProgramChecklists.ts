@@ -78,12 +78,16 @@ export const useDeleteProgramChecklistItem = () => {
 type UseUpdateProgramChecklistArgs = {
   programId: string
   checklistId: string
-  isCompleted: boolean
+  checklistItemObj: ProgramChecklistItemType
 }
 
 export const useUpdateProgramChecklistItem = () => {
   return useMutation({
-    mutationFn: async ({ programId, checklistId, isCompleted }: UseUpdateProgramChecklistArgs) => {
+    mutationFn: async ({
+      programId,
+      checklistId,
+      checklistItemObj,
+    }: UseUpdateProgramChecklistArgs) => {
       const programRef = doc(db, 'programs', programId)
       const checklistsRef = collection(programRef, 'checklists')
       const checklistRef = doc(checklistsRef, checklistId)
@@ -93,12 +97,12 @@ export const useUpdateProgramChecklistItem = () => {
         throw new Error('Checklist item not found')
       }
 
-      await updateDoc(checklistRef, { ...checklistDoc.data(), isCompleted })
+      await updateDoc(checklistRef, checklistItemObj)
 
       return { programId, checklistId }
     },
     onError: (error) => {
-      const errorMsg = error.message ?? 'Failed to delete checklist item. Please try again.'
+      const errorMsg = error.message ?? 'Failed to update checklist item. Please try again.'
       toast.error(errorMsg)
     },
     onSuccess: ({ programId }) => {

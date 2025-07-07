@@ -10,6 +10,7 @@ import type { ProgramChecklistItemType } from '@/types/PrgramChecklist'
 import { snakeToWordCase } from '@/utils/string'
 import { useProgramCategories } from '@/query/useProgramCategories'
 import { useUpdateProgramChecklistItem } from '@/query/useProgramChecklists'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const programId = route.params.id as string
@@ -42,6 +43,8 @@ const groupedChecklists = computed(() => {
   return group
 })
 
+const auth = useAuthStore()
+
 const { mutateAsync: deleteChecklistMutation, isPending: deleteChecklistPending } =
   useDeleteProgramChecklistItem()
 
@@ -53,7 +56,23 @@ const { mutateAsync: updateChecklistMutation, isPending: updateChecklistPending 
   useUpdateProgramChecklistItem()
 
 async function updateChecklist(checklistId: string, isCompleted: boolean) {
-  await updateChecklistMutation({ programId, checklistId, isCompleted })
+  const targetChecklist = checklists.value?.find((checklist) => checklist.id === checklistId)
+
+  if (!auth.user) {
+    throw new Error('You are not logged in')
+  }
+
+  if (!targetChecklist) {
+    throw new Error('Checklist item not found')
+  }
+
+  const checklistItemObj = {
+    ...targetChecklist,
+    isCompleted,
+    completedBy: auth.user.uid,
+  }
+
+  await updateChecklistMutation({ programId, checklistId, checklistItemObj })
 }
 </script>
 
@@ -137,7 +156,7 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
 .checklist-item {
   display: flex;
   justify-content: space-between;
- 
+
   padding: 0.5rem;
   border-radius: 6px;
   background: #f8fafc;
