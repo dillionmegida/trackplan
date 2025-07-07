@@ -37,7 +37,9 @@ const groupedChecklists = computed(() => {
     if (!group[categoryName]) {
       group[categoryName] = { items: [], checked: 0 }
     }
-    group[categoryName].items.push({ ...checklist })
+
+    if (checklist.isCompleted) group[categoryName].items.push(checklist)
+    else group[categoryName].items.unshift(checklist)
     group[categoryName].checked += checklist.isCompleted ? 1 : 0
   })
 
@@ -191,8 +193,8 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
 .checklist-item {
   display: flex;
   justify-content: space-between;
-
-  padding: 0.5rem;
+  padding: 0.5rem 0 0.5rem 0.5rem;
+  overflow: hidden;
   border-radius: 6px;
   background: #f8fafc;
   border: 1px solid #d1d5db;
@@ -200,6 +202,8 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
   gap: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+
 
   &:hover {
     background-color: #d5dee7;
@@ -242,12 +246,17 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
   }
 
   .delete-button {
-    position: relative;
-    top: 1px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 30px;
+    height: 100%;
+    background-color: rgb(198, 188, 188);
+    color: #333;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
-      color: red;
+      background-color: rgb(239, 136, 136);
     }
   }
 }
