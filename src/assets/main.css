@@ -26,6 +26,8 @@ h6 {
 
 button {
   cursor: pointer;
+  border: none;
+  background: none;
 }
 
 button:disabled {
@@ -38,6 +40,12 @@ a {
   text-decoration: none;
 }
 
-input, textarea {
+input,
+textarea {
   font-family: inherit;
+}
+
+textarea {
+  min-width: 100%;
+  max-width: 100%;
 }
