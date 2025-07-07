@@ -68,8 +68,12 @@ async function deleteCategory(categoryId: string) {
     message="Error loading categories for this program."
   />
 
+  <p class="categories-description">
+    Categories allow you to group related checklists in a program. Note that deleting a category
+    will move all associated checklists to "uncategorized".
+  </p>
+
   <div class="categories-list">
-    <span class="categories-description">Categories allow you to group related checklists.</span>
     <form @submit.prevent="createCategory" class="category-add-form">
       <input v-model="newCategoryName" placeholder="Category name" />
       <button :disabled="newCategoryName === '' || createCategoryPending" type="submit">
@@ -92,8 +96,13 @@ async function deleteCategory(categoryId: string) {
 </template>
 
 <style lang="scss" scoped>
-.categories-list {
+.categories-description {
+  color: #64748b;
   margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.categories-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -102,7 +111,7 @@ async function deleteCategory(categoryId: string) {
   border: 1px solid #d1d5db;
   position: relative;
 
-  .categories-description {
+  /* .categories-description {
     font-size: 0.8rem;
     background: #f8fafc;
     padding: 0.25rem 0.5rem;
@@ -113,7 +122,7 @@ async function deleteCategory(categoryId: string) {
     left: 1rem;
     color: #64748b;
     margin-bottom: 1rem;
-  }
+  } */
 
   .category-item,
   .category-add-form {

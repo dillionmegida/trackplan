@@ -8,6 +8,7 @@ import Layout from '@/components/Layout.vue'
 import { toast } from 'vue3-toastify'
 import { LINKS } from '@/constants/links'
 import BackIcon from '@/components/icons/BackIcon.vue'
+import CategoriesSection from '@/components/DashboardProgram/CategoriesSection.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -85,40 +86,46 @@ const allRequiredFieldsFilled = computed(() => {
 
         <div v-else-if="error" class="error">Error loading program: {{ error }}</div>
 
-        <form v-if="program" @submit.prevent="submit" class="form-card">
-          <div class="input-group">
-            <label for="title">Program Title</label>
-            <input
-              type="text"
-              id="title"
-              v-model="form.title"
-              placeholder="Program Title"
-              required
-            />
-          </div>
+        <div v-if="program" class="forms">
+          <form v-if="program" @submit.prevent="submit" class="form-card">
+            <div class="input-group">
+              <label for="title">Program Title</label>
+              <input
+                type="text"
+                id="title"
+                v-model="form.title"
+                placeholder="Program Title"
+                required
+              />
+            </div>
 
-          <div class="input-group">
-            <label for="description">Description</label>
-            <textarea
-              id="description"
-              v-model="form.description"
-              placeholder="Description"
-            ></textarea>
-          </div>
+            <div class="input-group">
+              <label for="description">Description</label>
+              <textarea
+                id="description"
+                v-model="form.description"
+                placeholder="Description"
+              ></textarea>
+            </div>
 
-          <div class="input-group">
-            <label for="date">Program Date</label>
-            <input type="date" id="date" v-model="form.date" required />
-          </div>
+            <div class="input-group">
+              <label for="date">Program Date</label>
+              <input type="date" id="date" v-model="form.date" required />
+            </div>
 
-          <button
-            type="submit"
-            :disabled="!allRequiredFieldsFilled || !hasChanges || isPending"
-            class="submit-btn"
-          >
-            {{ isPending ? 'Saving...' : 'Save Changes' }}
-          </button>
-        </form>
+            <button
+              type="submit"
+              :disabled="!allRequiredFieldsFilled || !hasChanges || isPending"
+              class="submit-btn"
+            >
+              {{ isPending ? 'Saving...' : 'Save Changes' }}
+            </button>
+          </form>
+
+          <div class="form-card">
+            <CategoriesSection />
+          </div>
+        </div>
       </div>
     </div>
   </Layout>
@@ -132,7 +139,7 @@ const allRequiredFieldsFilled = computed(() => {
   gap: 1rem;
   min-height: 100vh;
   background: linear-gradient(135deg, #f6f9fc 0%, #f1f5f9 100%);
-  padding: 6rem 1.5rem 1.5rem;
+  padding: 6rem 1.5rem 10rem;
 }
 
 .form-wrapper {
@@ -190,6 +197,12 @@ h1 {
   justify-content: center;
 }
 
+.forms {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .form-card {
   background: white;
   border-radius: 1rem;
@@ -201,11 +214,6 @@ h1 {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.5);
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  }
 }
 
 .input-group {

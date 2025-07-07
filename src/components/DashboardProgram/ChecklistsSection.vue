@@ -110,7 +110,11 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
       :key="category"
       class="checklist-category"
     >
-      <div class="category-header">
+      <!-- v-if here is so that the category header is not displayed if there are no checklists in that category -->
+      <div
+        v-if="checklists.checked.length > 0 || checklists.unchecked.length > 0"
+        class="category-header"
+      >
         <h2>
           {{ snakeToWordCase(category) }} - {{ checklists.checked.length }}/{{
             checklists.unchecked.length + checklists.checked.length
@@ -158,31 +162,14 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
         />
       </div>
     </div>
-    <div
-      v-if="
-        Object.keys(groupedChecklists).length === 1 &&
-        groupedChecklists['uncategorized']?.length === 0
-      "
-      class="no-checklists"
-    >
-      You have no checklist items yet.
-    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .checklists-section {
-  margin-top: 1rem;
-}
-
-.no-checklists {
-  padding: 2rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: #f8fafc;
-  text-align: center;
-  color: #9ca3af;
-  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .completed-checklists {
@@ -195,7 +182,7 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin: 2rem 0;
+  /* margin: 2rem 0; */
 
   .category-header {
     display: flex;

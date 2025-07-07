@@ -8,8 +8,6 @@ import EditIcon from '@/components/icons/EditIcon.vue'
 import { LINKS } from '@/constants/links'
 import BackIcon from '@/components/icons/BackIcon.vue'
 import { useProgramChecklists } from '@/query/useProgramChecklists'
-
-import CategoriesSection from '@/components/DashboardProgram/CategoriesSection.vue'
 import ChecklistsForm from '@/components/DashboardProgram/ChecklistsForm.vue'
 import ChecklistsSection from '@/components/DashboardProgram/ChecklistsSection.vue'
 
@@ -54,8 +52,6 @@ const howManyChecked = computed(() => {
               </RouterLink>
             </div>
             <p class="program-date">{{ formatDate(program.date) }}</p>
-
-            <p class="program-description">{{ program.description }}</p>
           </div>
           <div class="progress">
             <ve-progress :size="80" :progress="(howManyChecked / (checklists?.length || 1)) * 100">
@@ -64,9 +60,16 @@ const howManyChecked = computed(() => {
           </div>
         </div>
 
-        <CategoriesSection />
-        <ChecklistsForm />
+        <p class="program-description">{{ program.description }}</p>
+
+        <div class="checklist-form">
+          <ChecklistsForm />
+        </div>
+
         <ChecklistsSection />
+        <div v-if="checklists?.length === 0" class="no-checklists">
+          You have no checklist items yet. Create one above.
+        </div>
       </div>
     </div>
   </Layout>
@@ -74,7 +77,20 @@ const howManyChecked = computed(() => {
 
 <style lang="scss" scoped>
 .program-details {
-  
+}
+
+.checklist-form {
+  margin-bottom: 2rem;
+}
+
+.no-checklists {
+  padding: 2rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #f8fafc;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.9rem;
 }
 
 .back-link {

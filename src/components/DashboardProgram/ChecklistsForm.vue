@@ -20,7 +20,10 @@ const { mutateAsync: addChecklistItemMutation } = useAddProgramChecklist()
 defineProps<Props>()
 
 const title = ref('')
-const selectedCategory = ref<{ value: string; label: string } | null>(null)
+const selectedCategory = ref<{ value: string; label: string }>({
+  value: null,
+  label: 'Uncategorized',
+})
 
 const {
   data: categories,
@@ -29,11 +32,12 @@ const {
 } = useProgramCategories(programId)
 
 const categoryOptions = computed(() => {
-  return categories.value
-    ?.map((category) => ({
+  return [{ value: null, label: 'Uncategorized' }].concat(
+    categories.value?.map((category) => ({
       label: snakeToWordCase(category.name),
       value: category.id,
     }))
+  )
 })
 
 const addChecklist = async () => {
