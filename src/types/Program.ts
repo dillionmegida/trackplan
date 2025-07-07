@@ -10,4 +10,5 @@ export type ProgramType = {
   createdAt: Timestamp
   updatedBy: string
   updatedAt: Timestamp
+  trashDate: Timestamp | null
 }

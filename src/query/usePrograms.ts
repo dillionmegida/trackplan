@@ -1,15 +1,17 @@
 import { QueryClient, useQuery } from '@tanstack/vue-query'
 
-
 import { db } from '@/configs/firebase'
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
   query,
+  serverTimestamp,
   setDoc,
+  Timestamp,
   updateDoc,
   where,
 } from 'firebase/firestore'
@@ -23,7 +25,11 @@ export const useProgramsForUser = (userId: string) => {
     queryKey: ['programs', userId],
     queryFn: async () => {
       const programsRef = collection(db, 'programs')
-      const q = query(programsRef, where('organizationId', '==', userId))
+      const q = query(
+        programsRef,
+        where('organizationId', '==', userId),
+        where('trashDate', '==', null),
+      )
       const programsSnapshot = await getDocs(q)
       const programs = programsSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -59,10 +65,17 @@ type UseCreateProgramArgs = {
 
 export const useCreateProgram = () => {
   return useMutation({
-    mutationFn: async ({ data }: UseCreateProgramArgs): Promise<{ id: string }> => {
+    mutationFn: async ({ data }: UseCreateProgramArgs): Promise<{ id: string; userId: string }> => {
       const programRef = collection(db, 'programs')
       const docRef = await addDoc(programRef, data)
-      return { id: docRef.id }
+      return { id: docRef.id, userId: data.createdBy }
+    },
+    onSuccess: ({ id, userId }) => {
+      toast.success('Program created successfully')
+      queryClient.invalidateQueries({ queryKey: ['programs', userId] })
+    },
+    onError: (error) => {
+      toast.error('Failed to create program. Please try again.')
     },
   })
 }
@@ -85,7 +98,7 @@ export const useUpdateProgram = () => {
         throw new Error('You are not authorized to update this program')
       }
 
-      await updateDoc(programRef, {...programData, ...data})
+      await updateDoc(programRef, { ...programData, ...data })
       return { id: data.id }
     },
     onSuccess: ({ id }) => {
@@ -94,6 +107,33 @@ export const useUpdateProgram = () => {
     },
     onError: (error) => {
       toast.error('Failed to update program. Please try again.')
+    },
+  })
+}
+
+export const useDeleteProgram = () => {
+  return useMutation({
+    mutationFn: async ({ programId, userId }: { programId: string; userId: string }) => {
+      const programRef = doc(db, 'programs', programId)
+      const programDoc = await getDoc(programRef)
+      if (!programDoc.exists()) {
+        throw new Error('Program not found')
+      }
+
+      const programData = programDoc.data()
+      if (programData.organizationId !== userId) {
+        throw new Error('You are not authorized to delete this program')
+      }
+
+      await updateDoc(programRef, { trashDate: serverTimestamp() as Timestamp })
+      return { userId }
+    },
+    onSuccess: ({ userId }) => {
+      toast.success('Program deleted successfully')
+      queryClient.invalidateQueries({ queryKey: ['programs', userId] })
+    },
+    onError: (error) => {
+      toast.error('Failed to delete program. Please try again.')
     },
   })
 }

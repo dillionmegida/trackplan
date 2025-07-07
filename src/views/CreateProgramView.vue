@@ -7,6 +7,7 @@ import { useCreateProgram } from '@/query/usePrograms'
 import Layout from '@/components/Layout.vue'
 import { toast } from 'vue3-toastify'
 import { LINKS } from '@/constants/links'
+import CategoriesSection from '@/components/DashboardProgram/CategoriesSection.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -33,16 +34,16 @@ const submit = async () => {
     createdBy: authStore.user.uid,
     updatedAt: serverTimestamp() as Timestamp,
     updatedBy: authStore.user.uid,
+    trashDate: null,
   }
 
   try {
-    await createProgram({ data: programData })
+    const { id } = await createProgram({ data: programData })
+    router.push(LINKS.program_edit(id))
   } catch {
     toast.error('Failed to create program. Please try again.')
     return
   }
-
-  router.push(LINKS.home)
 }
 
 const allFieldsFilled = computed(() => {
@@ -56,24 +57,30 @@ const allFieldsFilled = computed(() => {
       <div class="form-wrapper">
         <h1>Create Program</h1>
         <p class="subtitle">You are creating a new program under your personal organization.</p>
-        <div class="form-card">
-          <div class="input-group">
-            <label for="title">Program Title</label>
-            <input type="text" v-model="program.title" placeholder="Program Title" />
+        <div class="forms">
+          <div class="form-card">
+            <div class="input-group">
+              <label for="title">Program Title</label>
+              <input type="text" v-model="program.title" placeholder="Program Title" />
+            </div>
+            <div class="input-group">
+              <label for="description">Description</label>
+              <input type="text" v-model="program.description" placeholder="Description" />
+            </div>
+            <div class="input-group">
+              <label for="date">Program Date</label>
+              <input type="date" v-model="program.date" />
+            </div>
+            <!-- TODO: Select checklist template -->
+            <button class="btn" type="submit" :disabled="isPending || !allFieldsFilled">
+              <span v-if="isPending">Creating...</span>
+              <span v-else>Create Program</span>
+            </button>
           </div>
-          <div class="input-group">
-            <label for="description">Description</label>
-            <input type="text" v-model="program.description" placeholder="Description" />
+
+          <div class="form-card">
+            <p class="subtitle">When you create a program, you can add categories to group related checklists.</p>
           </div>
-          <div class="input-group">
-            <label for="date">Program Date</label>
-            <input type="date" v-model="program.date" />
-          </div>
-          <!-- TODO: Select checklist template -->
-          <button class="btn" type="submit" :disabled="isPending || !allFieldsFilled">
-            <span v-if="isPending">Creating...</span>
-            <span v-else>Create Program</span>
-          </button>
         </div>
       </div>
     </form>
@@ -106,9 +113,15 @@ h1 {
 .subtitle {
   color: #64748b;
   font-size: 1rem;
-  margin-bottom: 1rem;
   font-weight: 400;
   line-height: 1.5;
+}
+
+.forms {
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .form-card {
@@ -122,11 +135,6 @@ h1 {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.5);
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  }
 }
 
 .input-group {

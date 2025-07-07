@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { format } from 'date-fns'
-import { useProgram } from '@/query/usePrograms'
+import { useDeleteProgram, useProgram } from '@/query/usePrograms'
 import Layout from '@/components/Layout.vue'
 import EditIcon from '@/components/icons/EditIcon.vue'
 import { LINKS } from '@/constants/links'
@@ -10,7 +10,12 @@ import BackIcon from '@/components/icons/BackIcon.vue'
 import { useProgramChecklists } from '@/query/useProgramChecklists'
 import ChecklistsForm from '@/components/DashboardProgram/ChecklistsForm.vue'
 import ChecklistsSection from '@/components/DashboardProgram/ChecklistsSection.vue'
+import TrashIcon from '@/components/icons/TrashIcon.vue'
+import { useAuthStore } from '@/stores/auth'
+import { toast } from 'vue3-toastify'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const route = useRoute()
 const programId = route.params.id as string
 
@@ -32,6 +37,18 @@ const howManyChecked = computed(() => {
 
   return checklists.value.filter((checklist) => checklist.isCompleted).length
 })
+
+const { mutateAsync: deleteProgramMutation, isPending: deleteProgramPending } = useDeleteProgram()
+const authStore = useAuthStore()
+
+const deleteProgram = async (id: string) => {
+  if (!authStore.user) {
+    return toast.error('You must be logged in to delete a program')
+  }
+  await deleteProgramMutation({ programId: id, userId: authStore.user.uid })
+  toast.success('Program deleted successfully')
+  router.push(LINKS.home)
+}
 </script>
 
 <template>
@@ -50,6 +67,13 @@ const howManyChecked = computed(() => {
               <RouterLink :to="LINKS.program_edit(program.id)" class="edit-program">
                 <EditIcon />
               </RouterLink>
+              <button
+                class="delete-program"
+                @click="deleteProgram(program.id)"
+                :disabled="deleteProgramPending"
+              >
+                <TrashIcon />
+              </button>
             </div>
             <p class="program-date">{{ formatDate(program.date) }}</p>
           </div>
@@ -134,6 +158,10 @@ const howManyChecked = computed(() => {
 
     .edit-program {
       color: #64748b;
+    }
+
+    .delete-program {
+      color: #ef4444;
     }
   }
 
