@@ -64,7 +64,7 @@ const howManyChecked = computed(() => {
           </div>
         </div>
 
-        <!-- <CategoriesSection /> -->
+        <CategoriesSection />
         <ChecklistsForm />
         <ChecklistsSection />
       </div>

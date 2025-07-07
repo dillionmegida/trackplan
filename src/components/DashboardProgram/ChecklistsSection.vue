@@ -20,24 +20,25 @@ const { data: categories } = useProgramCategories(programId)
 
 const groupedChecklists = computed(() => {
   if (!checklists.value || !categories.value) {
-    return {} as Record<string, ProgramChecklistItemType[]>
+    return {} as Record<string, { items: ProgramChecklistItemType[]; checked: number }>
   }
 
   const categoryMap = new Map(categories.value.map((category) => [category.id, category.name]))
-  const group: Record<string, ProgramChecklistItemType[]> = {
-    uncategorized: [],
+  const group: Record<string, { items: ProgramChecklistItemType[]; checked: number }> = {
+    uncategorized: { items: [], checked: 0 },
   }
 
   checklists.value?.forEach((checklist) => {
     const categoryId = checklist.categoryId as string
-    const categoryName: string = categoryId
+    const categoryName = categoryId
       ? (categoryMap.get(categoryId) as string) || 'uncategorized'
       : 'uncategorized'
 
     if (!group[categoryName]) {
-      group[categoryName] = []
+      group[categoryName] = { items: [], checked: 0 }
     }
-    group[categoryName].push(checklist)
+    group[categoryName].items.push({ ...checklist })
+    group[categoryName].checked += checklist.isCompleted ? 1 : 0
   })
 
   return group
@@ -84,8 +85,16 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
       :key="category"
       class="checklist-category"
     >
-      <h2 v-if="checklists.length > 0">{{ snakeToWordCase(category) }}</h2>
-      <label v-for="checklist in checklists" :key="checklist.id" class="checklist-item">
+      <div class="category-header">
+        <h2 v-if="checklists.items.length > 0">{{ snakeToWordCase(category) }}</h2>
+        <div class="progress-container">
+          <div
+            class="progress-bar"
+            :style="{ width: `${(checklists.checked / checklists.items.length) * 100}%` }"
+          ></div>
+        </div>
+      </div>
+      <label v-for="checklist in checklists.items" :key="checklist.id" class="checklist-item">
         <!-- <label class="checklist-container"> -->
         <div class="checklist-checkbox">
           <input
@@ -146,10 +155,36 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
   gap: 0.5rem;
   margin: 2rem 0;
 
-  h2 {
-    font-weight: 300;
-    text-transform: uppercase;
-    font-size: 0.8rem;
+  .category-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+
+    .progress-container {
+      width: 100%;
+      height: 6px;
+      background: #edf0f5;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      display: flex;
+      width: 100%;
+      border: none;
+      height: 6px;
+      border-radius: 6px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      background: #f63bf3;
+    }
+
+    h2 {
+      flex: 1;
+      font-weight: 300;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
   }
 }
 

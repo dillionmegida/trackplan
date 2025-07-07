@@ -29,10 +29,11 @@ const {
 } = useProgramCategories(programId)
 
 const categoryOptions = computed(() => {
-  return categories.value?.map((category) => ({
-    label: snakeToWordCase(category.name),
-    value: category.id,
-  }))
+  return categories.value
+    ?.map((category) => ({
+      label: snakeToWordCase(category.name),
+      value: category.id,
+    }))
 })
 
 const addChecklist = async () => {

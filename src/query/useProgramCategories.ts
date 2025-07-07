@@ -48,7 +48,6 @@ export const useCreateProgramCategory = () => {
       return { id: categoryDoc.id, programId }
     },
     onSuccess: ({ programId }) => {
-      toast.success('Category created successfully')
       queryClient.invalidateQueries({ queryKey: ['program-categories', programId] })
     },
     onError: (error) => {

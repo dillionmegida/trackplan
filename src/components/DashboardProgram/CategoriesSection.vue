@@ -48,6 +48,7 @@ async function createCategory() {
   newCategoryName.value = ''
 }
 
+// TODO: after deleting category, you should check if the category is in the select
 async function deleteCategory(categoryId: string) {
   try {
     await deleteCategoryMutation({ programId, categoryId })
