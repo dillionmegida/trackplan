@@ -2,15 +2,18 @@
 import Layout from '@/components/Layout.vue'
 import { useUser } from '@/query/useUsers'
 import { useAuthStore } from '@/stores/auth'
-import { onMounted } from 'vue'
+import { watch } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const userId = useAuthStore().user?.uid
-const {
-  query: { data: user, isLoading, error },
-} = useUser(userId)
+const { data: user, isLoading, error } = useUser(userId)
 
-onMounted(() => {
-  console.log({ user })
+watch(user, () => {
+  if (user.value && user.value === 'not-found') {
+    console.log("User not found")
+    router.push({ name: 'onboarding' })
+  }
 })
 </script>
 
@@ -20,8 +23,8 @@ onMounted(() => {
     <main class="main-content container">
       <p v-if="isLoading">Loading...</p>
       <p v-else-if="error">{{ error }}</p>
-      <p v-else-if="user">Hello {{ user.displayName }}</p>
-      <p v-else>No user found</p>
+      <p v-else-if="user !== 'not-found'">Hello {{ user.displayName }}</p>
+      <p v-else>Redirecting to onboarding...</p>
     </main>
   </Layout>
 </template>

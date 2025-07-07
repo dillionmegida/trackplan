@@ -3,6 +3,8 @@ import { signOut } from 'firebase/auth'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { auth } from '@/configs/firebase'
+import { LINKS } from '@/constants/links'
+import { toast } from 'vue3-toastify'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -11,9 +13,10 @@ const user = authStore.user
 const handleLogout = async () => {
   try {
     await signOut(auth)
-    router.push('/login')
+    router.push(LINKS.login)
   } catch (error) {
     console.error('Error signing out:', error)
+    toast.error('Failed to sign out. Please try again.')
   }
 }
 </script>
