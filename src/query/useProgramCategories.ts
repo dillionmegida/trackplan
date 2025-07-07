@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/vue-query'
 import { db } from '@/configs/firebase'
-import { collection, getDocs, doc, addDoc, deleteDoc } from 'firebase/firestore'
+import { collection, getDocs, doc, addDoc, deleteDoc, query, where } from 'firebase/firestore'
 import { useMutation } from '@tanstack/vue-query'
 import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
@@ -17,7 +17,7 @@ export const useProgramCategories = (programId: string) => {
         id: doc.id,
         ...doc.data(),
       }))
-      return categories
+      return categories as ProgramChecklistCategoryType[]
     },
     enabled: !!programId,
   })
@@ -36,6 +36,14 @@ export const useCreateProgramCategory = () => {
     }: UseCreateCategoryArgs): Promise<{ id: string; programId: string }> => {
       const programRef = doc(db, 'programs', programId)
       const categoriesRef = collection(programRef, 'categories')
+
+      const existingCategoryQuery = query(categoriesRef, where('name', '==', data.name))
+      const existingCategorySnapshot = await getDocs(existingCategoryQuery)
+
+      if (!existingCategorySnapshot.empty) {
+        throw new Error(`Category '${data.name}' already exists`)
+      }
+
       const categoryDoc = await addDoc(categoriesRef, data)
       return { id: categoryDoc.id, programId }
     },
@@ -44,7 +52,8 @@ export const useCreateProgramCategory = () => {
       queryClient.invalidateQueries({ queryKey: ['program-categories', programId] })
     },
     onError: (error) => {
-      toast.error('Failed to create category. Please try again.')
+      const errorMsg = error.message ?? 'Failed to create category. Please try again.'
+      toast.error(errorMsg)
     },
   })
 }
