@@ -58,7 +58,8 @@ async function deleteCategory(categoryId: string) {
 </script>
 
 <template>
-  <div v-if="categoriesLoading" class="loading">Loading categories...</div>
+  <!-- TODO: Add loading state -->
+  <!-- <div v-if="categoriesLoading" class="loading">Loading categories...</div> -->
 
   <InfoBlock
     v-if="categoriesError"
@@ -96,7 +97,7 @@ async function deleteCategory(categoryId: string) {
   flex-wrap: wrap;
   gap: 0.5rem;
   padding: 1rem;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   border: 1px solid #d1d5db;
   position: relative;
 

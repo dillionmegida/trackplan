@@ -13,12 +13,15 @@
   },
   "dependencies": {
     "@tanstack/vue-query": "^5.81.5",
+    "@types/vue-select": "^3.16.8",
     "date-fns": "^4.1.0",
     "firebase": "^11.10.0",
     "pinia": "^3.0.3",
     "sass-embedded": "^1.89.2",
     "vue": "^3.5.17",
+    "vue-ellipse-progress": "^2.2.0",
     "vue-router": "^4.5.1",
+    "vue-select": "^4.0.0-beta.6",
     "vue3-toastify": "^0.2.8"
   },
   "devDependencies": {

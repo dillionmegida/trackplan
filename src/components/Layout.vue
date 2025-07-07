@@ -26,7 +26,7 @@ const handleLogout = async () => {
   <div class="layout">
     <header class="header">
       <div class="container">
-        <div class="logo">T</div>
+        <RouterLink to="/" class="logo">🗓️</RouterLink>
         <div class="user-menu">
           <div class="user-info">
             <img
@@ -79,11 +79,6 @@ const handleLogout = async () => {
   font-size: 1.75rem;
   font-weight: 800;
   color: #3b82f6;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.5px;
 }
 
 .user-menu {
@@ -156,10 +151,6 @@ const handleLogout = async () => {
 @media (max-width: 768px) {
   .header {
     padding: 1rem;
-  }
-
-  .main-content {
-    padding: 1.5rem 1rem;
   }
 
   .user-name {

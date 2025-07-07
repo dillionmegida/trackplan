@@ -14,6 +14,7 @@ export type ProgramChecklistCategoryType = ChecklistTemplateCategoryType & {
 }
 
 export type ProgramChecklistItemType = ChecklistTemplateItemType & {
+  categoryId: string | null
   isCompleted: boolean
   completedBy: string
   completedAt: Timestamp

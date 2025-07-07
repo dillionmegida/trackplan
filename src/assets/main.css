@@ -24,6 +24,12 @@ h6 {
   padding: 2rem;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+}
+
 button {
   cursor: pointer;
   border: none;

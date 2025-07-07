@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { format } from 'date-fns'
 import { useProgram } from '@/query/usePrograms'
@@ -10,6 +10,8 @@ import BackIcon from '@/components/icons/BackIcon.vue'
 import { useProgramChecklists } from '@/query/useProgramChecklists'
 
 import CategoriesSection from '@/components/DashboardProgram/CategoriesSection.vue'
+import ChecklistsForm from '@/components/DashboardProgram/ChecklistsForm.vue'
+import ChecklistsSection from '@/components/DashboardProgram/ChecklistsSection.vue'
 
 const route = useRoute()
 const programId = route.params.id as string
@@ -24,6 +26,14 @@ const {
 const formatDate = (timestamp: any) => {
   return format(timestamp.toDate(), 'MMMM d, yyyy')
 }
+
+const howManyChecked = computed(() => {
+  if (!checklists.value) {
+    return 0
+  }
+
+  return checklists.value.filter((checklist) => checklist.isCompleted).length
+})
 </script>
 
 <template>
@@ -35,17 +45,28 @@ const formatDate = (timestamp: any) => {
 
       <div v-else-if="program" class="program-content">
         <RouterLink class="back-link" :to="LINKS.home"><BackIcon /> Back to Programs</RouterLink>
-        <div class="title-block">
-          <h1>{{ program.title }}</h1>
-          <RouterLink :to="LINKS.program_edit(program.id)" class="edit-program">
-            <EditIcon />
-          </RouterLink>
+        <div class="program-info">
+          <div>
+            <div class="title-block">
+              <h1>{{ program.title }}</h1>
+              <RouterLink :to="LINKS.program_edit(program.id)" class="edit-program">
+                <EditIcon />
+              </RouterLink>
+            </div>
+            <p class="program-date">{{ formatDate(program.date) }}</p>
+
+            <p class="program-description">{{ program.description }}</p>
+          </div>
+          <div class="progress">
+            <ve-progress :size="80" :progress="(howManyChecked / (checklists?.length || 1)) * 100">
+              {{ howManyChecked }} / {{ checklists?.length }}
+            </ve-progress>
+          </div>
         </div>
-        <p class="program-date">{{ formatDate(program.date) }}</p>
 
-        <p class="program-description">{{ program.description }}</p>
-
-        <CategoriesSection />
+        <!-- <CategoriesSection /> -->
+        <ChecklistsForm />
+        <ChecklistsSection />
       </div>
     </div>
   </Layout>
@@ -115,11 +136,14 @@ const formatDate = (timestamp: any) => {
 }
 
 .program-info {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  justify-content: space-between;
   gap: 1.5rem;
   background: #f8fafc;
   border-radius: 0.75rem;
+
+  .progress {
+  }
 }
 
 .info-item {
