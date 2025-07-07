@@ -7,10 +7,12 @@ import CloseIcon from '@/components/icons/CloseIcon.vue'
 import CheckIcon from '@/components/icons/CheckIcon.vue'
 import { computed } from 'vue'
 import type { ProgramChecklistItemType } from '@/types/PrgramChecklist'
-import { snakeToWordCase } from '@/utils/string'
+import { addPlural, snakeToWordCase } from '@/utils/string'
 import { useProgramCategories } from '@/query/useProgramCategories'
 import { useUpdateProgramChecklistItem } from '@/query/useProgramChecklists'
 import { useAuthStore } from '@/stores/auth'
+import { ref } from 'vue'
+import ChecklistItem from './CheclistItem.vue'
 
 const route = useRoute()
 const programId = route.params.id as string
@@ -20,12 +22,24 @@ const { data: categories } = useProgramCategories(programId)
 
 const groupedChecklists = computed(() => {
   if (!checklists.value || !categories.value) {
-    return {} as Record<string, { items: ProgramChecklistItemType[]; checked: number }>
+    return {} as Record<
+      string,
+      {
+        unchecked: ProgramChecklistItemType[]
+        checked: ProgramChecklistItemType[]
+      }
+    >
   }
 
   const categoryMap = new Map(categories.value.map((category) => [category.id, category.name]))
-  const group: Record<string, { items: ProgramChecklistItemType[]; checked: number }> = {
-    uncategorized: { items: [], checked: 0 },
+  const group: Record<
+    string,
+    {
+      unchecked: ProgramChecklistItemType[]
+      checked: ProgramChecklistItemType[]
+    }
+  > = {
+    uncategorized: { unchecked: [], checked: [] },
   }
 
   checklists.value?.forEach((checklist) => {
@@ -35,16 +49,25 @@ const groupedChecklists = computed(() => {
       : 'uncategorized'
 
     if (!group[categoryName]) {
-      group[categoryName] = { items: [], checked: 0 }
+      group[categoryName] = { unchecked: [], checked: [] }
     }
 
-    if (checklist.isCompleted) group[categoryName].items.push(checklist)
-    else group[categoryName].items.unshift(checklist)
-    group[categoryName].checked += checklist.isCompleted ? 1 : 0
+    if (checklist.isCompleted) group[categoryName].checked.push(checklist)
+    else group[categoryName].unchecked.push(checklist)
   })
 
   return group
 })
+
+const showCompletedCategories = ref<string[]>([])
+
+const toggleCompletedCategories = (category: string) => {
+  if (showCompletedCategories.value.includes(category)) {
+    showCompletedCategories.value = showCompletedCategories.value.filter((cat) => cat !== category)
+  } else {
+    showCompletedCategories.value.push(category)
+  }
+}
 
 const auth = useAuthStore()
 
@@ -88,41 +111,52 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
       class="checklist-category"
     >
       <div class="category-header">
-        <h2 v-if="checklists.items.length > 0">{{ snakeToWordCase(category) }}</h2>
+        <h2>
+          {{ snakeToWordCase(category) }} - {{ checklists.checked.length }}/{{
+            checklists.unchecked.length + checklists.checked.length
+          }}
+        </h2>
         <div class="progress-container">
           <div
             class="progress-bar"
-            :style="{ width: `${(checklists.checked / checklists.items.length) * 100}%` }"
+            :style="{
+              width: `${
+                (checklists.checked.length /
+                  (checklists.unchecked.length + checklists.checked.length)) *
+                100
+              }%`,
+            }"
           ></div>
         </div>
       </div>
-      <label v-for="checklist in checklists.items" :key="checklist.id" class="checklist-item">
-        <!-- <label class="checklist-container"> -->
-        <div class="checklist-checkbox">
-          <input
-            @change="updateChecklist(checklist.id, checklist.isCompleted)"
-            type="checkbox"
-            v-model="checklist.isCompleted"
-            class="checklist-checkbox-input"
-          />
-          <span class="checklist-checkbox-custom">
-            <CheckIcon size="16" />
-          </span>
-        </div>
-
-        <div class="checklist-title" :class="{ checked: checklist.isCompleted }">
-          {{ checklist.title }}
-        </div>
-        <button
-          @click.stop="deleteChecklist(checklist.id)"
-          type="button"
-          :disabled="deleteChecklistPending"
-          class="delete-button"
-        >
-          <CloseIcon size="12" />
-        </button>
-        <!-- </label> -->
-      </label>
+      <ChecklistItem
+        v-for="checklist in checklists.unchecked"
+        :key="checklist.id"
+        :checklist="checklist"
+        @delete="deleteChecklist(checklist.id)"
+        @update="(newValue) => updateChecklist(checklist.id, newValue)"
+      />
+      <button
+        v-if="checklists.checked.length > 0"
+        @click="toggleCompletedCategories(category)"
+        class="see-completed-button"
+      >
+        {{
+          showCompletedCategories.includes(category)
+            ? `Hide ${checklists.checked.length} Completed `
+            : `See ${checklists.checked.length} Completed `
+        }}
+        {{ addPlural(checklists.checked.length, 'Item') }}
+      </button>
+      <div v-if="showCompletedCategories.includes(category)" class="completed-checklists">
+        <ChecklistItem
+          v-for="checklist in checklists.checked"
+          :key="checklist.id"
+          :checklist="checklist"
+          @delete="deleteChecklist(checklist.id)"
+          @update="(newValue) => updateChecklist(checklist.id, newValue)"
+        />
+      </div>
     </div>
     <div
       v-if="
@@ -149,6 +183,12 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
   text-align: center;
   color: #9ca3af;
   font-size: 0.9rem;
+}
+
+.completed-checklists {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .checklist-category {
@@ -190,74 +230,18 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
   }
 }
 
-.checklist-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0 0.5rem 0.5rem;
-  overflow: hidden;
-  border-radius: 6px;
-  background: #f8fafc;
+.see-completed-button {
   border: 1px solid #d1d5db;
-  font-size: 0.9rem;
-  gap: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  color: #64748b;
+  gap: 0.2rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: max-content;
 
   &:hover {
     background-color: #d5dee7;
-  }
-
-  .checklist-checkbox {
-    border: 2px solid #d1d5db;
-    border-radius: 4px;
-    background: white;
-    position: relative;
-    width: 20px;
-    height: 20px;
-    transition: all 0.2s ease;
-    position: relative;
-    top: -1px;
-
-    .checklist-checkbox-input {
-      visibility: hidden;
-      position: absolute;
-      left: -20px;
-
-      &:checked + .checklist-checkbox-custom {
-        display: block;
-      }
-    }
-
-    .checklist-checkbox-custom {
-      display: none;
-    }
-  }
-
-  .checklist-title {
-    flex: 1;
-    width: 100%;
-
-    &.checked {
-      text-decoration: line-through;
-      color: #9ca3af;
-    }
-  }
-
-  .delete-button {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 30px;
-    height: 100%;
-    background-color: rgb(198, 188, 188);
-    color: #333;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      background-color: rgb(239, 136, 136);
-    }
+    color: #1e293b;
   }
 }
 </style>
