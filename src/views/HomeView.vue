@@ -9,6 +9,7 @@ import { RouterLink } from 'vue-router'
 import { useProgramsForUser } from '@/query/usePrograms'
 import { LINKS } from '@/constants/links'
 import { format } from 'date-fns'
+import PlusIcon from '@/components/icons/PlusIcon.vue'
 
 const router = useRouter()
 const userId = useAuthStore().user?.uid
@@ -38,7 +39,9 @@ watch(user, () => {
       <div v-else>
         <div class="top-header">
           <h1>Programs</h1>
-          <RouterLink class="create-link" :to="LINKS.createProgram">Create</RouterLink>
+          <RouterLink class="create-link" :to="LINKS.createProgram">
+            <PlusIcon :size="12" />
+          </RouterLink>
         </div>
         <section class="programs-section">
           <p v-if="programsLoading">Loading programs...</p>
@@ -67,8 +70,8 @@ watch(user, () => {
 
 .top-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 
   h1 {
     font-weight: 300;
@@ -76,7 +79,7 @@ watch(user, () => {
   }
 
   .create-link {
-    padding: 0.75rem 1rem;
+    padding: 0.5rem;
     font-size: 0.9rem;
     font-weight: 500;
     color: white;
@@ -85,6 +88,9 @@ watch(user, () => {
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .create-link:hover {
@@ -111,7 +117,7 @@ watch(user, () => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
-  margin: 2rem 0;
+  margin: 1rem 0;
 }
 
 .program-item {
