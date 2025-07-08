@@ -6,11 +6,18 @@ import { toast } from 'vue3-toastify'
 import { LINKS } from '@/constants/links'
 import Layout from '@/components/Layout.vue'
 import { useOrganization } from '@/query/useOrganizations'
+import { computed } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useUser } from '@/query/useUsers'
+import InfoBlock from '@/components/InfoBlock.vue'
 
 const route = useRoute()
 const organizationId = route.params.organizationId as string
 const email = ref('')
 
+const authUser = useAuthStore().user
+
+const {data: user, isLoading: userLoading, error: userError} = useUser(authUser?.uid ?? '')
 const { mutateAsync: inviteUser, isPending, error } = useInviteUser(organizationId)
 const {
   data: organization,
@@ -27,14 +34,28 @@ const handleSubmit = async () => {
   await inviteUser({ email: email.value })
   email.value = ''
 }
+
+const shouldBeAbleToInvite = computed(() => {
+  if (!organization.value || !user.value || user.value === 'not-found') {
+    return false
+  }
+
+  return organization.value?.createdBy === user.value.id
+})
 </script>
 
 <template>
   <Layout>
     <main class="main-content container">
-      <div v-if="organizationLoading" class="loading">Loading organization...</div>
+      <div v-if="organizationLoading || userLoading" class="loading">Loading organization...</div>
       <div v-else-if="organizationError" class="error">
         Error loading organization: {{ organizationError }}
+      </div>
+      <div v-else-if="userError" class="error">
+        Error loading user: {{ userError }}
+      </div>
+      <div v-else-if="!shouldBeAbleToInvite">
+        <InfoBlock variant="error" message="You are not authorized to invite team members to this organization." />
       </div>
       <div v-else class="invite-container">
         <div class="invite-header">

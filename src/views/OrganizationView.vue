@@ -6,6 +6,7 @@ import { LINKS } from '@/constants/links'
 import Layout from '@/components/Layout.vue'
 import { format } from 'date-fns'
 import { useUser } from '@/query/useUsers'
+import { computed } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,6 +20,14 @@ const handleInvite = () => {
   router.push(LINKS.inviteToOrganization(organizationId))
 }
 
+const shouldBeAbleToInvite = computed(() => {
+  if (!organization.value || !user.value || user.value === 'not-found') {
+    return false
+  }
+
+  return organization.value?.createdBy === user.value.id
+})
+
 </script>
 
 <template>
@@ -30,7 +39,7 @@ const handleInvite = () => {
         <div class="organization-header">
           <h1>{{ organization?.name }} <span v-if="user?.activeOrganizationId === organizationId" class="active-badge">Active</span> </h1>
           <div class="organization-actions">
-            <button @click="handleInvite" class="invite-button">Invite Someone</button>
+            <button v-if="shouldBeAbleToInvite" @click="handleInvite" class="invite-button">Invite Someone</button>
           </div>
         </div>
 

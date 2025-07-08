@@ -55,7 +55,7 @@ const iconColor = computed(() => {
   padding: 0.5rem 1rem;
   border-radius: 0.75rem;
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 2px solid #e2e8f0;
   margin-bottom: 1rem;
   font-size: 0.9rem;
 
@@ -74,7 +74,7 @@ const iconColor = computed(() => {
   }
 
   &.variant-error {
-    border-color: #fee2e2;
+    border-color: #f61d1d;
     .icon-wrapper svg path {
       stroke: #ef4444;
     }
