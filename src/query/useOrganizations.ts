@@ -100,3 +100,30 @@ export const useOrganization = (organizationId: MaybeRefOrGetter<string | undefi
     enabled: !!organizationId,
   })
 }
+
+export const useMembersInOrganization = (organizationId: string) => {
+  return useQuery({
+    queryKey: ['organization-members', organizationId],
+    queryFn: async () => {
+      const organizationRef = doc(db, 'organizations', organizationId)
+      const docSnap = await getDoc(organizationRef)
+
+      if (!docSnap.exists()) {
+        throw new Error('Organization not found')
+      }
+
+      // get all users where their organizationIds include the current organization
+      const usersRef = collection(db, 'users')
+      const q = query(usersRef, where('organizationIds', 'array-contains', organizationId))
+      const usersSnapshot = await getDocs(q)
+
+      const users = usersSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+
+      return users as UserType[]
+    },
+    enabled: !!organizationId,
+  })
+}
