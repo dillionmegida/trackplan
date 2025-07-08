@@ -7,7 +7,7 @@ import { useCreateProgram } from '@/query/usePrograms'
 import Layout from '@/components/Layout.vue'
 import { toast } from 'vue3-toastify'
 import { LINKS } from '@/constants/links'
-import CategoriesSection from '@/components/DashboardProgram/CategoriesSection.vue'
+
 
 const router = useRouter()
 const authStore = useAuthStore()

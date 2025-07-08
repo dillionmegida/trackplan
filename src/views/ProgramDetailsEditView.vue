@@ -4,11 +4,11 @@ import { useRouter, useRoute } from 'vue-router'
 import { Timestamp } from 'firebase/firestore'
 import { useAuthStore } from '@/stores/auth'
 import { useProgram, useUpdateProgram } from '@/query/usePrograms'
-import Layout from '@/components/Layout.vue'
 import { toast } from 'vue3-toastify'
 import { LINKS } from '@/constants/links'
 import BackIcon from '@/components/icons/BackIcon.vue'
 import CategoriesSection from '@/components/DashboardProgram/CategoriesSection.vue'
+import ProgramLayout from '@/components/ProgramLayout.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -73,7 +73,7 @@ const allRequiredFieldsFilled = computed(() => {
 </script>
 
 <template>
-  <Layout>
+  <ProgramLayout>
     <div class="form-container">
       <div class="form-wrapper">
         <RouterLink class="back-link" :to="LINKS.program(programId)"
@@ -128,7 +128,7 @@ const allRequiredFieldsFilled = computed(() => {
         </div>
       </div>
     </div>
-  </Layout>
+  </ProgramLayout>
 </template>
 
 <style lang="scss" scoped>

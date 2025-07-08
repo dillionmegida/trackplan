@@ -20,14 +20,22 @@ import type { ProgramType } from '@/types/Program'
 import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
 
-export const useProgramsForUser = (userId: string) => {
+import type { MaybeRefOrGetter } from 'vue'
+import { toValue } from 'vue'
+
+export const useProgramsForOrganization = (
+  organizationId: MaybeRefOrGetter<string | undefined | null>,
+) => {
   return useQuery({
-    queryKey: ['programs', userId],
+    queryKey: ['programs', () => toValue(organizationId)],
     queryFn: async () => {
+      const orgId = toValue(organizationId)
+      if (!orgId) return []
+
       const programsRef = collection(db, 'programs')
       const q = query(
         programsRef,
-        where('organizationId', '==', userId),
+        where('organizationId', '==', orgId),
         where('trashDate', '==', null),
       )
       const programsSnapshot = await getDocs(q)
@@ -37,18 +45,23 @@ export const useProgramsForUser = (userId: string) => {
       }))
       return programs as ProgramType[]
     },
-    enabled: !!userId,
+    enabled: () => !!toValue(organizationId),
   })
 }
 
-export const useTrashedProgramsForUser = (userId: string) => {
+export const useTrashedProgramsForOrganization = (
+  organizationId: MaybeRefOrGetter<string | undefined | null>,
+) => {
   return useQuery({
-    queryKey: ['programs-trash', userId],
+    queryKey: ['programs-trash', organizationId],
     queryFn: async () => {
+      const orgId = toValue(organizationId)
+      if (!orgId) return []
+
       const programsRef = collection(db, 'programs')
       const q = query(
         programsRef,
-        where('organizationId', '==', userId),
+        where('organizationId', '==', orgId),
         where('trashDate', '!=', null),
       )
       const programsSnapshot = await getDocs(q)
@@ -58,7 +71,7 @@ export const useTrashedProgramsForUser = (userId: string) => {
       }))
       return programs as ProgramType[]
     },
-    enabled: !!userId,
+    enabled: !!organizationId,
   })
 }
 

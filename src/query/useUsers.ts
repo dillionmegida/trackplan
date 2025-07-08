@@ -27,8 +27,9 @@ export const useUser = (userId: string) => {
       if (!userSnapshot.exists()) {
         return "not-found"
       }
-      return { id: userSnapshot.id, ...userSnapshot.data() }
+      return { id: userSnapshot.id, ...userSnapshot.data() } as UserType
     },
+    enabled: !!userId,
   })
 }
 

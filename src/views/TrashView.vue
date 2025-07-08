@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { format } from 'date-fns'
 import { Timestamp } from 'firebase/firestore'
 import { useAuthStore } from '@/stores/auth'
@@ -10,19 +10,26 @@ import { toast } from 'vue3-toastify'
 import {
   useDeleteProgram,
   useRestoreProgramFromTrash,
-  useTrashedProgramsForUser,
+  useTrashedProgramsForOrganization,
 } from '@/query/usePrograms'
+import { useUser } from '@/query/useUsers'
 
 const authStore = useAuthStore()
 
 const { mutateAsync: restoreProgramMutation, isPending: restoreProgramPending } =
   useRestoreProgramFromTrash()
 const { mutateAsync: deleteProgramMutation, isPending: deleteProgramPending } = useDeleteProgram()
+
+const { data: user, isLoading: userLoading } = useUser(authStore.user?.uid ?? '')
+
+const organizationId = computed(() => {
+  return user.value?.organizationIds?.[0]
+})
 const {
   data: trashedProgramsData,
   isLoading: trashedProgramsLoading,
   error: trashedProgramsError,
-} = useTrashedProgramsForUser(authStore.user?.uid)
+} = useTrashedProgramsForOrganization(organizationId)
 
 const restoreProgram = async (programId: string) => {}
 
@@ -49,7 +56,7 @@ const formatDate = (date: Timestamp) => {
         <p>Deleted programs will be permanently removed after 30 days.</p>
       </div>
 
-      <div v-if="trashedProgramsLoading" class="loading">Loading trashed programs...</div>
+      <div v-if="userLoading ||trashedProgramsLoading" class="loading">Loading trashed programs...</div>
       <div v-else-if="trashedProgramsError" class="error">
         Error loading trashed programs. Please check back later.
       </div>

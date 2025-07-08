@@ -14,6 +14,7 @@ import TrashIcon from '@/components/icons/TrashIcon.vue'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue3-toastify'
 import { useRouter } from 'vue-router'
+import ProgramLayout from '@/components/ProgramLayout.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -52,7 +53,7 @@ const deleteProgram = async (id: string) => {
 </script>
 
 <template>
-  <Layout>
+  <ProgramLayout>
     <div class="program-details container">
       <div v-if="isLoading" class="loading">Loading program details...</div>
 
@@ -96,7 +97,7 @@ const deleteProgram = async (id: string) => {
         </div>
       </div>
     </div>
-  </Layout>
+  </ProgramLayout>
 </template>
 
 <style lang="scss" scoped>

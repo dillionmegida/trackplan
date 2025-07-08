@@ -2,11 +2,10 @@
 import Layout from '@/components/Layout.vue'
 import { useUser } from '@/query/useUsers'
 import { useAuthStore } from '@/stores/auth'
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { getFirstName } from '@/utils/string'
 import { RouterLink } from 'vue-router'
-import { useProgramsForUser } from '@/query/usePrograms'
+import { useProgramsForOrganization } from '@/query/usePrograms'
 import { LINKS } from '@/constants/links'
 import { format } from 'date-fns'
 import PlusIcon from '@/components/icons/PlusIcon.vue'
@@ -14,12 +13,13 @@ import PlusIcon from '@/components/icons/PlusIcon.vue'
 const router = useRouter()
 const userId = useAuthStore().user?.uid
 
-const { data: user, isLoading, error } = useUser(userId)
+const { data: user, isLoading, error } = useUser(userId ?? '')
+const organizationId = computed(() => user.value?.organizationIds?.[0])
 const {
   data: programs,
   isLoading: programsLoading,
   error: programsError,
-} = useProgramsForUser(userId)
+} = useProgramsForOrganization(organizationId)
 
 watch(user, () => {
   if (user.value && user.value === 'not-found') {
@@ -33,7 +33,7 @@ watch(user, () => {
 <template>
   <Layout>
     <main class="main-content container">
-      <p v-if="isLoading">Loading...</p>
+      <p v-if="isLoading || programsLoading">Loading...</p>
       <p v-else-if="error">{{ error }}</p>
       <p v-else-if="user === 'not-found'">Redirecting to onboarding...</p>
       <div v-else>
