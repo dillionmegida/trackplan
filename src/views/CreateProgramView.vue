@@ -7,7 +7,8 @@ import { useCreateProgram } from '@/query/usePrograms'
 import Layout from '@/components/Layout.vue'
 import { toast } from 'vue3-toastify'
 import { LINKS } from '@/constants/links'
-
+import BackIcon from '@/components/icons/BackIcon.vue'
+import { RouterLink } from 'vue-router'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -55,6 +56,7 @@ const allFieldsFilled = computed(() => {
   <Layout>
     <form @submit.prevent="submit" class="form-container">
       <div class="form-wrapper">
+        <RouterLink class="back-link" :to="LINKS.home"><BackIcon /> Back to Programs</RouterLink>
         <h1>Create Program</h1>
         <p class="subtitle">You are creating a new program under your personal organization.</p>
         <div class="forms">
@@ -79,7 +81,9 @@ const allFieldsFilled = computed(() => {
           </div>
 
           <div class="form-card">
-            <p class="subtitle">When you create a program, you can add categories to group related checklists.</p>
+            <p class="subtitle">
+              When you create a program, you can add categories to group related checklists.
+            </p>
           </div>
         </div>
       </div>
@@ -96,6 +100,24 @@ const allFieldsFilled = computed(() => {
   min-height: 100vh;
   background: linear-gradient(135deg, #f6f9fc 0%, #f1f5f9 100%);
   padding: 6rem 1.5rem 1.5rem;
+}
+
+.back-link {
+  align-items: center;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  border: 1px solid #d1d5db;
+  display: inline-flex;
+  padding: 0.2rem 0.4rem 0.2rem 0.2rem;
+  color: #64748b;
+  gap: 0.2rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background-color: #d5dee7;
+    color: #1e293b;
+  }
 }
 
 .form-wrapper {

@@ -9,17 +9,85 @@ import { useProgramsForOrganization } from '@/query/usePrograms'
 import { LINKS } from '@/constants/links'
 import { format } from 'date-fns'
 import PlusIcon from '@/components/icons/PlusIcon.vue'
+import {
+  useCreateOrganization,
+  useOrganizationsForUser,
+  useSelectActiveOrganization,
+} from '@/query/useOrganizations'
+import { Timestamp } from 'firebase/firestore'
+import { toast } from 'vue3-toastify'
+import LoaderIcon from '@/components/icons/LoaderIcon.vue'
 
 const router = useRouter()
 const userId = useAuthStore().user?.uid
+const newAccount = router.currentRoute.value.query.new === 'true'
+
+if (newAccount) {
+  toast('Your trackplan account has been created successfully')
+}
 
 const { data: user, isLoading, error } = useUser(userId ?? '')
-const organizationId = computed(() => user.value?.organizationIds?.[0])
+
+const organizationId = computed(() => {
+  if (user.value === 'not-found') {
+    return ''
+  }
+  return user.value?.activeOrganizationId
+})
+
+const {
+  data: organizations,
+  isLoading: organizationsLoading,
+  error: organizationsError,
+} = useOrganizationsForUser(userId ?? '')
 const {
   data: programs,
   isLoading: programsLoading,
   error: programsError,
 } = useProgramsForOrganization(organizationId)
+
+const {
+  mutateAsync: createOrganization,
+  isPending: createOrganizationPending,
+  error: createOrganizationError,
+} = useCreateOrganization()
+
+const {
+  mutateAsync: selectActiveOrganization,
+  isPending: selectActiveOrganizationPending,
+  error: selectActiveOrganizationError,
+} = useSelectActiveOrganization(userId ?? '')
+
+const createOrg = async () => {
+  if (!userId) {
+    toast('You must be logged in to create an organization.')
+    return
+  }
+
+  const orgObj = {
+    id: userId,
+    name: 'Personal Organization',
+    createdAt: Timestamp.fromDate(new Date()),
+    updatedAt: Timestamp.fromDate(new Date()),
+    createdBy: userId,
+    updatedBy: userId,
+  }
+
+  await createOrganization({
+    data: orgObj,
+  })
+  toast.success('Your personal organization created successfully')
+}
+
+const selectOrganization = async (organizationId: string) => {
+  if (!userId) {
+    toast('You must be logged in to select an organization.')
+    return
+  }
+
+  await selectActiveOrganization({ organizationId })
+  toast.success('Your personal organization is selected.')
+}
 
 watch(user, () => {
   if (user.value && user.value === 'not-found') {
@@ -33,20 +101,48 @@ watch(user, () => {
 <template>
   <Layout>
     <main class="main-content container">
-      <p v-if="isLoading || programsLoading">Loading...</p>
+      <p v-if="isLoading || organizationsLoading || programsLoading">Loading...</p>
       <p v-else-if="error">{{ error }}</p>
       <p v-else-if="user === 'not-found'">Redirecting to onboarding...</p>
+      <div v-else-if="organizations?.length === 0" class="no-organizations">
+        <p>No organizations found</p>
+        <button @click="createOrg" class="create-btn" :disabled="createOrganizationPending">
+          <PlusIcon :size="12" />
+          {{ createOrganizationPending ? 'Creating...' : 'Create Personal Organization' }}
+        </button>
+      </div>
+      <div v-else-if="!user?.activeOrganizationId" class="organizations">
+        <div class="organization">
+          <h1>Select organization to begin</h1>
+          <div class="organizations-list">
+            <button
+              @click="selectOrganization(organization.id)"
+              v-for="organization in organizations"
+              :key="organization.id"
+              class="organization-item"
+              :disabled="selectActiveOrganizationPending"
+            >
+              <span class="organization-name">{{ organization.name }}</span>
+              <span class="loading-icon">
+                <LoaderIcon :size="20" />
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
       <div v-else>
         <div class="top-header">
           <h1>Programs</h1>
           <RouterLink class="create-link" :to="LINKS.createProgram">
-            <PlusIcon :size="12" />
+            Create
           </RouterLink>
         </div>
         <section class="programs-section">
           <p v-if="programsLoading">Loading programs...</p>
           <p v-else-if="programsError">{{ programsError }}</p>
-          <div v-else-if="programs?.length === 0" class="no-programs">No programs found</div>
+          <div v-else-if="programs?.length === 0" class="no-programs">
+            Create a program to get started
+          </div>
           <div v-else class="programs-list">
             <RouterLink
               v-for="program in programs"
@@ -79,6 +175,41 @@ watch(user, () => {
   }
 
   .create-link {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.9rem;
+    color: white;
+    background-color: #3b82f6;
+    border: none;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .create-link:hover {
+    background-color: #2563eb;
+  }
+
+  .create-link:active {
+    background-color: #1d4ed8;
+  }
+}
+
+.no-organizations {
+  padding: 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  /* border: 1px solid #d3d9e2; */
+  margin: 2rem 0;
+
+  .create-btn {
     padding: 0.5rem;
     font-size: 0.9rem;
     font-weight: 500;
@@ -89,16 +220,72 @@ watch(user, () => {
     cursor: pointer;
     transition: background-color 0.2s;
     display: flex;
+    gap: 0.5rem;
     align-items: center;
     justify-content: center;
+    width: 240px;
+
+    &:hover {
+      background-color: #2563eb;
+    }
+
+    &:active {
+      background-color: #1d4ed8;
+    }
+  }
+}
+
+.organizations {
+  padding: 1rem 2rem;
+
+  h1 {
+    text-transform: uppercase;
+    font-weight: 300;
+    font-size: 1rem;
+    margin-bottom: 1rem;
   }
 
-  .create-link:hover {
-    background-color: #2563eb;
-  }
+  .organizations-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
 
-  .create-link:active {
-    background-color: #1d4ed8;
+    .organization-item {
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #1e293b;
+      background-color: #f8fafc;
+      border: 1px solid #d3d9e2;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+      position: relative;
+
+      &:hover {
+        background-color: #e5e7eb;
+      }
+
+      &:active {
+        background-color: #d1d5db;
+      }
+
+      &:disabled .organization-name {
+        opacity: 0.1;
+      }
+
+      &:disabled .loading-icon {
+        display: block;
+      }
+
+      .loading-icon {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+      }
+    }
   }
 }
 

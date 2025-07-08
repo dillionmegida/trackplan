@@ -7,21 +7,28 @@ import Layout from '@/components/Layout.vue'
 import { useCreateUser, useUser } from '@/query/useUsers'
 import { UserType } from '@/types/User'
 import { Timestamp } from 'firebase/firestore'
+import { useOrganizationsForUser } from '@/query/useOrganizations'
+import { toast } from 'vue3-toastify'
+import { LINKS } from '@/constants/links'
 
 const authStore = useAuthStore()
 const router = useRouter()
 const isLoading = ref(false)
-const { mutateAsync: createUser, isPending, error } = useCreateUser()
+const { mutateAsync: createUser, isPending, error } = useCreateUser(authStore.user?.uid ?? '')
 
 const userId = useAuthStore().user?.uid
-const { data: user, isLoading: userLoading, error: userError } = useUser(userId)
+const { data: user, isLoading: userLoading, error: userError } = useUser(userId ?? '')
 
-watch(user, () => {
-  console.log('in onboarding page')
-  if (user.value && user.value !== 'not-found') {
-    router.push({ name: 'home' })
-  }
-}, { immediate: true })
+watch(
+  user,
+  () => {
+    console.log('in onboarding page')
+    if (user.value && user.value !== 'not-found') {
+      router.push({ name: 'home' })
+    }
+  },
+  { immediate: true }
+)
 
 const confirmDetails = async () => {
   const userId = authStore.user.uid
@@ -37,7 +44,7 @@ const confirmDetails = async () => {
   }
 
   await createUser({ data: userObj })
-  router.push({ name: 'home' })
+  router.push(LINKS.home + '?new=true')
 }
 </script>
 
