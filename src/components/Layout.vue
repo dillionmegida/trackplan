@@ -44,7 +44,9 @@ const handleLogout = async () => {
   <div class="layout">
     <header class="header">
       <div class="container">
-        <RouterLink to="/" class="logo">🗓️</RouterLink>
+        <RouterLink to="/" class="logo">
+          <img src="/logo-dark.png" alt="TrackPlan" />
+        </RouterLink>
         <div class="user-menu">
           <RouterLink :to="LINKS.trash" class="trash-link">
             <TrashIcon />
@@ -114,6 +116,10 @@ const handleLogout = async () => {
   font-size: 1.75rem;
   font-weight: 800;
   color: #3b82f6;
+
+  img {
+    width: 2rem;
+  }
 }
 
 .user-menu {
