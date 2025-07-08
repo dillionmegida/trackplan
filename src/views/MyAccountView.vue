@@ -73,7 +73,7 @@ const selectOrganization = async (orgId: string) => {
       <div v-else-if="!user" class="empty-state">
         <p>User not found</p>
       </div>
-      <div v-else class="user-section">
+      <div v-else class="user-section container">
         <div class="user-header">
           <div class="user-avatar">
             <img
@@ -141,13 +141,13 @@ const selectOrganization = async (orgId: string) => {
   background: white;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
   margin-bottom: 2rem;
+
+
 }
 
 .user-header {
   display: flex;
-  align-items: center;
   gap: 1.5rem;
 }
 
@@ -156,6 +156,16 @@ const selectOrganization = async (orgId: string) => {
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
+
+  @media (max-width: 768px) {
+    width: 60px;
+    height: 60px;
+  }
+
+  @media (max-width: 425px) {
+    width: 50px;
+    height: 50px;
+  }
 }
 
 .avatar-placeholder {
@@ -175,17 +185,19 @@ const selectOrganization = async (orgId: string) => {
   margin: 0 0 0.25rem;
   font-size: 1.75rem;
   font-weight: 600;
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
 }
 
 .email {
   margin: 0 0 0.5rem;
   color: #64748b;
+  font-size: clamp(0.8rem, 1.2vw, 1rem);
 }
 
 .member-since {
   margin: 0;
   color: #94a3b8;
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 1.2vw, 0.9rem);
 }
 
 .organizations-section {
@@ -193,6 +205,12 @@ const selectOrganization = async (orgId: string) => {
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 0;
+    background: none;
+    box-shadow: none;
+  }
 }
 
 .section-header h2 {
@@ -214,8 +232,13 @@ const selectOrganization = async (orgId: string) => {
 
 .organizations-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  --size: 300px;
+  grid-template-columns: repeat(auto-fill, minmax(var(--size), 1fr));
   gap: 1.25rem;
+
+  @media (max-width: 768px) {
+    --size: 200px;
+  }
 }
 
 .make-active-btn {
@@ -259,6 +282,19 @@ const selectOrganization = async (orgId: string) => {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  @media (max-width: 768px) {
+    .org-icon {
+     display: none;
+    }
+
+    .active-badge {
+      top: -0.8rem;
+    }
+
+    padding: 1rem;
+    gap: 0.5rem;
   }
 }
 

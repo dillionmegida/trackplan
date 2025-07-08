@@ -75,55 +75,57 @@ const allRequiredFieldsFilled = computed(() => {
 <template>
   <ProgramLayout>
     <div class="form-container">
-      <div class="form-wrapper">
-        <RouterLink class="back-link" :to="LINKS.program(programId)"
-          ><BackIcon /> Back to Program</RouterLink
-        >
-        <h1>Edit Program</h1>
-        <p class="subtitle">Update program details</p>
+      <div class="container">
+        <div class="form-wrapper">
+          <RouterLink class="back-link" :to="LINKS.program(programId)"
+            ><BackIcon /> Back to Program</RouterLink
+          >
+          <h1>Edit Program</h1>
+          <p class="subtitle">Update program details</p>
 
-        <div v-if="isLoading" class="loading">Loading program details...</div>
+          <div v-if="isLoading" class="loading">Loading program details...</div>
 
-        <div v-else-if="error" class="error">Error loading program: {{ error }}</div>
+          <div v-else-if="error" class="error">Error loading program: {{ error }}</div>
 
-        <div v-if="program" class="forms">
-          <form v-if="program" @submit.prevent="submit" class="form-card">
-            <div class="input-group">
-              <label for="title">Program Title</label>
-              <input
-                type="text"
-                id="title"
-                v-model="form.title"
-                placeholder="Program Title"
-                required
-              />
+          <div v-if="program" class="forms">
+            <form v-if="program" @submit.prevent="submit" class="form-card container">
+              <div class="input-group">
+                <label for="title">Program Title</label>
+                <input
+                  type="text"
+                  id="title"
+                  v-model="form.title"
+                  placeholder="Program Title"
+                  required
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="description">Description</label>
+                <textarea
+                  id="description"
+                  v-model="form.description"
+                  placeholder="Description"
+                ></textarea>
+              </div>
+
+              <div class="input-group">
+                <label for="date">Program Date</label>
+                <input type="date" id="date" v-model="form.date" required />
+              </div>
+
+              <button
+                type="submit"
+                :disabled="!allRequiredFieldsFilled || !hasChanges || isPending"
+                class="submit-btn"
+              >
+                {{ isPending ? 'Saving...' : 'Save Changes' }}
+              </button>
+            </form>
+
+            <div class="form-card container">
+              <CategoriesSection />
             </div>
-
-            <div class="input-group">
-              <label for="description">Description</label>
-              <textarea
-                id="description"
-                v-model="form.description"
-                placeholder="Description"
-              ></textarea>
-            </div>
-
-            <div class="input-group">
-              <label for="date">Program Date</label>
-              <input type="date" id="date" v-model="form.date" required />
-            </div>
-
-            <button
-              type="submit"
-              :disabled="!allRequiredFieldsFilled || !hasChanges || isPending"
-              class="submit-btn"
-            >
-              {{ isPending ? 'Saving...' : 'Save Changes' }}
-            </button>
-          </form>
-
-          <div class="form-card">
-            <CategoriesSection />
           </div>
         </div>
       </div>
@@ -139,7 +141,7 @@ const allRequiredFieldsFilled = computed(() => {
   gap: 1rem;
   min-height: 100vh;
   background: linear-gradient(135deg, #f6f9fc 0%, #f1f5f9 100%);
-  padding: 6rem 1.5rem 10rem;
+  padding-bottom: 10rem;
 }
 
 .form-wrapper {
@@ -192,11 +194,6 @@ h1 {
   color: #ef4444;
 }
 
-.form-container {
-  display: flex;
-  justify-content: center;
-}
-
 .forms {
   display: flex;
   flex-direction: column;
@@ -207,7 +204,6 @@ h1 {
   background: white;
   border-radius: 1rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  padding: 2.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;

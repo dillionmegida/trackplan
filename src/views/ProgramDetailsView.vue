@@ -181,9 +181,12 @@ const deleteProgram = async (id: string) => {
 .program-info {
   display: flex;
   justify-content: space-between;
-  gap: 1.5rem;
+  column-gap: 1.5rem;
+  row-gap: 0.5rem;
+  flex-wrap: wrap;
   background: #f8fafc;
   border-radius: 0.75rem;
+  margin-bottom: 2rem;
 
   .progress {
   }

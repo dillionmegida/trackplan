@@ -37,7 +37,7 @@ const shouldBeAbleToInvite = computed(() => {
       <div v-else-if="organizationError">Error loading organization: {{ organizationError }}</div>
       <div v-else>
         <div class="organization-header">
-          <h1>{{ organization?.name }} <span v-if="user?.activeOrganizationId === organizationId" class="active-badge">Active</span> </h1>
+          <h1>{{ organization?.name }} <span v-if="user?.activeOrganizationId === organizationId" class="active-badge"></span> </h1>
           <div class="organization-actions">
             <button v-if="shouldBeAbleToInvite" @click="handleInvite" class="invite-button">Invite Someone</button>
           </div>
@@ -75,13 +75,17 @@ const shouldBeAbleToInvite = computed(() => {
   }
 
   .active-badge {
-    background-color: #24a34e;
+    background-color: #0ef059;
     color: white;
-    border-radius: 6px;
-    padding: 0.25rem 0.5rem;
+    border-radius: 50%;
+    width: 0.5rem;
+    height: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: absolute;
-    left: 0;
-    top: -1.2rem;
+    left: -0.25rem;
+    top: -0.25rem;
     z-index: 1;
     font-size: 0.7rem;
   }

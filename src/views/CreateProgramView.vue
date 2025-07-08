@@ -55,35 +55,37 @@ const allFieldsFilled = computed(() => {
 <template>
   <Layout>
     <form @submit.prevent="submit" class="form-container">
-      <div class="form-wrapper">
-        <RouterLink class="back-link" :to="LINKS.home"><BackIcon /> Back to Programs</RouterLink>
-        <h1>Create Program</h1>
-        <p class="subtitle">You are creating a new program under your personal organization.</p>
-        <div class="forms">
-          <div class="form-card">
-            <div class="input-group">
-              <label for="title">Program Title</label>
-              <input type="text" v-model="program.title" placeholder="Program Title" />
+      <div class="container">
+        <div class="form-wrapper">
+          <RouterLink class="back-link" :to="LINKS.home"><BackIcon /> Back to Programs</RouterLink>
+          <h1>Create Program</h1>
+          <p class="subtitle">You are creating a new program under your personal organization.</p>
+          <div class="forms">
+            <div class="form-card container">
+              <div class="input-group">
+                <label for="title">Program Title</label>
+                <input type="text" v-model="program.title" placeholder="Program Title" />
+              </div>
+              <div class="input-group">
+                <label for="description">Description</label>
+                <input type="text" v-model="program.description" placeholder="Description" />
+              </div>
+              <div class="input-group">
+                <label for="date">Program Date</label>
+                <input type="date" v-model="program.date" />
+              </div>
+              <!-- TODO: Select checklist template -->
+              <button class="btn" type="submit" :disabled="isPending || !allFieldsFilled">
+                <span v-if="isPending">Creating...</span>
+                <span v-else>Create Program</span>
+              </button>
             </div>
-            <div class="input-group">
-              <label for="description">Description</label>
-              <input type="text" v-model="program.description" placeholder="Description" />
-            </div>
-            <div class="input-group">
-              <label for="date">Program Date</label>
-              <input type="date" v-model="program.date" />
-            </div>
-            <!-- TODO: Select checklist template -->
-            <button class="btn" type="submit" :disabled="isPending || !allFieldsFilled">
-              <span v-if="isPending">Creating...</span>
-              <span v-else>Create Program</span>
-            </button>
-          </div>
 
-          <div class="form-card">
-            <p class="subtitle">
-              When you create a program, you can add categories to group related checklists.
-            </p>
+            <div class="form-card container">
+              <p class="subtitle">
+                When you create a program, you can add categories to group related checklists.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -99,7 +101,7 @@ const allFieldsFilled = computed(() => {
   gap: 1rem;
   min-height: 100vh;
   background: linear-gradient(135deg, #f6f9fc 0%, #f1f5f9 100%);
-  padding: 6rem 1.5rem 1.5rem;
+  padding-bottom: 10rem;
 }
 
 .back-link {
@@ -150,7 +152,6 @@ h1 {
   background: white;
   border-radius: 1rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  padding: 2.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
