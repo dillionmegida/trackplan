@@ -5,12 +5,18 @@ import { useInviteUser } from '@/query/useInvites'
 import { toast } from 'vue3-toastify'
 import { LINKS } from '@/constants/links'
 import Layout from '@/components/Layout.vue'
+import { useOrganization } from '@/query/useOrganizations'
 
 const route = useRoute()
 const organizationId = route.params.organizationId as string
 const email = ref('')
 
 const { mutateAsync: inviteUser, isPending, error } = useInviteUser(organizationId)
+const {
+  data: organization,
+  isLoading: organizationLoading,
+  error: organizationError,
+} = useOrganization(organizationId)
 
 const handleSubmit = async () => {
   if (!email.value.trim()) {
@@ -26,9 +32,14 @@ const handleSubmit = async () => {
 <template>
   <Layout>
     <main class="main-content container">
-      <div class="invite-container">
+      <div v-if="organizationLoading" class="loading">Loading organization...</div>
+      <div v-else-if="organizationError" class="error">
+        Error loading organization: {{ organizationError }}
+      </div>
+      <div v-else class="invite-container">
         <div class="invite-header">
           <h1>Invite Team Member</h1>
+          <span class="organization-name">'{{ organization?.name }}' Organization</span>
           <p class="subtitle">
             Add a team member to your organization by entering their email address.
           </p>
@@ -69,13 +80,22 @@ const handleSubmit = async () => {
 }
 
 .invite-header {
-  text-align: center;
   margin-bottom: 2rem;
 
   h1 {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
     color: #1e293b;
+  }
+
+  .organization-name {
+    display: inline-block;
+    font-size: 0.9rem;
+    color: black;
+    margin-bottom: 1rem;
+    background-color: #ecee73;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
   }
 
   .subtitle {

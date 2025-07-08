@@ -4,65 +4,80 @@ import { useAuthStore } from '@/stores/auth'
 import { useOrganization } from '@/query/useOrganizations'
 import { LINKS } from '@/constants/links'
 import Layout from '@/components/Layout.vue'
+import { format } from 'date-fns'
+import { useUser } from '@/query/useUsers'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
-const organizationId = route.params.id as string
+const organizationId = route.params.organizationId as string
 
-const { data: organization, isLoading, error } = useOrganization(organizationId)
+const { data: user, isLoading: userLoading } = useUser(authStore.user?.uid ?? '')
+const { data: organization, isLoading: organizationLoading, error } = useOrganization(organizationId)
 
 const handleInvite = () => {
   router.push(LINKS.inviteToOrganization(organizationId))
 }
+
 </script>
 
 <template>
   <Layout>
     <main class="main-content container">
-      <div class="organization-container">
+      <div v-if="userLoading || organizationLoading">Loading organization...</div>
+      <div v-else-if="organizationError">Error loading organization: {{ organizationError }}</div>
+      <div v-else>
         <div class="organization-header">
-          <h1>{{ organization?.name || 'Loading...' }}</h1>
+          <h1>{{ organization?.name }} <span v-if="user?.activeOrganizationId === organizationId" class="active-badge">Active</span> </h1>
           <div class="organization-actions">
-            <button @click="handleInvite" class="invite-button">
-              Invite Team Member
-            </button>
+            <button @click="handleInvite" class="invite-button">Invite Someone</button>
           </div>
         </div>
 
+        <!-- TODO: Add organization content -->
         <div class="organization-content">
-          <p v-if="isLoading">Loading organization details...</p>
-          <p v-else-if="error">{{ error }}</p>
-          <div v-else-if="organization">
-            <div class="organization-info">
-              <p>Created by: {{ organization.createdBy }}</p>
-              <p>Created at: {{ new Date(organization.createdAt?.toDate()).toLocaleDateString() }}</p>
-            </div>
-          </div>
+          <p>Created since {{ format(organization?.createdAt?.toDate(), 'MMMM dd, yyyy') }}</p>
         </div>
+        <!-- <div class="organization-content">
+          <div class="organization-info">
+            <p>Created by: {{ organization?.createdBy }}</p>
+            <p>
+              Created at: {{ new Date(organization?.createdAt?.toDate()).toLocaleDateString() }}
+            </p>
+          </div>
+        </div> -->
       </div>
     </main>
   </Layout>
 </template>
 
 <style lang="scss" scoped>
-.organization-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
 .organization-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  position: relative;
 
   h1 {
-    font-size: 1.5rem;
+    font-size: clamp(1rem, 2vw, 1.3rem);
     color: #1e293b;
   }
+
+  .active-badge {
+    background-color: #24a34e;
+    color: white;
+    border-radius: 6px;
+    padding: 0.25rem 0.5rem;
+    position: absolute;
+    left: 0;
+    top: -1.2rem;
+    z-index: 1;
+    font-size: 0.7rem;
+  }
 }
+
 
 .organization-actions {
   display: flex;
@@ -87,8 +102,7 @@ const handleInvite = () => {
 .organization-content {
   background-color: #f8fafc;
   border-radius: 8px;
-  padding: 1.5rem;
-  border: 1px solid #e2e8f0;
+  padding: 1.5rem 0;
 }
 
 .organization-info {

@@ -9,11 +9,25 @@ import LogoutIcon from '@/components/icons/LogoutIcon.vue'
 import { RouterLink } from 'vue-router'
 import TrashIcon from '@/components/icons/TrashIcon.vue'
 import { useUser } from '@/query/useUsers'
+import { useOrganization } from '@/query/useOrganizations'
+import { computed } from 'vue'
 const router = useRouter()
 const authStore = useAuthStore()
 const authUser = authStore.user
 
 const { data: userFromDb, isLoading: userLoading, error: userError } = useUser(authUser?.uid ?? '')
+
+const activeOrganizationId = computed(() => {
+  if (userFromDb.value === 'not-found') {
+    return ''
+  }
+  return userFromDb.value?.activeOrganizationId
+})
+const {
+  data: organization,
+  isLoading: organizationLoading,
+  error: organizationError,
+} = useOrganization(activeOrganizationId)
 
 const handleLogout = async () => {
   try {
@@ -32,34 +46,27 @@ const handleLogout = async () => {
       <div class="container">
         <RouterLink to="/" class="logo">🗓️</RouterLink>
         <div class="user-menu">
-          <RouterLink
-            v-if="userFromDb?.activeOrganizationId"
-            :to="LINKS.inviteToOrganization(userFromDb?.activeOrganizationId)"
-            class="organization-link"
-          >
-            Invite
-          </RouterLink>
           <RouterLink :to="LINKS.trash" class="trash-link">
             <TrashIcon />
           </RouterLink>
-          <div class="user-info">
-            <img
-              v-if="authUser?.photoURL"
-              :src="authUser.photoURL"
-              :alt="authUser.displayName"
-              class="user-avatar"
-            />
-            <div v-else class="avatar-placeholder">
-              {{ authUser?.displayName?.charAt(0).toUpperCase() }}
-            </div>
-            <button @click="handleLogout" class="logout-button">
-              <LogoutIcon :size="20" :color="'currentColor'" />
-              <span>Logout</span>
-            </button>
-          </div>
+          <RouterLink :to="LINKS.my_account" class="user-info">
+            <img :src="authUser.photoURL" :alt="authUser.displayName" class="user-avatar" />
+          </RouterLink>
+          <button @click="handleLogout" class="logout-button">
+            <LogoutIcon :size="20" :color="'currentColor'" />
+            <span>Logout</span>
+          </button>
         </div>
       </div>
     </header>
+    <div class="active-organization container">
+      <div v-if="organization">
+        Active:
+        <span class="active-organization-text">
+          {{ organization?.name }}
+        </span>
+      </div>
+    </div>
     <main class="main-content">
       <slot></slot>
     </main>
@@ -89,6 +96,20 @@ const handleLogout = async () => {
   }
 }
 
+.active-organization {
+  font-size: 0.8rem;
+  &.container {
+    padding-block: 1rem;
+  }
+
+  .active-organization-text {
+    background-color: #1e293b;
+    color: white;
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+  }
+}
+
 .logo {
   font-size: 1.75rem;
   font-weight: 800;
@@ -109,12 +130,16 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   gap: 1rem;
-}
 
-.user-name {
-  font-weight: 500;
-  color: #1e293b;
-  font-size: 0.95rem;
+  img {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover {
+    img {
+      transform: scale(1.1);
+    }
+  }
 }
 
 .logout-button {
@@ -150,31 +175,10 @@ const handleLogout = async () => {
   border: 2px solid #e2e8f0;
 }
 
-.avatar-placeholder {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
 .main-content {
 }
 
 @media (max-width: 768px) {
-  /* .header {
-    padding: 1rem;
-  } */
-
-  .user-name {
-    display: none;
-  }
-
   .logout-button span {
     display: none;
   }

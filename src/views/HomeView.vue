@@ -17,6 +17,7 @@ import {
 import { Timestamp } from 'firebase/firestore'
 import { toast } from 'vue3-toastify'
 import LoaderIcon from '@/components/icons/LoaderIcon.vue'
+import NoOrganizationsYet from '@/components/NoOrganizationsYet.vue'
 
 const router = useRouter()
 const userId = useAuthStore().user?.uid
@@ -48,11 +49,6 @@ const {
   error: programsError,
 } = useProgramsForOrganization(organizationId)
 
-const {
-  mutateAsync: createOrganization,
-  isPending: createOrganizationPending,
-  error: createOrganizationError,
-} = useCreateOrganization()
 
 const {
   mutateAsync: selectActiveOrganization,
@@ -60,26 +56,7 @@ const {
   error: selectActiveOrganizationError,
 } = useSelectActiveOrganization(userId ?? '')
 
-const createOrg = async () => {
-  if (!userId) {
-    toast('You must be logged in to create an organization.')
-    return
-  }
 
-  const orgObj = {
-    id: userId,
-    name: 'Personal Organization',
-    createdAt: Timestamp.fromDate(new Date()),
-    updatedAt: Timestamp.fromDate(new Date()),
-    createdBy: userId,
-    updatedBy: userId,
-  }
-
-  await createOrganization({
-    data: orgObj,
-  })
-  toast.success('Your personal organization created successfully')
-}
 
 const selectOrganization = async (organizationId: string) => {
   if (!userId) {
@@ -114,13 +91,7 @@ watch(user, () => {
       <p v-if="isLoading || organizationsLoading || programsLoading">Loading...</p>
       <p v-else-if="error">{{ error }}</p>
       <p v-else-if="user === 'not-found'">Redirecting to onboarding...</p>
-      <div v-else-if="organizations?.length === 0" class="no-organizations">
-        <p>No organizations found</p>
-        <button @click="createOrg" class="create-btn" :disabled="createOrganizationPending">
-          <PlusIcon :size="12" />
-          {{ createOrganizationPending ? 'Creating...' : 'Create Personal Organization' }}
-        </button>
-      </div>
+      <NoOrganizationsYet v-else-if="organizations?.length === 0" :user="user" />
       <div v-else-if="!user?.activeOrganizationId" class="organizations">
         <div class="organization">
           <h1>Select organization to begin</h1>
@@ -205,43 +176,6 @@ watch(user, () => {
   }
 }
 
-.no-organizations {
-  padding: 1rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  justify-content: center;
-  align-items: center;
-  border-radius: 8px;
-  background-color: #f8fafc;
-  /* border: 1px solid #d3d9e2; */
-  margin: 2rem 0;
-
-  .create-btn {
-    padding: 0.5rem;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: white;
-    background-color: #3b82f6;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    justify-content: center;
-    width: 240px;
-
-    &:hover {
-      background-color: #2563eb;
-    }
-
-    &:active {
-      background-color: #1d4ed8;
-    }
-  }
-}
 
 .organizations {
   padding: 1rem 2rem;

@@ -10,6 +10,7 @@ import ProgramDetailsEditView from '../views/ProgramDetailsEditView.vue'
 import TrashView from '@/views/TrashView.vue'
 import InviteToOrganizationView from '../views/InviteToOrganization.vue'
 import OrganizationView from '../views/OrganizationView.vue'
+import MyAccountView from '../views/MyAccountView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -66,6 +67,12 @@ const router = createRouter({
       path: LINKS.inviteToOrganization(':organizationId'),
       name: 'inviteToOrganization',
       component: InviteToOrganizationView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: LINKS.my_account,
+      name: 'myAccount',
+      component: MyAccountView,
       meta: { requiresAuth: true },
     },
   ],

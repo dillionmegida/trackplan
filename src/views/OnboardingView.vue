@@ -37,7 +37,7 @@ const confirmDetails = async () => {
     id: userId,
     name: authStore.user.displayName,
     email: authStore.user.email,
-    organizationIds: [userId],
+    organizationIds: [userId], // TODO: only do this when they create organization
     createdAt: serverTimestamp() as Timestamp,
     updatedAt: serverTimestamp() as Timestamp,
     onboarded: true,

@@ -1,10 +1,21 @@
-import { useMutation, useQuery } from "@tanstack/vue-query"
-import { db } from "@/configs/firebase"
-import { collection, doc, setDoc, getDocs, where, query, updateDoc, getDoc } from "firebase/firestore"
-import type { OrganizationType } from "@/types/Organization"
-import type { UserType } from "@/types/User"
-import { queryClient } from "@/configs/react-query"
-import { toast } from "vue3-toastify"
+import { useMutation, useQuery } from '@tanstack/vue-query'
+import { db } from '@/configs/firebase'
+import {
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  where,
+  query,
+  updateDoc,
+  getDoc,
+} from 'firebase/firestore'
+import type { OrganizationType } from '@/types/Organization'
+import type { UserType } from '@/types/User'
+import { queryClient } from '@/configs/react-query'
+import { toast } from 'vue3-toastify'
+import type { MaybeRefOrGetter } from 'vue'
+import { toValue } from 'vue'
 
 export const useCreateOrganization = () => {
   return useMutation({
@@ -59,7 +70,7 @@ export const useOrganizationsForUser = (userId: string) => {
       const organizationsRef = collection(db, 'organizations')
       const q = query(organizationsRef, where('id', 'in', organizationIds))
       const organizationsSnapshot = await getDocs(q)
-      
+
       const organizations = organizationsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -70,22 +81,22 @@ export const useOrganizationsForUser = (userId: string) => {
   })
 }
 
-export const useOrganization = (organizationId: string) => {
+export const useOrganization = (organizationId: MaybeRefOrGetter<string | undefined | null>) => {
   return useQuery({
     queryKey: ['organization', organizationId],
     queryFn: async () => {
-      const organizationRef = doc(db, 'organizations', organizationId)
+      const organizationRef = doc(db, 'organizations', toValue(organizationId))
       const docSnap = await getDoc(organizationRef)
-      
+
       if (!docSnap.exists()) {
         throw new Error('Organization not found')
       }
 
       return {
         id: docSnap.id,
-        ...docSnap.data()
+        ...docSnap.data(),
       } as OrganizationType
     },
-    enabled: !!organizationId
+    enabled: !!organizationId,
   })
 }
