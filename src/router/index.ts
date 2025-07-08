@@ -8,6 +8,8 @@ import CreateProgramView from '../views/CreateProgramView.vue'
 import ProgramDetailsView from '../views/ProgramDetailsView.vue'
 import ProgramDetailsEditView from '../views/ProgramDetailsEditView.vue'
 import TrashView from '@/views/TrashView.vue'
+import InviteToOrganizationView from '../views/InviteToOrganization.vue'
+import OrganizationView from '../views/OrganizationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -52,6 +54,18 @@ const router = createRouter({
       path: LINKS.trash,
       name: 'trash',
       component: TrashView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: LINKS.organization(':organizationId'),
+      name: 'organization',
+      component: OrganizationView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: LINKS.inviteToOrganization(':organizationId'),
+      name: 'inviteToOrganization',
+      component: InviteToOrganizationView,
       meta: { requiresAuth: true },
     },
   ],

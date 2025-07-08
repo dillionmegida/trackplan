@@ -6,4 +6,6 @@ export const LINKS = {
   program: (id: string) => `/dashboard/program/${id}`,
   program_edit: (id: string) => `/dashboard/program/${id}/edit`,
   trash: '/trash',
+  organization: (id: string) => `/dashboard/organization/${id}`,
+  inviteToOrganization: (id: string) => `/dashboard/organization/${id}/invite`
 }

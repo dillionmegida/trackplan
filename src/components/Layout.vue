@@ -8,10 +8,12 @@ import { toast } from 'vue3-toastify'
 import LogoutIcon from '@/components/icons/LogoutIcon.vue'
 import { RouterLink } from 'vue-router'
 import TrashIcon from '@/components/icons/TrashIcon.vue'
-
+import { useUser } from '@/query/useUsers'
 const router = useRouter()
 const authStore = useAuthStore()
-const user = authStore.user
+const authUser = authStore.user
+
+const { data: userFromDb, isLoading: userLoading, error: userError } = useUser(authUser?.uid ?? '')
 
 const handleLogout = async () => {
   try {
@@ -30,18 +32,25 @@ const handleLogout = async () => {
       <div class="container">
         <RouterLink to="/" class="logo">🗓️</RouterLink>
         <div class="user-menu">
+          <RouterLink
+            v-if="userFromDb?.activeOrganizationId"
+            :to="LINKS.inviteToOrganization(userFromDb?.activeOrganizationId)"
+            class="organization-link"
+          >
+            Invite
+          </RouterLink>
           <RouterLink :to="LINKS.trash" class="trash-link">
             <TrashIcon />
           </RouterLink>
           <div class="user-info">
             <img
-              v-if="user?.photoURL"
-              :src="user.photoURL"
-              :alt="user.displayName"
+              v-if="authUser?.photoURL"
+              :src="authUser.photoURL"
+              :alt="authUser.displayName"
               class="user-avatar"
             />
             <div v-else class="avatar-placeholder">
-              {{ user.displayName.charAt(0).toUpperCase() }}
+              {{ authUser?.displayName?.charAt(0).toUpperCase() }}
             </div>
             <button @click="handleLogout" class="logout-button">
               <LogoutIcon :size="20" :color="'currentColor'" />

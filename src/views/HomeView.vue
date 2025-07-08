@@ -2,7 +2,7 @@
 import Layout from '@/components/Layout.vue'
 import { useUser } from '@/query/useUsers'
 import { useAuthStore } from '@/stores/auth'
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import { useProgramsForOrganization } from '@/query/usePrograms'
@@ -21,6 +21,8 @@ import LoaderIcon from '@/components/icons/LoaderIcon.vue'
 const router = useRouter()
 const userId = useAuthStore().user?.uid
 const newAccount = router.currentRoute.value.query.new === 'true'
+
+const organizationBeenSelected = ref('')
 
 if (newAccount) {
   toast('Your trackplan account has been created successfully')
@@ -85,8 +87,16 @@ const selectOrganization = async (organizationId: string) => {
     return
   }
 
+  organizationBeenSelected.value = organizationId
+
   await selectActiveOrganization({ organizationId })
-  toast.success('Your personal organization is selected.')
+
+  const toastMsg =
+    organizationBeenSelected.value === userId
+      ? 'Your personal organization is selected.'
+      : 'Organization selected successfully'
+  toast.success(toastMsg)
+  organizationBeenSelected.value = ''
 }
 
 watch(user, () => {
@@ -123,7 +133,7 @@ watch(user, () => {
               :disabled="selectActiveOrganizationPending"
             >
               <span class="organization-name">{{ organization.name }}</span>
-              <span class="loading-icon">
+              <span v-if="organizationBeenSelected === organization.id" class="loading-icon">
                 <LoaderIcon :size="20" />
               </span>
             </button>
@@ -133,9 +143,7 @@ watch(user, () => {
       <div v-else>
         <div class="top-header">
           <h1>Programs</h1>
-          <RouterLink class="create-link" :to="LINKS.createProgram">
-            Create
-          </RouterLink>
+          <RouterLink class="create-link" :to="LINKS.createProgram"> Create </RouterLink>
         </div>
         <section class="programs-section">
           <p v-if="programsLoading">Loading programs...</p>
