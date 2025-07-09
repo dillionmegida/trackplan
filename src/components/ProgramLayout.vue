@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import InfoBlock from '@/components/InfoBlock.vue'
-import { useUser } from '@/query/useUsers'
+import { NOT_FOUND, useUser } from '@/query/useUsers'
 
 const route = useRoute()
 const programId = route.params.id as string
@@ -20,7 +20,7 @@ const userHasAccess = computed(() => {
   if (isLoading.value || !program.value) return 'loading'
 
   const userOrganizationIds = user.value?.organizationIds
-  if (!userOrganizationIds || !userOrganizationIds.length || user.value === 'not-found') return 'noAccess'
+  if (!userOrganizationIds || !userOrganizationIds.length || user.value?.name === NOT_FOUND) return 'noAccess'
 
   return userOrganizationIds.includes(program.value.organizationId) ? 'hasAccess' : 'noAccess'
 })

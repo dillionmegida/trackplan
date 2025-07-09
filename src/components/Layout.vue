@@ -7,8 +7,7 @@ import { LINKS } from '@/constants/links'
 import { toast } from 'vue3-toastify'
 import LogoutIcon from '@/components/icons/LogoutIcon.vue'
 import { RouterLink } from 'vue-router'
-import TrashIcon from '@/components/icons/TrashIcon.vue'
-import { useUser } from '@/query/useUsers'
+import { NOT_FOUND, useUser } from '@/query/useUsers'
 import { useOrganization } from '@/query/useOrganizations'
 import { computed } from 'vue'
 const router = useRouter()
@@ -18,7 +17,7 @@ const authUser = authStore.user
 const { data: userFromDb, isLoading: userLoading, error: userError } = useUser(authUser?.uid ?? '')
 
 const activeOrganizationId = computed(() => {
-  if (userFromDb.value === 'not-found') {
+  if (userFromDb.value?.name === NOT_FOUND) {
     return ''
   }
   return userFromDb.value?.activeOrganizationId

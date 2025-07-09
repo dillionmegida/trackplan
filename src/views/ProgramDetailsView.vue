@@ -118,7 +118,7 @@ const shouldBeAbleToEditProgram = computed(() => {
                     <TrashIcon />
                   </button>
                 </div>
-                <p class="program-date"><ClockIcon size="14" /> {{ formatDate(program.date) }}</p>
+                <p class="program-date"><ClockIcon :size="14" /> {{ formatDate(program.date) }}</p>
                 <p v-if="creator" class="program-creator">Created by {{ creator.name }}</p>
               </div>
               <div class="progress">

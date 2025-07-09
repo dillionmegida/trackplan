@@ -1,10 +1,12 @@
 import { useMutation, useQuery } from '@tanstack/vue-query'
 import { db } from '@/configs/firebase'
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore'
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where, writeBatch, type DocumentReference } from 'firebase/firestore'
 import type { UserType } from '@/types/User'
 import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
 import { toValue, type MaybeRefOrGetter } from 'vue'
+
+export const NOT_FOUND = 'not-found'
 
 export const useUsers = () => {
   return useQuery({
@@ -28,7 +30,7 @@ export const useUser = (userId: string | MaybeRefOrGetter<string | undefined | n
       const userRef = doc(db, 'users', toValue(userId))
       const userSnapshot = await getDoc(userRef)
       if (!userSnapshot.exists()) {
-        return 'not-found'
+        return { name: NOT_FOUND } as UserType
       }
 
       return { id: userSnapshot.id, ...userSnapshot.data() } as UserType
@@ -66,6 +68,63 @@ export const useCreateUser = (authId: string) => {
     },
     onError: () => {
       toast.error('Failed to create user. Please try again.')
+    },
+  })
+}
+
+export const useDeleteUser = () => {
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const userRef = doc(db, 'users', userId)
+      const userSnapshot = await getDoc(userRef)
+      if (!userSnapshot.exists()) {
+        throw new Error('User not found')
+      }
+
+      const batch = writeBatch(db)
+
+      const organizationsRef = collection(db, 'organizations')
+      const organizationsQ = query(organizationsRef, where('createdBy', '==', userId))
+      const organizationsSnapshot = await getDocs(organizationsQ)
+      const organizations = organizationsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+
+      const programDocRefs: DocumentReference[] = []
+      const organizationRefs: DocumentReference[] = []
+
+      // First, collect all program document references and organization references
+      for (const organization of organizations) {
+        const organizationRef = doc(db, 'organizations', organization.id)
+        const programsCollectionRef = collection(db, 'programs')
+        const programQ = query(programsCollectionRef, where('organizationId', '==', organization.id))
+        const programSnapshot = await getDocs(programQ)
+        
+        // Add each program document reference to the batch
+        programSnapshot.docs.forEach((doc) => {
+          console.log(doc.data())
+          programDocRefs.push(doc.ref)
+        })
+        
+        organizationRefs.push(organizationRef)
+      }
+
+      // Add all program deletions to the batch
+      programDocRefs.forEach((programRef) => batch.delete(programRef))
+      // Add all organization deletions to the batch
+      organizationRefs.forEach((organizationRef) => batch.delete(organizationRef))
+
+      // Add user deletion to the batch
+      batch.delete(userRef)
+
+      // await batch.commit()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+    },
+    onError: (error) => {
+      toast.error(error.message ?? 'Failed to delete user. Please try again.')
     },
   })
 }

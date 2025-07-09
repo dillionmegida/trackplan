@@ -4,11 +4,9 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { serverTimestamp } from 'firebase/firestore'
 import Layout from '@/components/Layout.vue'
-import { useCreateUser, useUser } from '@/query/useUsers'
-import { UserType } from '@/types/User'
+import { NOT_FOUND, useCreateUser, useUser } from '@/query/useUsers'
+import type { UserType } from '@/types/User'
 import { Timestamp } from 'firebase/firestore'
-import { useOrganizationsForUser } from '@/query/useOrganizations'
-import { toast } from 'vue3-toastify'
 import { LINKS } from '@/constants/links'
 
 const authStore = useAuthStore()
@@ -23,7 +21,7 @@ watch(
   user,
   () => {
     console.log('in onboarding page')
-    if (user.value && user.value !== 'not-found') {
+    if (user.value && user.value?.name !== NOT_FOUND) {
       router.push({ name: 'home' })
     }
   },

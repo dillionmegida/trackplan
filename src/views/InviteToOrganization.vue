@@ -8,7 +8,7 @@ import Layout from '@/components/Layout.vue'
 import { useOrganization } from '@/query/useOrganizations'
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useUser } from '@/query/useUsers'
+import { NOT_FOUND, useUser } from '@/query/useUsers'
 import InfoBlock from '@/components/InfoBlock.vue'
 
 const route = useRoute()
@@ -36,7 +36,7 @@ const handleSubmit = async () => {
 }
 
 const shouldBeAbleToInvite = computed(() => {
-  if (!organization.value || !user.value || user.value === 'not-found') {
+  if (!organization.value || !user.value || user.value?.name === NOT_FOUND) {
     return false
   }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Layout from '@/components/Layout.vue'
-import { useUser } from '@/query/useUsers'
+import { NOT_FOUND, useUser } from '@/query/useUsers'
 import { useAuthStore } from '@/stores/auth'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -8,17 +8,14 @@ import { RouterLink } from 'vue-router'
 import { useProgramsForOrganization } from '@/query/usePrograms'
 import { LINKS } from '@/constants/links'
 import { format } from 'date-fns'
-import PlusIcon from '@/components/icons/PlusIcon.vue'
 import {
-  useCreateOrganization,
   useOrganizationsForUser,
   useSelectActiveOrganization,
 } from '@/query/useOrganizations'
-import { Timestamp } from 'firebase/firestore'
 import { toast } from 'vue3-toastify'
 import LoaderIcon from '@/components/icons/LoaderIcon.vue'
 import NoOrganizationsYet from '@/components/NoOrganizationsYet.vue'
-import { getIntensity, getWhiteMixAmount } from '@/utils/color'
+import { getWhiteMixAmount } from '@/utils/color'
 
 const router = useRouter()
 const userId = useAuthStore().user?.uid
@@ -33,7 +30,7 @@ if (newAccount) {
 const { data: user, isLoading, error } = useUser(userId ?? '')
 
 const organizationId = computed(() => {
-  if (user.value === 'not-found') {
+  if (user.value?.name === NOT_FOUND) {
     return ''
   }
   return user.value?.activeOrganizationId
@@ -75,7 +72,7 @@ const selectOrganization = async (organizationId: string) => {
 }
 
 watch(user, () => {
-  if (user.value && user.value === 'not-found') {
+  if (user.value && user.value?.name === NOT_FOUND) {
     console.log('User not found')
     router.push({ name: 'onboarding' })
   }
@@ -88,7 +85,7 @@ watch(user, () => {
     <main class="main-content container">
       <p v-if="isLoading || organizationsLoading || programsLoading">Loading...</p>
       <p v-else-if="error">{{ error }}</p>
-      <p v-else-if="user === 'not-found'">Redirecting to onboarding...</p>
+      <p v-else-if="user?.name === NOT_FOUND">Redirecting to onboarding...</p>
       <NoOrganizationsYet v-else-if="organizations?.length === 0" :user="user" />
       <div v-else-if="!user?.activeOrganizationId" class="organizations">
         <div class="organization">
@@ -143,9 +140,6 @@ watch(user, () => {
 </template>
 
 <style lang="scss" scoped>
-.main-content {
-}
-
 .top-header {
   display: flex;
   align-items: center;

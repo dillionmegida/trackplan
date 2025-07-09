@@ -5,7 +5,7 @@ import { useMembersInOrganization, useOrganization } from '@/query/useOrganizati
 import { LINKS } from '@/constants/links'
 import Layout from '@/components/Layout.vue'
 import { format } from 'date-fns'
-import { useUser } from '@/query/useUsers'
+import { NOT_FOUND, useUser } from '@/query/useUsers'
 import { computed } from 'vue'
 
 const route = useRoute()
@@ -30,7 +30,7 @@ const handleInvite = () => {
 }
 
 const shouldBeAbleToInvite = computed(() => {
-  if (!organization.value || !user.value || user.value === 'not-found') {
+  if (!organization.value || !user.value || user.value?.name === NOT_FOUND) {
     return false
   }
 

@@ -10,6 +10,7 @@ import { LINKS } from '@/constants/links'
 import BackIcon from '@/components/icons/BackIcon.vue'
 import { RouterLink } from 'vue-router'
 import { useUser } from '@/query/useUsers'
+import { NOT_FOUND } from '@/query/useUsers'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -24,7 +25,7 @@ const program = ref({
 })
 
 const submit = async () => {
-  if (!authStore.user || !user.value || user.value === 'not-found') {
+  if (!authStore.user || !user.value || user.value?.name === NOT_FOUND) {
     toast('You must be logged in to create a program.')
     return
   }

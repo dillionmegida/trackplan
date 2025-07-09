@@ -1,23 +1,16 @@
 <script lang="ts" setup>
 import { useProgramCategories } from '@/query/useProgramCategories'
 import { useAddProgramChecklist } from '@/query/useProgramChecklists'
-import type { ProgramChecklistCategoryType } from '@/types/ProgramChecklist'
 import { snakeToWordCase } from '@/utils/string'
 import { Timestamp } from 'firebase/firestore'
-import { computed, defineProps, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { toast } from 'vue3-toastify'
 
 const route = useRoute()
 const programId = route.params.id as string
 
-type Props = {
-  categories: ProgramChecklistCategoryType[]
-}
 
 const { mutateAsync: addChecklistItemMutation } = useAddProgramChecklist()
-
-defineProps<Props>()
 
 const title = ref('')
 const selectedCategory = ref<{ value: string; label: string }>({
@@ -62,11 +55,7 @@ const addChecklist = async () => {
 <template>
   <form>
     <input type="text" placeholder="Checklist title" v-model="title" />
-    <v-select
-      placeholder="Select category"
-      :options="categoryOptions"
-      v-model="selectedCategory"
-    ></v-select>
+    <v-select placeholder="Select category" :options="categoryOptions" v-model="selectedCategory"></v-select>
     <button :disabled="!title" @click.prevent="addChecklist" type="submit">Add</button>
   </form>
 </template>

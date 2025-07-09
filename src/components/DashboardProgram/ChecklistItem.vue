@@ -25,7 +25,7 @@ const deleteChecklistPending = ref(false)
           class="checklist-checkbox-input"
         />
         <span class="checklist-checkbox-custom">
-          <CheckIcon size="16" />
+          <CheckIcon :size="16" />
         </span>
       </div>
 
@@ -39,7 +39,7 @@ const deleteChecklistPending = ref(false)
       :disabled="deleteChecklistPending"
       class="delete-button"
     >
-      <CloseIcon size="10" />
+      <CloseIcon :size="10" />
     </button>
   </div>
 </template>
