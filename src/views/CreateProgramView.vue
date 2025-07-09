@@ -9,10 +9,12 @@ import { toast } from 'vue3-toastify'
 import { LINKS } from '@/constants/links'
 import BackIcon from '@/components/icons/BackIcon.vue'
 import { RouterLink } from 'vue-router'
+import { useUser } from '@/query/useUsers'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const { mutateAsync: createProgram, isPending, error: createProgramError } = useCreateProgram()
+const { data: user } = useUser(authStore.user?.uid ?? '')
 
 const program = ref({
   title: '',
@@ -22,8 +24,13 @@ const program = ref({
 })
 
 const submit = async () => {
-  if (!authStore.user) {
+  if (!authStore.user || !user.value || user.value === 'not-found') {
     toast('You must be logged in to create a program.')
+    return
+  }
+
+  if (!user.value.activeOrganizationId) {
+    toast('You must select an organization to create a program.')
     return
   }
 
@@ -31,11 +38,11 @@ const submit = async () => {
     title: program.value.title.trim(),
     date: Timestamp.fromDate(new Date(program.value.date)),
     description: program.value.description.trim(),
-    organizationId: authStore.user.uid,
+    organizationId: user.value.activeOrganizationId,
     createdAt: serverTimestamp() as Timestamp,
-    createdBy: authStore.user.uid,
+    createdBy: user.value.id,
     updatedAt: serverTimestamp() as Timestamp,
-    updatedBy: authStore.user.uid,
+    updatedBy: user.value.id,
     trashDate: null,
     color: program.value.color,
   }

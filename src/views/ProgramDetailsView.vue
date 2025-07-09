@@ -52,6 +52,11 @@ const deleteProgram = async (id: string) => {
   toast.success('Program deleted successfully')
   router.push(LINKS.home)
 }
+
+// TODO: keep track of the main owner of an organization
+const shouldBeAbleToDeleteProgram = computed(() => {
+  return authStore.user?.uid === program.value?.createdBy
+})
 </script>
 
 <template>
@@ -81,6 +86,7 @@ const deleteProgram = async (id: string) => {
                     <EditIcon />
                   </RouterLink>
                   <button
+                    v-if="shouldBeAbleToDeleteProgram"
                     class="delete-program"
                     @click="deleteProgram(program.id)"
                     :disabled="addProgramToTrashPending"

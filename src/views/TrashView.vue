@@ -23,7 +23,7 @@ const { mutateAsync: deleteProgramMutation, isPending: deleteProgramPending } = 
 const { data: user, isLoading: userLoading } = useUser(authStore.user?.uid ?? '')
 
 const organizationId = computed(() => {
-  return user.value?.organizationIds?.[0]
+  return user.value?.activeOrganizationId
 })
 const {
   data: trashedProgramsData,
@@ -53,10 +53,15 @@ const formatDate = (date: Timestamp) => {
     <div class="trash-view container">
       <div class="header">
         <h1>Trash</h1>
-        <p>Deleted programs will be permanently removed after 30 days.</p>
+        <p>
+          Here, you can find all the programs that you have deleted under the active organization.
+          Deleted programs will be permanently removed after 30 days.
+        </p>
       </div>
 
-      <div v-if="userLoading ||trashedProgramsLoading" class="loading">Loading trashed programs...</div>
+      <div v-if="userLoading || trashedProgramsLoading" class="loading">
+        Loading trashed programs...
+      </div>
       <div v-else-if="trashedProgramsError" class="error">
         Error loading trashed programs. Please check back later.
       </div>
