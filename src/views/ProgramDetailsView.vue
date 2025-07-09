@@ -19,6 +19,7 @@ import { getWhiteMixAmount } from '@/utils/color'
 import { useOrganization } from '@/query/useOrganizations'
 import type { MaybeRefOrGetter } from 'vue'
 import { useUser } from '@/query/useUsers'
+import ClockIcon from '@/components/icons/ClockIcon.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -117,7 +118,7 @@ const shouldBeAbleToEditProgram = computed(() => {
                     <TrashIcon />
                   </button>
                 </div>
-                <p class="program-date">{{ formatDate(program.date) }}</p>
+                <p class="program-date"><ClockIcon size="14" /> {{ formatDate(program.date) }}</p>
                 <p v-if="creator" class="program-creator">Created by {{ creator.name }}</p>
               </div>
               <div class="progress">
@@ -220,6 +221,9 @@ const shouldBeAbleToEditProgram = computed(() => {
   }
 
   .program-date {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
     font-size: 1rem;
     font-weight: 300;
     color: #64748b;
