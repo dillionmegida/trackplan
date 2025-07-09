@@ -63,10 +63,8 @@ const handleLogout = async () => {
     </header>
     <div class="active-organization container">
       <div v-if="organization">
-        Active:
-        <span class="active-organization-text">
-          {{ organization?.name }}
-        </span>
+        <span class="active-organization-label"> Active:</span>
+        <span class="active-organization-text">{{ organization?.name }}</span>
       </div>
     </div>
     <main class="main-content">
@@ -101,13 +99,18 @@ const handleLogout = async () => {
 .active-organization {
   font-size: 0.8rem;
   &.container {
-    padding-block: 1rem;
+    padding-block: 0.2rem;
+  }
+
+  .active-organization-label {
+    background-color: #9ca3af;
+    color: white;
+    padding: 0.2rem 0.5rem;
   }
 
   .active-organization-text {
     background-color: #1e293b;
     color: white;
-    border-radius: 6px;
     padding: 0.2rem 0.5rem;
   }
 }

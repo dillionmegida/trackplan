@@ -14,37 +14,45 @@ const deleteChecklistPending = ref(false)
 </script>
 
 <template>
-  <label :for="checklist.id" class="checklist-item">
-    <div class="checklist-checkbox">
-      <input
-        :id="checklist.id"
-        @change="$emit('update', $event.target.checked)"
-        type="checkbox"
-        :checked="checklist.isCompleted"
-        class="checklist-checkbox-input"
-      />
-      <span class="checklist-checkbox-custom">
-        <CheckIcon size="16" />
-      </span>
-    </div>
+  <div class="checklist-item-wrapper">
+    <label :for="checklist.id" class="checklist-item">
+      <div class="checklist-checkbox">
+        <input
+          :id="checklist.id"
+          @change="$emit('update', $event.target.checked)"
+          type="checkbox"
+          :checked="checklist.isCompleted"
+          class="checklist-checkbox-input"
+        />
+        <span class="checklist-checkbox-custom">
+          <CheckIcon size="16" />
+        </span>
+      </div>
 
-    <div class="checklist-title" :class="{ checked: checklist.isCompleted }">
-      {{ checklist.title }}
-    </div>
+      <div class="checklist-title" :class="{ checked: checklist.isCompleted }">
+        {{ checklist.title }}
+      </div>
+    </label>
     <button
-      @click.stop="$emit('delete')"
+      @click="$emit('delete')"
       type="button"
       :disabled="deleteChecklistPending"
       class="delete-button"
     >
-      <CloseIcon size="12" />
+      <CloseIcon size="10" />
     </button>
-  </label>
+  </div>
 </template>
 
 <style lang="scss" scoped>
+.checklist-item-wrapper {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .checklist-item {
   display: flex;
+  width: 100%;
   justify-content: space-between;
   padding: 0.5rem 0 0.5rem 0.5rem;
   overflow: hidden;
@@ -96,20 +104,26 @@ const deleteChecklistPending = ref(false)
       color: #9ca3af;
     }
   }
+}
+.delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
+  border-radius: 3px;
+  background-color: rgb(198, 188, 188);
+  color: #333;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-  .delete-button {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 30px;
-    height: 100%;
-    background-color: rgb(198, 188, 188);
-    color: #333;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  &:hover {
+    background-color: rgb(239, 136, 136);
+  }
 
-    &:hover {
-      background-color: rgb(239, 136, 136);
-    }
+  svg {
+    position: relative;
+    top: -1px;
+    left: -0.5px;
   }
 }
 </style>
