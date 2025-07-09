@@ -123,8 +123,8 @@ const shouldBeAbleToEditProgram = computed(() => {
               </div>
               <div class="progress">
                 <ve-progress
-                  :color="program.color"
-                  :empty-color="'white'"
+                  :color="getWhiteMixAmount(program.color) < 20 ? '#333' : program.color"
+                  :empty-color="getWhiteMixAmount(program.color) < 20 ? program.color : '#fff'"
                   :size="80"
                   :progress="(howManyChecked / (checklists?.length || 1)) * 100"
                 >
@@ -254,6 +254,11 @@ const shouldBeAbleToEditProgram = computed(() => {
   margin-bottom: 2rem;
 
   .progress {
+    svg {
+      path {
+        fill: var(--dark-color);
+      }
+    }
   }
 }
 
