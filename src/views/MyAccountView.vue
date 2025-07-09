@@ -130,7 +130,29 @@ const selectOrganization = async (orgId: string) => {
           <!-- TODO: -->
           <!-- <button class="organization-card create-org">Create Organization</button> -->
         </div>
-        <RouterLink class="trashed-link" :to="LINKS.trash">View Trashed programs</RouterLink>
+        <div class="action-links">
+          <RouterLink class="trashed-link" :to="LINKS.trash">View Trashed Programs</RouterLink>
+          <RouterLink class="archived-link" :to="LINKS.archived">View Archived Programs</RouterLink>
+
+        </div>
+
+        <div class="delete-account-card">
+          <h3>Danger Zone</h3>
+          <p class="warning-text">
+            <strong>Warning:</strong> Deleting your account is a permanent action that cannot be
+            undone. Note that this will also delete all of your data, including:
+          </p>
+          <ul class="warning-list">
+            <li>All organizations you own</li>
+            <li>All programs within those organizations</li>
+            <li>All associated checklist items</li>
+          </ul>
+          <p class="warning-note">
+            If you're sure you want to proceed, please click the button below to delete your
+            account.
+          </p>
+          <button class="delete-account-btn">Delete My Account</button>
+        </div>
       </div>
     </div>
   </Layout>
@@ -200,18 +222,35 @@ const selectOrganization = async (orgId: string) => {
   font-size: clamp(0.8rem, 1.2vw, 0.9rem);
 }
 
-.trashed-link {
-  display: block;
-  width: max-content;
+.action-links {
+  display: flex;
+  gap: 1rem;
   margin-bottom: 1rem;
-  padding: 0.5rem 0.9rem;
-  font-size: 0.9rem;
-  color: #f63b3b;
-  text-decoration: none;
-  font-weight: 500;
-  transition: all 0.2s;
+
+  a {
+    display: block;
+    width: max-content;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    border-radius: 6px;
+  }
+}
+
+.trashed-link {
+  color: #aa4c4c;
   background-color: #fce9e9;
-  border-radius: 6px;
+
+  &:hover {
+    background-color: #6f5757;
+    color: white;
+  }
+}
+
+.archived-link {
+  color: #6f5757;
+  background-color: #e5e7eb;
 
   &:hover {
     background-color: #6f5757;
@@ -405,5 +444,63 @@ const selectOrganization = async (orgId: string) => {
 
 .error {
   color: #ef4444;
+}
+
+.delete-account-card {
+  background-color: #fff5f5;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.delete-account-card h3 {
+  color: #dc2626;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.warning-text {
+  color: #7f1d1d;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.warning-list {
+  color: #7f1d1d;
+  padding-left: 1.5rem;
+  margin: 0 0 1.5rem;
+  line-height: 1.2;
+}
+
+.warning-list li {
+  margin-bottom: 0.5rem;
+}
+
+.warning-note {
+  color: #7f1d1d;
+  margin-bottom: 1.5rem;
+}
+
+.delete-account-btn {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 1rem;
+}
+
+.delete-account-btn:hover {
+  background-color: #b91c1c;
+}
+
+.delete-account-btn:disabled {
+  background-color: #fca5a5;
+  cursor: not-allowed;
 }
 </style>
