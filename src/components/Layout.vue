@@ -48,9 +48,6 @@ const handleLogout = async () => {
           <img src="/logo-dark.png" alt="TrackPlan" />
         </RouterLink>
         <div class="user-menu">
-          <RouterLink :to="LINKS.trash" class="trash-link">
-            <TrashIcon />
-          </RouterLink>
           <RouterLink :to="LINKS.my_account" class="user-info">
             <img :src="authUser.photoURL" :alt="authUser.displayName" class="user-avatar" />
           </RouterLink>
@@ -130,10 +127,6 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   gap: 1rem;
-}
-
-.trash-link {
-  color: rgb(138, 51, 51);
 }
 
 .user-info {

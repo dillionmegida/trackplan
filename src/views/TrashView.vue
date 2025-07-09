@@ -13,6 +13,8 @@ import {
   useTrashedProgramsForOrganization,
 } from '@/query/usePrograms'
 import { useUser } from '@/query/useUsers'
+import { LINKS } from '@/constants/links'
+import BackIcon from '@/components/icons/BackIcon.vue'
 
 const authStore = useAuthStore()
 
@@ -51,6 +53,7 @@ const formatDate = (date: Timestamp) => {
 <template>
   <Layout>
     <div class="trash-view container">
+      <RouterLink class="back-link" :to="LINKS.my_account"><BackIcon /> Back to My Account</RouterLink>
       <div class="header">
         <h1>Trash</h1>
         <p>
@@ -86,10 +89,27 @@ const formatDate = (date: Timestamp) => {
 
 
 
-<style scoped>
+<style lang="scss" scoped>
 .trash-view {
 }
 
+.back-link {
+  align-items: center;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  border: 1px solid #d1d5db;
+  display: inline-flex;
+  padding: 0.2rem 0.4rem 0.2rem 0.2rem;
+  color: #64748b;
+  gap: 0.2rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background-color: #d5dee7;
+    color: #1e293b;
+  }
+}
 .header {
   margin-bottom: 2rem;
 }

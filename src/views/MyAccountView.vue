@@ -73,62 +73,64 @@ const selectOrganization = async (orgId: string) => {
       <div v-else-if="!user" class="empty-state">
         <p>User not found</p>
       </div>
-      <div v-else class="user-section container">
-        <div class="user-header">
-          <div class="user-avatar">
-            <img
-              v-if="authStore.user?.photoURL"
-              :src="authStore.user.photoURL"
-              :alt="authStore.user.displayName"
-              class="avatar"
-            />
-            <div v-else class="avatar-placeholder">
-              {{ userInitials }}
+      <div v-else>
+        <div class="user-section container">
+          <div class="user-header">
+            <div class="user-avatar">
+              <img
+                v-if="authStore.user?.photoURL"
+                :src="authStore.user.photoURL"
+                :alt="authStore.user.displayName"
+                class="avatar"
+              />
+              <div v-else class="avatar-placeholder">
+                {{ userInitials }}
+              </div>
+            </div>
+            <div class="user-info">
+              <h1>{{ user?.name }}</h1>
+              <p class="email">{{ user?.email }}</p>
+              <p class="member-since">Member since {{ formatDate(user?.createdAt) }}</p>
             </div>
           </div>
-          <div class="user-info">
-            <h1>{{ user?.name }}</h1>
-            <p class="email">{{ user?.email }}</p>
-            <p class="member-since">Member since {{ formatDate(user?.createdAt) }}</p>
-          </div>
         </div>
-      </div>
 
-      <div v-if="organizationsLoading" class="loading"></div>
-      <NoOrganizationsYet v-else-if="!organizations?.length" :user="user" />
-      <div v-else class="organizations-section">
-        <div class="organizations-grid">
-          <div v-for="org in sortedOrganizations" :key="org.id" class="organization-item">
-            <RouterLink
-              :to="LINKS.organization(org.id)"
-              class="organization-card"
-              :class="{ active: org.id === user?.activeOrganizationId }"
-            >
-              <div class="org-icon">
-                <span>{{ org.name.charAt(0).toUpperCase() }}</span>
-              </div>
-              <div class="org-details">
-                <h3>{{ org.name }}</h3>
-                <p class="org-meta">
-                  {{ formatDate(org.createdAt) }}
-                </p>
-              </div>
-              <span v-if="org.id === user?.activeOrganizationId" class="active-badge">
-                Active
-              </span>
-            </RouterLink>
-            <button
-              v-if="org.id !== user?.activeOrganizationId"
-              class="make-active-btn"
-              @click="selectOrganization(org.id)"
-              :disabled="isSelectingOrg"
-            >
-              Make Active
-            </button>
+        <NoOrganizationsYet v-if="!organizations?.length" :user="user" />
+        <div v-else class="organizations-section">
+          <div class="organizations-grid">
+            <div v-for="org in sortedOrganizations" :key="org.id" class="organization-item">
+              <RouterLink
+                :to="LINKS.organization(org.id)"
+                class="organization-card"
+                :class="{ active: org.id === user?.activeOrganizationId }"
+              >
+                <div class="org-icon">
+                  <span>{{ org.name.charAt(0).toUpperCase() }}</span>
+                </div>
+                <div class="org-details">
+                  <h3>{{ org.name }}</h3>
+                  <p class="org-meta">
+                    {{ formatDate(org.createdAt) }}
+                  </p>
+                </div>
+                <span v-if="org.id === user?.activeOrganizationId" class="active-badge">
+                  Active
+                </span>
+              </RouterLink>
+              <button
+                v-if="org.id !== user?.activeOrganizationId"
+                class="make-active-btn"
+                @click="selectOrganization(org.id)"
+                :disabled="isSelectingOrg"
+              >
+                Make Active
+              </button>
+            </div>
           </div>
           <!-- TODO: -->
           <!-- <button class="organization-card create-org">Create Organization</button> -->
         </div>
+        <RouterLink class="trashed-link" :to="LINKS.trash">View Trashed programs</RouterLink>
       </div>
     </div>
   </Layout>
@@ -141,9 +143,7 @@ const selectOrganization = async (orgId: string) => {
   background: white;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-
-
+  margin-bottom: 1rem;
 }
 
 .user-header {
@@ -200,11 +200,31 @@ const selectOrganization = async (orgId: string) => {
   font-size: clamp(0.8rem, 1.2vw, 0.9rem);
 }
 
+.trashed-link {
+  display: block;
+  width: max-content;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.9rem;
+  color: #f63b3b;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+  background-color: #fce9e9;
+  border-radius: 6px;
+
+  &:hover {
+    background-color: #6f5757;
+    color: white;
+  }
+}
+
 .organizations-section {
   background: white;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 2rem;
+  margin-bottom: 1rem;
 
   @media (max-width: 768px) {
     padding: 0;
@@ -286,7 +306,7 @@ const selectOrganization = async (orgId: string) => {
 
   @media (max-width: 768px) {
     .org-icon {
-     display: none;
+      display: none;
     }
 
     .active-badge {
