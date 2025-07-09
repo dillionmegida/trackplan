@@ -9,6 +9,7 @@ import { LINKS } from '@/constants/links'
 import BackIcon from '@/components/icons/BackIcon.vue'
 import CategoriesSection from '@/components/DashboardProgram/CategoriesSection.vue'
 import ProgramLayout from '@/components/ProgramLayout.vue'
+import InfoBlock from '@/components/InfoBlock.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -38,9 +39,19 @@ watch(
   { immediate: true }
 )
 
+const shouldBeAbleToEditProgram = computed(() => {
+  if (!program.value || !authStore.user?.uid) return false
+  return program.value.createdBy === authStore.user.uid
+})
+
 const submit = async () => {
   if (!authStore.user) {
     toast('You must be logged in to edit a program.')
+    return
+  }
+
+  if (!shouldBeAbleToEditProgram.value) {
+    toast('You do not have permission to edit this program.')
     return
   }
 
@@ -92,8 +103,10 @@ const allRequiredFieldsFilled = computed(() => {
 
           <div v-else-if="error" class="error">Error loading program: {{ error }}</div>
 
-          <div v-if="program" class="forms">
-            <form v-if="program" @submit.prevent="submit" class="form-card container">
+          <InfoBlock v-else-if="!shouldBeAbleToEditProgram" variant="error" message="You do not have permission to edit this program." />
+
+          <div v-else-if="program" class="forms">
+            <form @submit.prevent="submit" class="form-card container">
               <div class="input-group">
                 <label for="title">Program Title</label>
                 <input

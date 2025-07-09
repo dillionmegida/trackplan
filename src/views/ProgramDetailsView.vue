@@ -16,6 +16,8 @@ import { toast } from 'vue3-toastify'
 import { useRouter } from 'vue-router'
 import ProgramLayout from '@/components/ProgramLayout.vue'
 import { getWhiteMixAmount } from '@/utils/color'
+import { useOrganization } from '@/query/useOrganizations'
+import type { MaybeRefOrGetter } from 'vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -44,18 +46,30 @@ const { mutateAsync: addProgramToTrashMutation, isPending: addProgramToTrashPend
   useAddProgramToTrash()
 const authStore = useAuthStore()
 
+const shouldBeAbleToDeleteProgram = computed(() => {
+  if (!authStore.user?.uid || !organization.value) return false
+  return organization.value.createdBy === authStore.user.uid
+})
+
 const deleteProgram = async (id: string) => {
   if (!authStore.user) {
     return toast.error('You must be logged in to delete a program')
   }
+
+  if (!shouldBeAbleToDeleteProgram.value) {
+    return toast.error('You do not have permission to delete this program')
+  }
+
   await addProgramToTrashMutation({ programId: id, userId: authStore.user.uid })
   toast.success('Program deleted successfully')
   router.push(LINKS.home)
 }
 
-// TODO: keep track of the main owner of an organization
-const shouldBeAbleToDeleteProgram = computed(() => {
-  return authStore.user?.uid === program.value?.createdBy
+const { data: organization } = useOrganization(computed(() => program.value?.organizationId))
+
+const shouldBeAbleToEditProgram = computed(() => {
+  if (!program.value || !authStore.user?.uid) return false
+  return program.value.createdBy === authStore.user.uid
 })
 </script>
 
@@ -82,7 +96,11 @@ const shouldBeAbleToDeleteProgram = computed(() => {
               <div>
                 <div class="title-block">
                   <h1>{{ program.title }}</h1>
-                  <RouterLink :to="LINKS.program_edit(program.id)" class="edit-program">
+                  <RouterLink
+                    v-if="shouldBeAbleToEditProgram"
+                    :to="LINKS.program_edit(program.id)"
+                    class="edit-program"
+                  >
                     <EditIcon />
                   </RouterLink>
                   <button
