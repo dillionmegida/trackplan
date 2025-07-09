@@ -23,7 +23,7 @@ const createOrg = async () => {
 
   const orgObj = {
     id: user.id,
-    name: `${getFirstName(user.name)}'s Organization`,
+    name: `${getFirstName(user.name)}'s Personal Org`,
     createdAt: Timestamp.fromDate(new Date()),
     updatedAt: Timestamp.fromDate(new Date()),
     createdBy: user.id,
