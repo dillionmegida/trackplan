@@ -127,6 +127,7 @@ watch(user, () => {
               :to="LINKS.program(program.id)"
               :style="{
                 '--color': program.color,
+                '--dark-color': getWhiteMixAmount(program.color) < 20 ? '#333' : program.color,
                 '--white-level': getWhiteMixAmount(program.color) + '%',
               }"
               class="program-item"
@@ -256,7 +257,7 @@ watch(user, () => {
   font-weight: 500;
   color: #1e293b;
   background-color: #f8fafc;
-  border: 1px solid color-mix(in srgb, var(--color), white 60%);
+  border: 1px solid color-mix(in srgb, var(--dark-color), white 60%);
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s;

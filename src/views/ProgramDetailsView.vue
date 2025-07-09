@@ -17,7 +17,6 @@ import { useRouter } from 'vue-router'
 import ProgramLayout from '@/components/ProgramLayout.vue'
 import { getWhiteMixAmount } from '@/utils/color'
 import { useOrganization } from '@/query/useOrganizations'
-import type { MaybeRefOrGetter } from 'vue'
 import { useUser } from '@/query/useUsers'
 import ClockIcon from '@/components/icons/ClockIcon.vue'
 
@@ -90,6 +89,7 @@ const shouldBeAbleToEditProgram = computed(() => {
         <div
           :style="{
             '--color': program.color,
+            '--dark-color': getWhiteMixAmount(program.color) < 20 ? '#333' : program.color,
             '--white-level': getWhiteMixAmount(program.color) + '%',
           }"
           class="program-content"
@@ -174,10 +174,10 @@ const shouldBeAbleToEditProgram = computed(() => {
   align-items: center;
   border-radius: 6px;
   font-size: 0.9rem;
-  border: 1px solid var(--color);
+  border: 1px solid var(--dark-color);
   display: inline-flex;
   padding: 0.2rem 0.4rem 0.2rem 0.2rem;
-  color: var(--color);
+  color: var(--dark-color);
   gap: 0.2rem;
   margin-bottom: 1rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
