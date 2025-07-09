@@ -54,7 +54,7 @@ const deleteChecklistPending = ref(false)
   display: flex;
   width: 100%;
   justify-content: space-between;
-  padding: 0.5rem 0 0.5rem 0.5rem;
+  padding: 0.5rem;
   overflow: hidden;
   border-radius: 6px;
   background: #f8fafc;

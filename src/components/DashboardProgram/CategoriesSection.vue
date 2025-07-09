@@ -56,6 +56,8 @@ async function deleteCategory(categoryId: string) {
     toast.error('Failed to delete category. Please try again.')
   }
 }
+
+// TODO: guest users should not be able to delete categories
 </script>
 
 <template>

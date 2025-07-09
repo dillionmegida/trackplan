@@ -10,7 +10,7 @@ import { useProgramCategories } from '@/query/useProgramCategories'
 import { useUpdateProgramChecklistItem } from '@/query/useProgramChecklists'
 import { useAuthStore } from '@/stores/auth'
 import { ref } from 'vue'
-import ChecklistItem from './CheclistItem.vue'
+import ChecklistItem from './ChecklistItem.vue'
 
 const route = useRoute()
 const programId = route.params.id as string
