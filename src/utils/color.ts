@@ -26,7 +26,8 @@ export function getIntensity(hex: string) {
 
 export const getWhiteMixAmount = (color: string) => {
   const intensity = getIntensity(color)
-  const intensityPercentage = (intensity / 255) * 100
+  const intensityPercentage = (intensity / 255)
+  const whiteMixAmount = Math.pow(1 - intensityPercentage, 0.40) * 100
 
-  return 100 - intensityPercentage
+  return whiteMixAmount
 }

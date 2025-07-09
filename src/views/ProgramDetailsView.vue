@@ -92,6 +92,8 @@ const deleteProgram = async (id: string) => {
               </div>
               <div class="progress">
                 <ve-progress
+                  :color="program.color"
+                  :empty-color="'white'"
                   :size="80"
                   :progress="(howManyChecked / (checklists?.length || 1)) * 100"
                 >
