@@ -74,8 +74,6 @@ const selectOrganization = async (organizationId: string) => {
   organizationBeenSelected.value = ''
 }
 
-
-
 watch(user, () => {
   if (user.value && user.value === 'not-found') {
     console.log('User not found')
@@ -258,7 +256,7 @@ watch(user, () => {
   font-weight: 500;
   color: #1e293b;
   background-color: #f8fafc;
-  border: 1px solid #d3d9e2;
+  border: 1px solid color-mix(in srgb, var(--color), white 60%);
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s;

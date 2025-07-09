@@ -174,10 +174,10 @@ const shouldBeAbleToEditProgram = computed(() => {
   align-items: center;
   border-radius: 6px;
   font-size: 0.9rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color);
   display: inline-flex;
   padding: 0.2rem 0.4rem 0.2rem 0.2rem;
-  color: #64748b;
+  color: var(--color);
   gap: 0.2rem;
   margin-bottom: 1rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
