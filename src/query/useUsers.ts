@@ -4,6 +4,7 @@ import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/fi
 import type { UserType } from '@/types/User'
 import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
+import { toValue, type MaybeRefOrGetter } from 'vue'
 
 export const useUsers = () => {
   return useQuery({
@@ -20,15 +21,16 @@ export const useUsers = () => {
   })
 }
 
-export const useUser = (userId: string) => {
+export const useUser = (userId: string | MaybeRefOrGetter<string | undefined | null>) => {
   return useQuery({
     queryKey: ['user', userId],
     queryFn: async () => {
-      const userRef = doc(db, 'users', userId)
+      const userRef = doc(db, 'users', toValue(userId))
       const userSnapshot = await getDoc(userRef)
       if (!userSnapshot.exists()) {
-        return "not-found"
+        return 'not-found'
       }
+
       return { id: userSnapshot.id, ...userSnapshot.data() } as UserType
     },
     enabled: !!userId,

@@ -10,6 +10,7 @@ import BackIcon from '@/components/icons/BackIcon.vue'
 import CategoriesSection from '@/components/DashboardProgram/CategoriesSection.vue'
 import ProgramLayout from '@/components/ProgramLayout.vue'
 import InfoBlock from '@/components/InfoBlock.vue'
+import { useUser } from '@/query/useUsers'
 
 const router = useRouter()
 const route = useRoute()
@@ -18,6 +19,7 @@ const programId = route.params.id as string
 
 const { data: program, isLoading, error } = useProgram(programId)
 const { mutateAsync: updateProgram, isPending } = useUpdateProgram()
+const {data: user} = useUser(authStore.user?.uid)
 
 const form = ref({
   title: '',
@@ -40,8 +42,8 @@ watch(
 )
 
 const shouldBeAbleToEditProgram = computed(() => {
-  if (!program.value || !authStore.user?.uid) return false
-  return program.value.createdBy === authStore.user.uid
+  if (!program.value || !user.value) return false
+  return program.value.createdBy === user.value.id
 })
 
 const submit = async () => {
@@ -60,15 +62,14 @@ const submit = async () => {
     title: form.value.title.trim(),
     date: Timestamp.fromDate(new Date(form.value.date)),
     description: form.value.description.trim(),
-    organizationId: authStore.user?.uid,
+    organizationId: user.value?.activeOrganizationId,
     updatedAt: Timestamp.now(),
-    updatedBy: authStore.user?.uid,
+    updatedBy: user.value?.id,
     color: form.value.color,
     trashDate: null,
   }
 
-  await updateProgram({ data: programData })
-  toast.success('Program updated successfully')
+  await updateProgram({ data: programData, userId: user.value?.id })
   router.push(LINKS.program(programId))
 }
 

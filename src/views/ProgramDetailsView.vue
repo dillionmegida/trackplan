@@ -18,6 +18,7 @@ import ProgramLayout from '@/components/ProgramLayout.vue'
 import { getWhiteMixAmount } from '@/utils/color'
 import { useOrganization } from '@/query/useOrganizations'
 import type { MaybeRefOrGetter } from 'vue'
+import { useUser } from '@/query/useUsers'
 
 const router = useRouter()
 const route = useRoute()
@@ -65,7 +66,11 @@ const deleteProgram = async (id: string) => {
   router.push(LINKS.home)
 }
 
-const { data: organization } = useOrganization(computed(() => program.value?.organizationId))
+const organizationId = computed(() => program.value?.organizationId)
+const { data: organization } = useOrganization(organizationId)
+
+const programCreatorId = computed(() => program.value?.createdBy)
+const {data: creator} = useUser(programCreatorId)
 
 const shouldBeAbleToEditProgram = computed(() => {
   if (!program.value || !authStore.user?.uid) return false
@@ -113,6 +118,7 @@ const shouldBeAbleToEditProgram = computed(() => {
                   </button>
                 </div>
                 <p class="program-date">{{ formatDate(program.date) }}</p>
+                <p v-if="creator" class="program-creator">Created by {{ creator.name }}</p>
               </div>
               <div class="progress">
                 <ve-progress
@@ -217,7 +223,17 @@ const shouldBeAbleToEditProgram = computed(() => {
     font-size: 1rem;
     font-weight: 300;
     color: #64748b;
-    margin-bottom: 1rem;
+  }
+
+  .program-creator {
+    font-size: 0.7rem;
+    background-color: #64748b;
+    width: max-content;
+    padding: 0.2rem 0.4rem;
+    color: white;
+    font-weight: 300;
+    border-radius: 6px;
+    margin-top: 0.5rem;
   }
 
   .program-description {

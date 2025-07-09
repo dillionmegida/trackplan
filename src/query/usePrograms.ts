@@ -116,12 +116,14 @@ export const useCreateProgram = () => {
 
 type UseUpdateProgramArgs = {
   data: Omit<ProgramType, 'createdAt' | 'createdBy'>
+  userId: string
 }
 
 export const useUpdateProgram = () => {
   return useMutation({
     mutationFn: async ({
       data,
+      userId,
     }: UseUpdateProgramArgs): Promise<{ id: string; organizationId: string }> => {
       const programRef = doc(db, 'programs', data.id)
 
@@ -130,7 +132,7 @@ export const useUpdateProgram = () => {
         throw new Error('Program not found')
       }
       const programData = programDoc.data()
-      if (programData.organizationId !== data.organizationId) {
+      if (programData.createdBy !== userId) {
         throw new Error('You are not authorized to update this program')
       }
 
@@ -143,7 +145,7 @@ export const useUpdateProgram = () => {
       queryClient.invalidateQueries({ queryKey: ['programs', organizationId] })
     },
     onError: (error) => {
-      toast.error('Failed to update program. Please try again.')
+      toast.error(error.message ?? 'Failed to update program. Please try again.')
     },
   })
 }

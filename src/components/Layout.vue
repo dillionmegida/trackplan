@@ -98,6 +98,7 @@ const handleLogout = async () => {
 
 .active-organization {
   font-size: 0.8rem;
+  height: 20px;
   &.container {
     padding-block: 0.2rem;
   }
