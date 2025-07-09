@@ -120,7 +120,9 @@ type UseUpdateProgramArgs = {
 
 export const useUpdateProgram = () => {
   return useMutation({
-    mutationFn: async ({ data }: UseUpdateProgramArgs): Promise<{ id: string }> => {
+    mutationFn: async ({
+      data,
+    }: UseUpdateProgramArgs): Promise<{ id: string; organizationId: string }> => {
       const programRef = doc(db, 'programs', data.id)
 
       const programDoc = await getDoc(programRef)
@@ -133,11 +135,12 @@ export const useUpdateProgram = () => {
       }
 
       await updateDoc(programRef, { ...programData, ...data })
-      return { id: data.id }
+      return { id: data.id, organizationId: data.organizationId }
     },
-    onSuccess: ({ id }) => {
+    onSuccess: ({ id, organizationId }) => {
       toast.success('Program updated successfully')
       queryClient.invalidateQueries({ queryKey: ['program', id] })
+      queryClient.invalidateQueries({ queryKey: ['programs', organizationId] })
     },
     onError: (error) => {
       toast.error('Failed to update program. Please try again.')

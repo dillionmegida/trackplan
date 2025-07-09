@@ -22,6 +22,7 @@ const form = ref({
   title: '',
   date: '',
   description: '',
+  color: '',
 })
 
 watch(
@@ -31,6 +32,7 @@ watch(
       form.value.title = newProgram.title
       form.value.date = newProgram.date.toDate().toISOString().split('T')[0]
       form.value.description = newProgram.description
+      form.value.color = newProgram.color
     }
   },
   { immediate: true }
@@ -50,6 +52,8 @@ const submit = async () => {
     organizationId: authStore.user?.uid,
     updatedAt: Timestamp.now(),
     updatedBy: authStore.user?.uid,
+    color: form.value.color,
+    trashDate: null,
   }
 
   await updateProgram({ data: programData })
@@ -63,7 +67,8 @@ const hasChanges = computed(() => {
   return (
     form.value.title.trim() !== program.value.title ||
     form.value.date !== program.value.date.toDate().toISOString().split('T')[0] ||
-    (form.value.description !== '' && form.value.description?.trim() !== program.value.description)
+    form.value.description?.trim() !== program.value.description ||
+    form.value.color !== program.value.color
   )
 })
 
@@ -112,6 +117,11 @@ const allRequiredFieldsFilled = computed(() => {
               <div class="input-group">
                 <label for="date">Program Date</label>
                 <input type="date" id="date" v-model="form.date" required />
+              </div>
+
+              <div class="input-group">
+                <label for="color">Color</label>
+                <input type="color" id="color" v-model="form.color" required />
               </div>
 
               <button
@@ -236,6 +246,14 @@ textarea {
     outline: none;
     border-color: #3b82f6;
   }
+}
+
+input[type="color"] {
+  width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
 }
 
 .submit-btn {

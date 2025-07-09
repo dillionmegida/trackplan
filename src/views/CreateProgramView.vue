@@ -18,6 +18,7 @@ const program = ref({
   title: '',
   date: '',
   description: '',
+  color: '#000',
 })
 
 const submit = async () => {
@@ -36,6 +37,7 @@ const submit = async () => {
     updatedAt: serverTimestamp() as Timestamp,
     updatedBy: authStore.user.uid,
     trashDate: null,
+    color: program.value.color,
   }
 
   try {
@@ -63,16 +65,24 @@ const allFieldsFilled = computed(() => {
           <div class="forms">
             <div class="form-card container">
               <div class="input-group">
-                <label for="title">Program Title</label>
-                <input type="text" v-model="program.title" placeholder="Program Title" />
+                <label for="title">Program Title *</label>
+                <input type="text" v-model="program.title" placeholder="Program Title" required />
               </div>
               <div class="input-group">
                 <label for="description">Description</label>
+                <span class="description">Optionally, add a little description</span>
                 <input type="text" v-model="program.description" placeholder="Description" />
               </div>
               <div class="input-group">
-                <label for="date">Program Date</label>
-                <input type="date" v-model="program.date" />
+                <label for="date">Program Date *</label>
+                <input type="date" v-model="program.date" required />
+              </div>
+              <div class="input-group">
+                <label for="color">Color</label>
+                <span class="description"
+                  >Optionally, you can select a nice color theme for your program</span
+                >
+                <input type="color" id="color" v-model="program.color" required />
               </div>
               <!-- TODO: Select checklist template -->
               <button class="btn" type="submit" :disabled="isPending || !allFieldsFilled">
@@ -170,7 +180,13 @@ h1 {
     font-size: 0.9375rem;
     font-weight: 500;
     color: #374151;
-    margin-bottom: 0.25rem;
+  }
+
+  .description {
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
   }
 
   input {
@@ -193,6 +209,14 @@ h1 {
       border-color: #3b82f6;
       outline: 0;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    &[type='color'] {
+      width: 100%;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
     }
 
     &[type='date'] {

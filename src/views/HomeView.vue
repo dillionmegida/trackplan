@@ -18,6 +18,7 @@ import { Timestamp } from 'firebase/firestore'
 import { toast } from 'vue3-toastify'
 import LoaderIcon from '@/components/icons/LoaderIcon.vue'
 import NoOrganizationsYet from '@/components/NoOrganizationsYet.vue'
+import { getIntensity, getWhiteMixAmount } from '@/utils/color'
 
 const router = useRouter()
 const userId = useAuthStore().user?.uid
@@ -49,14 +50,11 @@ const {
   error: programsError,
 } = useProgramsForOrganization(organizationId)
 
-
 const {
   mutateAsync: selectActiveOrganization,
   isPending: selectActiveOrganizationPending,
   error: selectActiveOrganizationError,
 } = useSelectActiveOrganization(userId ?? '')
-
-
 
 const selectOrganization = async (organizationId: string) => {
   if (!userId) {
@@ -75,6 +73,8 @@ const selectOrganization = async (organizationId: string) => {
   toast.success(toastMsg)
   organizationBeenSelected.value = ''
 }
+
+
 
 watch(user, () => {
   if (user.value && user.value === 'not-found') {
@@ -127,6 +127,10 @@ watch(user, () => {
               v-for="program in programs"
               :key="program.id"
               :to="LINKS.program(program.id)"
+              :style="{
+                '--color': program.color,
+                '--white-level': getWhiteMixAmount(program.color) + '%',
+              }"
               class="program-item"
             >
               <span class="program-title">{{ program.title }}</span>
@@ -175,7 +179,6 @@ watch(user, () => {
     background-color: #1d4ed8;
   }
 }
-
 
 .organizations {
   padding: 1rem 2rem;
@@ -259,6 +262,8 @@ watch(user, () => {
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s;
+  background-color: color-mix(in srgb, var(--color), white var(--white-level));
+  // background-color: var(--color);
 }
 
 .program-item:hover {

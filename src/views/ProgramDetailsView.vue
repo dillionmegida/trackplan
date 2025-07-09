@@ -15,6 +15,7 @@ import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue3-toastify'
 import { useRouter } from 'vue-router'
 import ProgramLayout from '@/components/ProgramLayout.vue'
+import { getWhiteMixAmount } from '@/utils/color'
 
 const router = useRouter()
 const route = useRoute()
@@ -39,7 +40,8 @@ const howManyChecked = computed(() => {
   return checklists.value.filter((checklist) => checklist.isCompleted).length
 })
 
-const { mutateAsync: addProgramToTrashMutation, isPending: addProgramToTrashPending } = useAddProgramToTrash()
+const { mutateAsync: addProgramToTrashMutation, isPending: addProgramToTrashPending } =
+  useAddProgramToTrash()
 const authStore = useAuthStore()
 
 const deleteProgram = async (id: string) => {
@@ -54,46 +56,63 @@ const deleteProgram = async (id: string) => {
 
 <template>
   <ProgramLayout>
-    <div class="program-details container">
-      <div v-if="isLoading" class="loading">Loading program details...</div>
+    <div class="program-details">
+      <div v-if="isLoading" class="loading container">Loading program details...</div>
 
-      <div v-else-if="error" class="error">Error loading program: {{ error }}</div>
+      <div v-else-if="error" class="error container">Error loading program: {{ error }}</div>
 
       <div v-else-if="program" class="program-content">
-        <RouterLink class="back-link" :to="LINKS.home"><BackIcon /> Back to Programs</RouterLink>
-        <div class="program-info">
-          <div>
-            <div class="title-block">
-              <h1>{{ program.title }}</h1>
-              <RouterLink :to="LINKS.program_edit(program.id)" class="edit-program">
-                <EditIcon />
-              </RouterLink>
-              <button
-                class="delete-program"
-                @click="deleteProgram(program.id)"
-                :disabled="addProgramToTrashPending"
-              >
-                <TrashIcon />
-              </button>
+        <div
+          :style="{
+            '--color': program.color,
+            '--white-level': getWhiteMixAmount(program.color) + '%',
+          }"
+          class="program-content"
+        >
+          <div class="container">
+            <RouterLink class="back-link" :to="LINKS.home"
+              ><BackIcon /> Back to Programs</RouterLink
+            >
+            <div class="program-info">
+              <div>
+                <div class="title-block">
+                  <h1>{{ program.title }}</h1>
+                  <RouterLink :to="LINKS.program_edit(program.id)" class="edit-program">
+                    <EditIcon />
+                  </RouterLink>
+                  <button
+                    class="delete-program"
+                    @click="deleteProgram(program.id)"
+                    :disabled="addProgramToTrashPending"
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
+                <p class="program-date">{{ formatDate(program.date) }}</p>
+              </div>
+              <div class="progress">
+                <ve-progress
+                  :size="80"
+                  :progress="(howManyChecked / (checklists?.length || 1)) * 100"
+                >
+                  {{ howManyChecked }} / {{ checklists?.length }}
+                </ve-progress>
+              </div>
             </div>
-            <p class="program-date">{{ formatDate(program.date) }}</p>
-          </div>
-          <div class="progress">
-            <ve-progress :size="80" :progress="(howManyChecked / (checklists?.length || 1)) * 100">
-              {{ howManyChecked }} / {{ checklists?.length }}
-            </ve-progress>
+
+            <p class="program-description">{{ program.description }}</p>
           </div>
         </div>
 
-        <p class="program-description">{{ program.description }}</p>
+        <div class="container">
+          <div class="checklist-form">
+            <ChecklistsForm />
+          </div>
 
-        <div class="checklist-form">
-          <ChecklistsForm />
-        </div>
-
-        <ChecklistsSection />
-        <div v-if="checklists?.length === 0" class="no-checklists">
-          You have no checklist items yet. Create one above.
+          <ChecklistsSection />
+          <div v-if="checklists?.length === 0" class="no-checklists">
+            You have no checklist items yet. Create one above.
+          </div>
         </div>
       </div>
     </div>
@@ -147,6 +166,8 @@ const deleteProgram = async (id: string) => {
 }
 
 .program-content {
+  background-color: color-mix(in srgb, var(--color), white var(--white-level));
+
   .title-block {
     display: flex;
     align-items: center;
@@ -184,8 +205,6 @@ const deleteProgram = async (id: string) => {
   column-gap: 1.5rem;
   row-gap: 0.5rem;
   flex-wrap: wrap;
-  background: #f8fafc;
-  border-radius: 0.75rem;
   margin-bottom: 2rem;
 
   .progress {
