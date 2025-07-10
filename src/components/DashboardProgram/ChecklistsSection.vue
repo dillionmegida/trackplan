@@ -134,6 +134,7 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
       <ChecklistItem
         v-for="checklist in checklists.unchecked"
         :key="checklist.id"
+        :programId="programId"
         :checklist="checklist"
         @delete="deleteChecklist(checklist.id)"
         @update="(newValue) => updateChecklist(checklist.id, newValue)"
@@ -154,6 +155,7 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
         <ChecklistItem
           v-for="checklist in checklists.checked"
           :key="checklist.id"
+          :programId="programId"
           :checklist="checklist"
           @delete="deleteChecklist(checklist.id)"
           @update="(newValue) => updateChecklist(checklist.id, newValue)"
@@ -223,6 +225,7 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
   gap: 0.2rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   width: max-content;
+  margin-left: calc(20px + 0.5rem);
 
   &:hover {
     background-color: #d5dee7;
