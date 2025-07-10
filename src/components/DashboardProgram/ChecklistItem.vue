@@ -119,7 +119,7 @@ const showModal = ref(true)
       ></textarea>
     </div>
 
-    <VDropdown :distance="-6" placement="bottom-end">
+    <VDropdown :distance="-6" placement="top-end">
       <button class="dropdown-trigger">
         <EllipsisVerticalIcon :size="20" color="#64748b" />
       </button>
@@ -227,7 +227,8 @@ const showModal = ref(true)
   gap: 0.5rem;
 
   button {
-    padding: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
     background: #f8fafc;
     color: #64748b;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
