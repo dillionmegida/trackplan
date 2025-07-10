@@ -61,7 +61,9 @@ const deleteProgram = async (id: string) => {
     return toast.error('You do not have permission to delete this program')
   }
 
-  const decision = window.confirm('Are you sure you want to delete this program?')
+  const decision = window.confirm(
+    'Are you sure you want to delete this program? This will be in trash for 30 days.'
+  )
 
   if (!decision) {
     return
@@ -76,7 +78,7 @@ const organizationId = computed(() => program.value?.organizationId)
 const { data: organization } = useOrganization(organizationId)
 
 const programCreatorId = computed(() => program.value?.createdBy)
-const {data: creator} = useUser(programCreatorId)
+const { data: creator } = useUser(programCreatorId)
 
 const shouldBeAbleToEditProgram = computed(() => {
   if (!program.value || !authStore.user?.uid) return false

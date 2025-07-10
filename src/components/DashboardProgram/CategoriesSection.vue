@@ -48,8 +48,17 @@ async function createCategory() {
   newCategoryName.value = ''
 }
 
-// TODO: after deleting category, you should check if the category is in the select
-async function deleteCategory(categoryId: string) {
+async function deleteCategory(categoryId: string, categoryName: string) {
+  const decision = window.confirm(
+    `Are you sure you want to delete category '${snakeToWordCase(
+      categoryName
+    )}'? Checklists in this category will be moved to 'uncategorized'.`
+  )
+
+  if (!decision) {
+    return
+  }
+
   try {
     await deleteCategoryMutation({ programId, categoryId })
   } catch (error) {
@@ -86,7 +95,7 @@ async function deleteCategory(categoryId: string) {
     <div v-for="category in categories" :key="category.id" class="category-item">
       <div class="category-title">{{ snakeToWordCase(category.name) }}</div>
       <button
-        @click="deleteCategory(category.id)"
+        @click="deleteCategory(category.id, category.name)"
         type="button"
         :disabled="deleteCategoryPending"
         class="delete-button"
