@@ -32,7 +32,7 @@ async function updateChecklistTitle() {
     checklistId: props.checklist.id,
     checklistItemObj: {
       ...props.checklist,
-      title: checklist.value.title,
+      title: checklist.value.title.trim(),
     },
   })
   isEditing.value = false
@@ -41,8 +41,24 @@ async function updateChecklistTitle() {
 const startEditing = () => {
   isEditing.value = true
   nextTick(() => {
-    inputRef.value?.focus()
+    if (!inputRef.value) return
+
+    inputRef.value.focus()
+
+    function updateHeight() {
+      if (!inputRef.value) return
+      inputRef.value.style.height = 'auto'
+      inputRef.value.style.height = inputRef.value.scrollHeight + 'px'
+    }
+    updateHeight()
+    inputRef.value.addEventListener('input', updateHeight)
   })
+}
+
+const onDelete = () => {
+  const decision = window.confirm('Are you sure you want to delete this checklist item?')
+  if (!decision) return
+  emit('delete')
 }
 
 const onEnterPress = () => { isEditing.value = false }
@@ -71,13 +87,16 @@ const onBlur = async () => {
       <EditIcon v-else :size="20" color="#23934e" />
     </span>
 
-    <div v-if="!isEditing" class="checklist-title block" :class="{ checked: checklist.isCompleted }"
-      @click="startEditing">
-      {{ checklist.title }}
+    <div class="checklist-title-wrapper">
+      <div v-if="!isEditing" class="checklist-title block" :class="{ checked: checklist.isCompleted }"
+        @click="startEditing">
+        {{ checklist.title }}
+      </div>
+      <textarea :disabled="updateProgramChecklistItemPending" v-else ref="inputRef" class="checklist-title input"
+        v-model="checklist.title" @blur="onBlur" @keydown.enter.exact.prevent="onEnterPress"></textarea>
     </div>
-    <input :disabled="updateProgramChecklistItemPending" v-else ref="inputRef" class="checklist-title input" type="text"
-      v-model="checklist.title" @blur="onBlur" @keydown.enter.prevent="onEnterPress">
-    <button @click="$emit('delete')" type="button"
+
+    <button @click="onDelete" type="button"
       :disabled="deleteChecklistPending || updateProgramChecklistItemPending || isEditing" class="delete-button">
       <CloseIcon :size="10" />
     </button>
@@ -127,20 +146,13 @@ const onBlur = async () => {
   top: 5px;
 }
 
-.checklist-title.input:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
 
-.checklist-title.input:focus {
-  border: 1px solid #23934e;
-  outline: none;
-}
-
-
-.checklist-title {
+.checklist-title-wrapper {
   flex: 1;
   width: 100%;
+}
+
+.checklist-title {
   border: 1px solid #d1d5db;
   font-size: 0.9rem;
   padding: 0.5rem;
@@ -160,8 +172,16 @@ const onBlur = async () => {
 }
 
 
+.checklist-title.input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 
-.edit-icon {}
+.checklist-title.input:focus {
+  border: 1px solid #23934e;
+  outline: none;
+}
+
 
 .delete-button {
   display: flex;
