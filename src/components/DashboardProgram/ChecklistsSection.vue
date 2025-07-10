@@ -13,6 +13,10 @@ import { ref } from 'vue'
 import ChecklistItem from './ChecklistItem.vue'
 
 
+const props = defineProps<{themeColor: 'string'}>()
+
+const themeColor = props.themeColor || "#fff"
+
 const route = useRoute()
 const programId = route.params.id as string
 
@@ -115,7 +119,7 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
 
 
 <template>
-  <div class="checklists-section">
+  <div class="checklists-section" :style="{'--theme-color': themeColor}">
     <div
       v-for="(checklists, category) in groupedChecklists"
       :key="category"
@@ -218,7 +222,7 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
       border-radius: 6px;
       overflow: hidden;
       transition: all 0.2s ease;
-      background: #f63bf3;
+      background: var(--theme-color);
     }
 
     h2 {

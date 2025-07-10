@@ -150,7 +150,7 @@ const shouldBeAbleToEditProgram = computed(() => {
             <ChecklistsForm />
           </div>
 
-          <ChecklistsSection />
+          <ChecklistsSection :theme-color="program.color" />
           <div v-if="checklists?.length === 0" class="no-checklists">
             You have no checklist items yet. Create one above.
           </div>
