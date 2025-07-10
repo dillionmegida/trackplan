@@ -7,7 +7,7 @@ export const wordToSnakeCase = (word: string) => {
 }
 
 export const snakeToWordCase = (word: string) => {
-  return word.replace(/_/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase())
+  return word.replace(/_/g, ' ').replace(/(?<![^\w\s])\b\w/g, (match) => match.toUpperCase())
 }
 
 export const addPlural = (count: number, word: string) => {

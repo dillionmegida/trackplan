@@ -36,10 +36,19 @@ const groupedChecklists = computed(() => {
       unchecked: ProgramChecklistItemType[]
       checked: ProgramChecklistItemType[]
     }
-  > = {
-    uncategorized: { unchecked: [], checked: [] },
-  }
+  > = {}
 
+  // Initialize with uncategorized first
+  group['uncategorized'] = { unchecked: [], checked: [] }
+
+  // Initialize all categories from the categories list to maintain order
+  const sortedCategories = [...categories.value]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(category => {
+      group[category.name] = { unchecked: [], checked: [] }
+    })
+
+  // Group checklists into their categories
   checklists.value?.forEach((checklist) => {
     const categoryId = checklist.categoryId as string
     const categoryName = categoryId
@@ -50,8 +59,17 @@ const groupedChecklists = computed(() => {
       group[categoryName] = { unchecked: [], checked: [] }
     }
 
-    if (checklist.isCompleted) group[categoryName].checked.push(checklist)
-    else group[categoryName].unchecked.push(checklist)
+    if (checklist.isCompleted) {
+      group[categoryName].checked.push(checklist)
+    } else {
+      group[categoryName].unchecked.push(checklist)
+    }
+  })
+
+  // Sort checklists within each category
+  Object.values(group).forEach(category => {
+    category.unchecked.sort((a, b) => a.title.localeCompare(b.title))
+    category.checked.sort((a, b) => a.title.localeCompare(b.title))
   })
 
   return group
