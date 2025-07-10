@@ -61,6 +61,12 @@ const deleteProgram = async (id: string) => {
     return toast.error('You do not have permission to delete this program')
   }
 
+  const decision = window.confirm('Are you sure you want to delete this program?')
+
+  if (!decision) {
+    return
+  }
+
   await addProgramToTrashMutation({ programId: id, userId: authStore.user.uid })
   toast.success('Program deleted successfully')
   router.push(LINKS.home)
@@ -107,7 +113,7 @@ const shouldBeAbleToEditProgram = computed(() => {
                     :to="LINKS.program_edit(program.id)"
                     class="edit-program"
                   >
-                    <EditIcon />
+                    <EditIcon :size="20" />
                   </RouterLink>
                   <button
                     v-if="shouldBeAbleToDeleteProgram"
@@ -115,7 +121,7 @@ const shouldBeAbleToEditProgram = computed(() => {
                     @click="deleteProgram(program.id)"
                     :disabled="addProgramToTrashPending"
                   >
-                    <TrashIcon />
+                    <TrashIcon :size="19" />
                   </button>
                 </div>
                 <p class="program-date"><ClockIcon :size="14" /> {{ formatDate(program.date) }}</p>
