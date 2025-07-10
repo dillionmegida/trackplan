@@ -16,6 +16,7 @@
     "@types/vue-select": "^3.16.8",
     "date-fns": "^4.1.0",
     "firebase": "^11.10.0",
+    "floating-vue": "^5.2.2",
     "pinia": "^3.0.3",
     "sass-embedded": "^1.89.2",
     "vue": "^3.5.17",

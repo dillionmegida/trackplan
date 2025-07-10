@@ -12,6 +12,7 @@ import { useAuthStore } from '@/stores/auth'
 import { ref } from 'vue'
 import ChecklistItem from './ChecklistItem.vue'
 
+
 const route = useRoute()
 const programId = route.params.id as string
 
@@ -64,12 +65,6 @@ const groupedChecklists = computed(() => {
     } else {
       group[categoryName].unchecked.push(checklist)
     }
-  })
-
-  // Sort checklists within each category
-  Object.values(group).forEach(category => {
-    category.unchecked.sort((a, b) => a.title.localeCompare(b.title))
-    category.checked.sort((a, b) => a.title.localeCompare(b.title))
   })
 
   return group

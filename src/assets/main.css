@@ -60,3 +60,8 @@ img {
   width: 100%;
   display: block;
 }
+
+.v-popper__arrow-outer,
+.v-popper__arrow-inner {
+  display: none !important;
+}

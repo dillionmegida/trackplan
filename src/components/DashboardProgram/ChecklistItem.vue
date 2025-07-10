@@ -3,17 +3,19 @@ import CloseIcon from '@/components/icons/CloseIcon.vue'
 import CheckIcon from '@/components/icons/CheckIcon.vue'
 import { ref, defineEmits, nextTick } from 'vue'
 import type { ProgramChecklistItemType } from '@/types/ProgramChecklist'
-import EditIcon from '../icons/EditIcon.vue';
-import { useUpdateProgramChecklistItem } from '@/query/useProgramChecklists';
-import LoaderIcon from '../icons/LoaderIcon.vue';
+import EditIcon from '../icons/EditIcon.vue'
+import { useUpdateProgramChecklistItem } from '@/query/useProgramChecklists'
+import LoaderIcon from '../icons/LoaderIcon.vue'
+import EllipsisVerticalIcon from '../icons/EllipsisVerticalIcon.vue'
 
-const props = defineProps<{ checklist: ProgramChecklistItemType, programId: string }>()
-
+const props = defineProps<{ checklist: ProgramChecklistItemType; programId: string }>()
 
 const emit = defineEmits(['delete', 'update'])
 
-const { mutateAsync: updateProgramChecklistItemMutation, isPending: updateProgramChecklistItemPending } =
-  useUpdateProgramChecklistItem()
+const {
+  mutateAsync: updateProgramChecklistItemMutation,
+  isPending: updateProgramChecklistItemPending,
+} = useUpdateProgramChecklistItem()
 
 const checklist = ref({ ...props.checklist })
 
@@ -24,7 +26,7 @@ const inputRef = ref<HTMLInputElement | null>(null)
 
 async function updateChecklistTitle() {
   if (checklist.value.title === props.checklist.title) {
-    return isEditing.value = false
+    return (isEditing.value = false)
   }
 
   await updateProgramChecklistItemMutation({
@@ -61,21 +63,31 @@ const onDelete = () => {
   emit('delete')
 }
 
-const onEnterPress = () => { isEditing.value = false }
+const onEnterPress = () => {
+  isEditing.value = false
+}
 
 const onBlur = async () => {
   // enter will also trigger blur
   await updateChecklistTitle()
   isEditing.value = false
 }
+
+const showModal = ref(true)
 </script>
 
 <template>
   <div class="checklist-item-wrapper">
     <label v-if="!isEditing" :for="checklist.id" class="checklist-item">
+      <!-- TODO: while item is being checked, show loading icon and disable input -->
       <div class="checklist-checkbox">
-        <input :id="checklist.id" @change="$emit('update', $event.target.checked)" type="checkbox"
-          :checked="checklist.isCompleted" class="checklist-checkbox-input" />
+        <input
+          :id="checklist.id"
+          @change="$emit('update', $event.target.checked)"
+          type="checkbox"
+          :checked="checklist.isCompleted"
+          class="checklist-checkbox-input"
+        />
         <span class="checklist-checkbox-custom">
           <CheckIcon color="#23934e" :size="16" />
         </span>
@@ -88,18 +100,42 @@ const onBlur = async () => {
     </span>
 
     <div class="checklist-title-wrapper">
-      <div v-if="!isEditing" class="checklist-title block" :class="{ checked: checklist.isCompleted }"
-        @click="startEditing">
+      <div
+        v-if="!isEditing"
+        class="checklist-title block"
+        :class="{ checked: checklist.isCompleted }"
+        @click="startEditing"
+      >
         {{ checklist.title }}
       </div>
-      <textarea :disabled="updateProgramChecklistItemPending" v-else ref="inputRef" class="checklist-title input"
-        v-model="checklist.title" @blur="onBlur" @keydown.enter.exact.prevent="onEnterPress"></textarea>
+      <textarea
+        :disabled="updateProgramChecklistItemPending"
+        v-else
+        ref="inputRef"
+        class="checklist-title input"
+        v-model="checklist.title"
+        @blur="onBlur"
+        @keydown.enter.exact.prevent="onEnterPress"
+      ></textarea>
     </div>
 
-    <button @click="onDelete" type="button"
-      :disabled="deleteChecklistPending || updateProgramChecklistItemPending || isEditing" class="delete-button">
-      <CloseIcon :size="10" />
-    </button>
+    <VDropdown :distance="-6" placement="bottom-end">
+      <button class="dropdown-trigger">
+        <EllipsisVerticalIcon :size="20" color="#64748b" />
+      </button>
+
+      <template #popper>
+        <div class="actions">
+          <button
+            type="button"
+            :disabled="deleteChecklistPending || updateProgramChecklistItemPending || isEditing"
+            @click="onDelete"
+          >
+            Delete
+          </button>
+        </div>
+      </template>
+    </VDropdown>
   </div>
 </template>
 
@@ -128,7 +164,7 @@ const onBlur = async () => {
       position: absolute;
       left: -20px;
 
-      &:checked+.checklist-checkbox-custom {
+      &:checked + .checklist-checkbox-custom {
         display: block;
       }
     }
@@ -145,7 +181,6 @@ const onBlur = async () => {
   position: relative;
   top: 5px;
 }
-
 
 .checklist-title-wrapper {
   flex: 1;
@@ -171,7 +206,6 @@ const onBlur = async () => {
   }
 }
 
-
 .checklist-title.input:disabled {
   cursor: not-allowed;
   opacity: 0.5;
@@ -182,6 +216,28 @@ const onBlur = async () => {
   outline: none;
 }
 
+.dropdown-trigger {
+  position: relative;
+  top: 5px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  button {
+    padding: 0.5rem;
+    background: #f8fafc;
+    color: #64748b;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      background-color: #d5dee7;
+      color: #1e293b;
+    }
+  }
+}
 
 .delete-button {
   display: flex;
@@ -193,8 +249,6 @@ const onBlur = async () => {
   background-color: rgb(198, 188, 188);
   color: #333;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  top: 5px;
 
   &:hover {
     background-color: rgb(239, 136, 136);
