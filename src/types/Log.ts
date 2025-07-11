@@ -30,8 +30,10 @@ export enum LogAction {
   PROGRAM_RESTORED_FAILED = 'program_restore_failed',
   
   // Organization
-  ORGANIZATION_CREATED = 'organization_created',
-  ORGANIZATION_UPDATED = 'organization_updated',
+  ORGANIZATION_CREATED_SUCCESS = 'organization_created_success',
+  ORGANIZATION_CREATED_FAILED = 'organization_created_failed',
+  ORGANIZATION_UPDATED_SUCCESS = 'organization_updated_success',
+  ORGANIZATION_UPDATED_FAILED = 'organization_updated_failed',
   MEMBER_ADDED = 'member_added',
   MEMBER_REMOVED = 'member_removed',
   

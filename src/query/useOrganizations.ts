@@ -16,6 +16,8 @@ import { queryClient } from '@/configs/react-query'
 import { toast } from 'vue3-toastify'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
+import { CustomError } from '@/utils/error'
+import { organizationLogger } from '@/services/logger/organizationLogger'
 
 export const useCreateOrganization = () => {
   return useMutation({
@@ -28,8 +30,10 @@ export const useCreateOrganization = () => {
     onSuccess: ({ id }) => {
       queryClient.invalidateQueries({ queryKey: ['organizations', id] })
     },
-    onError: () => {
+    onError: (error: any) => {
       toast.error('Failed to create organization. Please try again.')
+      const customError = new CustomError(error.message, error.statusCode || 500)
+      organizationLogger.createOrganizationFailed(customError)
     },
   })
 }
@@ -85,7 +89,7 @@ export const useOrganization = (organizationId: MaybeRefOrGetter<string | undefi
   return useQuery({
     queryKey: ['organization', organizationId],
     queryFn: async () => {
-      const organizationRef = doc(db, 'organizations', toValue(organizationId))
+      const organizationRef = doc(db, 'organizations', toValue(organizationId) as string)
       const docSnap = await getDoc(organizationRef)
 
       if (!docSnap.exists()) {
@@ -98,6 +102,29 @@ export const useOrganization = (organizationId: MaybeRefOrGetter<string | undefi
       } as OrganizationType
     },
     enabled: !!organizationId,
+  })
+}
+
+export const useUpdateOrganizationName = (organizationId: string) => {
+  return useMutation({
+    mutationFn: async (name: string) => {
+      const organizationRef = doc(db, 'organizations', organizationId)
+      const organizationSnapshot = await getDoc(organizationRef)
+
+      if (!organizationSnapshot.exists()) {
+        throw new CustomError('Organization not found', 404)
+      }
+
+      await updateDoc(organizationRef, { name })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['organization', organizationId] })
+    },
+    onError: (error: any) => {
+      toast.error('Failed to update organization name. Please try again.')
+      const customError = new CustomError(error.message, error.statusCode || 500)
+      organizationLogger.updateOrganizationFailed(customError)
+    },
   })
 }
 
