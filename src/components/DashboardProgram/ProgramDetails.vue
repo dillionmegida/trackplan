@@ -13,12 +13,18 @@ import TrashIcon from '@/components/icons/TrashIcon.vue'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue3-toastify'
 import { useRouter } from 'vue-router'
-import { getWhiteMixAmount } from '@/utils/color'
+import { getIntensity, getWhiteMixAmount } from '@/utils/color'
+import type { ProgramType } from '@/types/Program'
+import { Ref } from 'vue'
+import { useOrganization } from '@/query/useOrganizations'
+import type { OrganizationType } from '@/types/Organization'
 
 const router = useRouter()
 const route = useRoute()
 const programId = route.params.id as string
-const program = inject('program')
+
+const program = inject('program') as Ref<ProgramType>
+const organization = inject('organization') as Ref<OrganizationType>
 
 const {
   data: checklists,
@@ -47,9 +53,24 @@ const deleteProgram = async (id: string) => {
     return toast.error('You must be logged in to delete a program')
   }
   await addProgramToTrashMutation({ programId: id, userId: authStore.user.uid })
-  toast.success('Program deleted successfully')
   router.push(LINKS.home)
 }
+
+const shouldBeAbleToEditProgram = computed(() => {
+  if (!authStore.user || !program.value) {
+    return false
+  }
+
+  return authStore.user.uid === program.value.createdBy
+})
+
+const shouldBeAbleToDeleteProgram = computed(() => {
+  if (!authStore.user || !program.value || !organization.value) {
+    return false
+  }
+
+  return authStore.user.uid === organization.value.createdBy
+})
 </script>
 
 <template>
@@ -59,6 +80,7 @@ const deleteProgram = async (id: string) => {
         :style="{
           '--color': program.color,
           '--white-level': getWhiteMixAmount(program.color) + '%',
+          '--dark-color': getIntensity(program.color) > 20 ? program.color : '#333',
         }"
         class="program-content"
       >
@@ -68,23 +90,32 @@ const deleteProgram = async (id: string) => {
             <div>
               <div class="title-block">
                 <h1>{{ program.title }}</h1>
-                <RouterLink :to="LINKS.program_edit(program.id)" class="edit-program">
-                  <EditIcon />
+
+                <RouterLink
+                  v-if="shouldBeAbleToEditProgram"
+                  :to="LINKS.program_edit(program.id)"
+                  class="edit-program"
+                >
+                  <EditIcon :size="24" />
                 </RouterLink>
                 <button
                   class="delete-program"
                   @click="deleteProgram(program.id)"
                   :disabled="addProgramToTrashPending"
+                  v-if="shouldBeAbleToDeleteProgram"
                 >
-                  <TrashIcon />
+                  <TrashIcon :size="24" />
                 </button>
               </div>
               <p class="program-date">{{ formatDate(program.date) }}</p>
+              <p class="organization-name" v-if="organization">Under {{ organization.name }}</p>
             </div>
             <div class="progress">
               <ve-progress
                 :size="80"
                 :progress="(howManyChecked / (checklists?.length || 1)) * 100"
+                :color="program.color"
+                :empty-color="getIntensity(program.color) < 20 ? '#000' : '#fff'"
               >
                 {{ howManyChecked }} / {{ checklists?.length }}
               </ve-progress>
@@ -100,7 +131,9 @@ const deleteProgram = async (id: string) => {
           <ChecklistsForm />
         </div>
 
-        <ChecklistsSection />
+        <ChecklistsSection
+          :themeColor="getIntensity(program.color) > 20 ? program.color : '#000'"
+        />
         <div v-if="checklists?.length === 0" class="no-checklists">
           You have no checklist items yet. Create one above.
         </div>
@@ -131,7 +164,7 @@ const deleteProgram = async (id: string) => {
   align-items: center;
   border-radius: 6px;
   font-size: 0.9rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--dark-color);
   display: inline-flex;
   padding: 0.2rem 0.4rem 0.2rem 0.2rem;
   color: #64748b;
@@ -151,6 +184,7 @@ const deleteProgram = async (id: string) => {
 
 .program-content {
   background-color: color-mix(in srgb, var(--color), white var(--white-level));
+  border-bottom: 1px solid var(--dark-color);
 
   .title-block {
     display: flex;
@@ -164,6 +198,8 @@ const deleteProgram = async (id: string) => {
 
     .edit-program {
       color: #64748b;
+      position: relative;
+      top: 2px;
     }
 
     .delete-program {
@@ -176,6 +212,18 @@ const deleteProgram = async (id: string) => {
     font-weight: 300;
     color: #64748b;
     margin-bottom: 1rem;
+  }
+
+  .organization-name {
+    font-size: 0.8rem;
+    display: inline-block;
+    font-weight: 300;
+    color: #64748b;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid var(--color);
+    margin-bottom: 1rem;
+    color: var(--color);
+    border-radius: 6px;
   }
 
   .program-description {

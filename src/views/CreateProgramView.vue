@@ -50,7 +50,7 @@ const submit = async () => {
 
   try {
     const { id } = await createProgram({ data: programData })
-    router.push(LINKS.program_edit(id))
+    router.push(LINKS.program(id))
   } catch {
     toast.error('Failed to create program. Please try again.')
     return
