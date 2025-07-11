@@ -13,6 +13,8 @@ import {
 } from 'firebase/firestore'
 import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
+import { inviteLogger } from '@/services/logger/inviteLogger'
+import { CustomError } from '@/utils/error'
 
 export type InviteUserArgs = {
   email: string
@@ -52,11 +54,14 @@ export const useInviteUser = (organizationId: string) => {
     },
     onSuccess: () => {
       toast.success('Invitation sent successfully!')
+      inviteLogger.inviteUserToOrganizationSuccess()
       // TODO:
       // queryClient.invalidateQueries({ queryKey: ['invites', organizationId] })
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message ?? 'Failed to send invitation. Please try again.')
+      const customError = new CustomError(error.message, error.statusCode ?? 500)
+      inviteLogger.inviteUserToOrganizationFailed(customError)
     },
   })
 }

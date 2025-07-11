@@ -22,6 +22,8 @@ import { queryClient } from '@/configs/react-query'
 
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
+import { programsLogger } from '@/services/logger/programsLogger'
+import { CustomError } from '@/utils/error'
 
 export const useProgramsForOrganization = (
   organizationId: MaybeRefOrGetter<string | undefined | null>,
@@ -43,7 +45,13 @@ export const useProgramsForOrganization = (
         id: doc.id,
         ...doc.data(),
       }))
+
+      programsLogger.programsForOrganizationFetchSuccess()
       return programs as ProgramType[]
+    },
+    throwOnError(error: CustomError, query) {
+      programsLogger.programsForOrganizationFetchFailed(error)
+      return false
     },
     enabled: () => !!toValue(organizationId),
   })
@@ -69,6 +77,7 @@ export const useTrashedProgramsForOrganization = (
         id: doc.id,
         ...doc.data(),
       }))
+
       return programs as ProgramType[]
     },
     enabled: !!organizationId,
@@ -82,13 +91,21 @@ export const useProgram = (programId: string) => {
       const programRef = doc(db, 'programs', programId)
       const programDoc = await getDoc(programRef)
       if (!programDoc.exists()) {
-        throw new Error('Program not found')
+        throw new CustomError('Program not found', 404)
       }
+
+      programsLogger.programFetchSuccess()
+
       return {
         id: programDoc.id,
         ...programDoc.data(),
       } as ProgramType
     },
+    throwOnError(error: CustomError, query) {
+      programsLogger.programFetchFailed(error)
+      return false
+    },
+    retry: 1,
     enabled: !!programId,
   })
 }
@@ -104,12 +121,15 @@ export const useCreateProgram = () => {
       const docRef = await addDoc(programRef, data)
       return { id: docRef.id, organizationId: data.organizationId }
     },
-    onSuccess: ({ id, organizationId }) => {
+    onSuccess: ({ organizationId }) => {
       toast.success('Program created successfully')
       queryClient.invalidateQueries({ queryKey: ['programs', organizationId] })
+      programsLogger.programCreationSuccess()
     },
     onError: (error) => {
       toast.error('Failed to create program. Please try again.')
+      const customError = new CustomError(error.message, 500)
+      programsLogger.programCreationFailed(customError)
     },
   })
 }
@@ -129,11 +149,11 @@ export const useUpdateProgram = () => {
 
       const programDoc = await getDoc(programRef)
       if (!programDoc.exists()) {
-        throw new Error('Program not found')
+        throw new CustomError('Program not found', 404)
       }
       const programData = programDoc.data()
       if (programData.createdBy !== userId) {
-        throw new Error('You are not authorized to update this program')
+        throw new CustomError('You are not authorized to update this program', 403)
       }
 
       await updateDoc(programRef, { ...programData, ...data })
@@ -144,8 +164,10 @@ export const useUpdateProgram = () => {
       queryClient.invalidateQueries({ queryKey: ['program', id] })
       queryClient.invalidateQueries({ queryKey: ['programs', organizationId] })
     },
-    onError: (error) => {
+    onError: (error: CustomError) => {
       toast.error(error.message ?? 'Failed to update program. Please try again.')
+      const customError = new CustomError(error.message, error.statusCode ?? 500)
+      programsLogger.programUpdateFailed(customError)
     },
   })
 }
@@ -156,12 +178,12 @@ export const useAddProgramToTrash = () => {
       const programRef = doc(db, 'programs', programId)
       const programDoc = await getDoc(programRef)
       if (!programDoc.exists()) {
-        throw new Error('Program not found')
+        throw new CustomError('Program not found', 404)
       }
 
       const programData = programDoc.data()
       if (programData.organizationId !== userId) {
-        throw new Error('You are not authorized to delete this program')
+        throw new CustomError('You are not authorized to delete this program', 403)
       }
 
       await updateDoc(programRef, { trashDate: serverTimestamp() as Timestamp })
@@ -172,8 +194,10 @@ export const useAddProgramToTrash = () => {
       queryClient.invalidateQueries({ queryKey: ['programs', userId] })
       queryClient.invalidateQueries({ queryKey: ['programs-trash', userId] })
     },
-    onError: (error) => {
+    onError: (error: CustomError) => {
       toast.error('Failed to delete program. Please try again.')
+      const customError = new CustomError(error.message, error.statusCode ?? 500)
+      programsLogger.programTrashFailed(customError)
     },
   })
 }
@@ -184,12 +208,12 @@ export const useDeleteProgram = () => {
       const programRef = doc(db, 'programs', programId)
       const programDoc = await getDoc(programRef)
       if (!programDoc.exists()) {
-        throw new Error('Program not found')
+        throw new CustomError('Program not found', 404)
       }
 
       const programData = programDoc.data()
       if (programData.organizationId !== userId) {
-        throw new Error('You are not authorized to delete this program')
+        throw new CustomError('You are not authorized to delete this program', 403)
       }
 
       await deleteDoc(programRef)
@@ -199,8 +223,10 @@ export const useDeleteProgram = () => {
       toast.success('Program deleted successfully')
       queryClient.invalidateQueries({ queryKey: ['programs', userId] })
     },
-    onError: (error) => {
+    onError: (error: CustomError) => {
       toast.error('Failed to delete program. Please try again.')
+      const customError = new CustomError(error.message, error.statusCode ?? 500)
+      programsLogger.programDeleteFailed(customError)
     },
   })
 }
@@ -211,12 +237,12 @@ export const useRestoreProgramFromTrash = () => {
       const programRef = doc(db, 'programs', programId)
       const programDoc = await getDoc(programRef)
       if (!programDoc.exists()) {
-        throw new Error('Program not found')
+        throw new CustomError('Program not found', 404)
       }
 
       const programData = programDoc.data()
       if (programData.organizationId !== userId) {
-        throw new Error('You are not authorized to restore this program')
+        throw new CustomError('You are not authorized to restore this program', 403)
       }
 
       await updateDoc(programRef, { trashDate: null })
@@ -226,8 +252,10 @@ export const useRestoreProgramFromTrash = () => {
       toast.success('Program restored successfully')
       queryClient.invalidateQueries({ queryKey: ['programs', userId] })
     },
-    onError: (error) => {
+    onError: (error: CustomError) => {
       toast.error('Failed to restore program. Please try again.')
+      const customError = new CustomError(error.message, error.statusCode ?? 500)
+      programsLogger.programRestoreFailed(customError)
     },
   })
 }
