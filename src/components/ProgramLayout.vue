@@ -14,7 +14,11 @@ const programId = route.params.id as string
 
 const { data: program, isLoading: programLoading, error: programError } = useProgram(programId)
 
-const organizationId = computed(() => program.value?.organizationId)
+const organizationId = computed(() => {
+  if (!program.value) return ''
+
+  return program.value.organizationId
+})
 
 const {
   data: organization,

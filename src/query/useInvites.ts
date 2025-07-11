@@ -55,6 +55,7 @@ export const useInviteUser = (organizationId: string) => {
     onSuccess: () => {
       toast.success('Invitation sent successfully!')
       inviteLogger.inviteUserToOrganizationSuccess()
+      queryClient.invalidateQueries({ queryKey: ['organization-members', organizationId] })
       // TODO:
       // queryClient.invalidateQueries({ queryKey: ['invites', organizationId] })
     },
