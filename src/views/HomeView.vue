@@ -14,6 +14,7 @@ import { toast } from 'vue3-toastify'
 import LoaderIcon from '@/components/icons/LoaderIcon.vue'
 import NoOrganizationsYet from '@/components/NoOrganizationsYet.vue'
 import { getIntensity, getWhiteMixAmount } from '@/utils/color'
+import InfoBlock from '@/components/InfoBlock.vue'
 
 const router = useRouter()
 const queryClient = useQueryClient()
@@ -38,10 +39,23 @@ if (newAccount) {
 const { data: user, isLoading, error } = useUser(userId ?? '')
 
 const organizationId = computed(() => {
-  if (user.value?.name === NOT_FOUND) {
+  if (!user.value) return
+
+  if (user.value.name === NOT_FOUND) {
     return ''
   }
-  return user.value?.activeOrganizationId
+
+  if (!user.value.organizationIds.includes(user.value.activeOrganizationId)) {
+    return ''
+  }
+
+  return user.value.activeOrganizationId
+})
+
+const isUserPartOfActiveOrganization = computed(() => {
+  if (!user.value) return false
+
+  return user.value.organizationIds.includes(user.value.activeOrganizationId)
 })
 
 const {
@@ -93,6 +107,11 @@ watch(user, () => {
     <main class="main-content container">
       <p v-if="isLoading || organizationsLoading || programsLoading">Loading...</p>
       <p v-else-if="error">{{ error }}</p>
+      <InfoBlock
+        v-else-if="!isUserPartOfActiveOrganization"
+        variant="error"
+        :message="'You have been removed from your active organization. Please activate another organization by clicking your user icon in the top right corner.'"
+      />
       <p v-else-if="user?.name === NOT_FOUND">Redirecting to onboarding...</p>
       <NoOrganizationsYet v-else-if="organizations?.length === 0" :user="user" />
       <div v-else-if="!user?.activeOrganizationId" class="organizations">
