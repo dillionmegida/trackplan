@@ -2,8 +2,9 @@
 import Layout from '@/components/Layout.vue'
 import { NOT_FOUND, useUser } from '@/query/useUsers'
 import { useAuthStore } from '@/stores/auth'
-import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref, watch, onMounted } from 'vue'
+import { useQueryClient } from '@tanstack/vue-query'
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import { useProgramsForOrganization } from '@/query/usePrograms'
 import { LINKS } from '@/constants/links'
@@ -15,8 +16,18 @@ import NoOrganizationsYet from '@/components/NoOrganizationsYet.vue'
 import { getIntensity, getWhiteMixAmount } from '@/utils/color'
 
 const router = useRouter()
+const queryClient = useQueryClient()
 const userId = useAuthStore().user?.uid
 const newAccount = router.currentRoute.value.query.new === 'true'
+
+onBeforeRouteLeave((to, from) => {
+  console.log(to.name, from.name, organizationId.value)
+
+  if (!organizationId.value) return
+  if (from.name === to.name) return
+
+  queryClient.invalidateQueries({ queryKey: ['programs', organizationId.value] })
+})
 
 const organizationBeenSelected = ref('')
 

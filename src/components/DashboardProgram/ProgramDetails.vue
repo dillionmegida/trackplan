@@ -133,6 +133,7 @@ const shouldBeAbleToDeleteProgram = computed(() => {
 
         <ChecklistsSection
           :themeColor="getIntensity(program.color) > 20 ? program.color : '#000'"
+          :organizationId="organization.id"
         />
         <div v-if="checklists?.length === 0" class="no-checklists">
           You have no checklist items yet. Create one above.

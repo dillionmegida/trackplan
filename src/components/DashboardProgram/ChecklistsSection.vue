@@ -11,17 +11,25 @@ import { useUpdateProgramChecklistItem } from '@/query/useProgramChecklists'
 import { useAuthStore } from '@/stores/auth'
 import { ref } from 'vue'
 import ChecklistItem from './ChecklistItem.vue'
+import { onBeforeRouteLeave } from 'vue-router'
+import { queryClient } from '@/configs/react-query'
 
+const props = defineProps<{ themeColor: 'string'; organizationId: string }>()
 
-const props = defineProps<{themeColor: 'string'}>()
-
-const themeColor = props.themeColor || "#fff"
+const themeColor = props.themeColor || '#fff'
 
 const route = useRoute()
 const programId = route.params.id as string
 
 const { data: checklists } = useProgramChecklists(programId)
 const { data: categories } = useProgramCategories(programId)
+
+const somethingChanged = ref(false)
+
+onBeforeRouteLeave(() => {
+  if (!props.organizationId || !somethingChanged.value) return
+  queryClient.invalidateQueries({ queryKey: ['programs', props.organizationId] })
+})
 
 const groupedChecklists = computed(() => {
   if (!checklists.value || !categories.value) {
@@ -49,7 +57,7 @@ const groupedChecklists = computed(() => {
   // Initialize all categories from the categories list to maintain order
   const sortedCategories = [...categories.value]
     .sort((a, b) => a.name.localeCompare(b.name))
-    .forEach(category => {
+    .forEach((category) => {
       group[category.name] = { unchecked: [], checked: [] }
     })
 
@@ -97,6 +105,7 @@ const { mutateAsync: updateChecklistMutation, isPending: updateChecklistPending 
   useUpdateProgramChecklistItem()
 
 async function updateChecklist(checklistId: string, isCompleted: boolean) {
+  somethingChanged.value = true // this is so that the query is invalidated when the user leaves the page
   const targetChecklist = checklists.value?.find((checklist) => checklist.id === checklistId)
 
   if (!auth.user) {
@@ -119,7 +128,7 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
 
 
 <template>
-  <div class="checklists-section" :style="{'--theme-color': themeColor}">
+  <div class="checklists-section" :style="{ '--theme-color': themeColor }">
     <div
       v-for="(checklists, category) in groupedChecklists"
       :key="category"
