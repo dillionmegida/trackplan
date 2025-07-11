@@ -124,10 +124,10 @@ const selectOrganization = async (orgId: string) => {
               <button
                 v-if="org.id !== user?.activeOrganizationId"
                 class="make-active-btn"
-                @click="selectOrganization(org.id)"
+                @click.stop="selectOrganization(org.id)"
                 :disabled="isSelectingOrg"
               >
-                Make Active
+                Activate
               </button>
             </div>
           </div>
@@ -268,7 +268,7 @@ const selectOrganization = async (orgId: string) => {
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 3rem;
 
   h2 {
     text-transform: uppercase;
@@ -306,7 +306,8 @@ const selectOrganization = async (orgId: string) => {
   display: grid;
   --size: 300px;
   grid-template-columns: repeat(auto-fill, minmax(var(--size), 1fr));
-  gap: 1.25rem;
+  column-gap: 1.25rem;
+  row-gap: 1.5rem;
 
   @media (max-width: 768px) {
     --size: 200px;
@@ -314,11 +315,14 @@ const selectOrganization = async (orgId: string) => {
 }
 
 .make-active-btn {
+  position: absolute;
+  bottom: -15px;
+  right: 10px;
   background-color: #61676f;
   color: white;
   border: none;
   border-radius: 6px;
-  padding: 0.625rem 1.25rem;
+  padding: 0.5rem 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -333,6 +337,7 @@ const selectOrganization = async (orgId: string) => {
   flex-direction: column;
   gap: 0.5rem;
   align-items: flex-start;
+  position: relative;
 }
 
 .organization-card {
