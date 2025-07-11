@@ -46,7 +46,6 @@ export const useProgramsForOrganization = (
         ...doc.data(),
       }))
 
-      programsLogger.programsForOrganizationFetchSuccess()
       return programs as ProgramType[]
     },
     throwOnError(error: CustomError, query) {
@@ -93,8 +92,6 @@ export const useProgram = (programId: string) => {
       if (!programDoc.exists()) {
         throw new CustomError('Program not found', 404)
       }
-
-      programsLogger.programFetchSuccess()
 
       return {
         id: programDoc.id,
