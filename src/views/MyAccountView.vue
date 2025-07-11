@@ -114,9 +114,12 @@ const selectOrganization = async (orgId: string) => {
                     {{ formatDate(org.createdAt) }}
                   </p>
                 </div>
-                <span v-if="org.id === user?.activeOrganizationId" class="active-badge">
-                  Active
-                </span>
+                <div class="org-labels">
+                  <span class="created-by-badge" v-if="org.createdBy === user?.id"> Yours </span>
+                  <span v-if="org.id === user?.activeOrganizationId" class="active-badge">
+                    Active
+                  </span>
+                </div>
               </RouterLink>
               <button
                 v-if="org.id !== user?.activeOrganizationId"
@@ -134,7 +137,6 @@ const selectOrganization = async (orgId: string) => {
         <div class="action-links">
           <RouterLink class="trashed-link" :to="LINKS.trash">View Trashed Programs</RouterLink>
           <RouterLink class="archived-link" :to="LINKS.archived">View Archived Programs</RouterLink>
-
         </div>
 
         <div class="line"></div>
@@ -412,16 +414,34 @@ const selectOrganization = async (orgId: string) => {
   font-size: 0.875rem;
 }
 
-.active-badge {
+.org-labels {
   position: absolute;
-  top: 0.75rem;
+  top: -1rem;
   right: 0.75rem;
-  background-color: #10b981;
-  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
   padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
+  border-radius: 10px;
+
+  span {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+  }
+}
+
+.created-by-badge {
+  background-color: #b98610;
+  color: white;
+}
+
+.active-badge {
+  background-color: #10b981;
+  color: white;
 }
 
 .empty-state {
