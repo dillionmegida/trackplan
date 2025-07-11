@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { auth, provider } from '@/configs/firebase'
 import { LINKS } from '@/constants/links'
+import { authLogger } from '@/services/logger/authLogger'
+import { CustomError } from '@/utils/error'
 import { onAuthStateChanged, signInWithPopup } from 'firebase/auth'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -14,9 +16,12 @@ const login = async () => {
     isLoading.value = true
     error.value = ''
     await signInWithPopup(auth, provider)
+    authLogger.userSignedInSuccess()
     router.push(LINKS.home)
-  } catch (err) {
+  } catch (err: any) {
     console.error('Login failed:', err)
+    const customError = new CustomError(err.message, err.statusCode ?? 500)
+    authLogger.userSignedInFailed(customError)
     error.value = 'Failed to sign in. Please try again.'
   } finally {
     isLoading.value = false

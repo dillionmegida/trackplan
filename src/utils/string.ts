@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid'
+
 export const getFirstName = (name: string) => {
   return name.split(' ')[0]
 }
@@ -16,4 +18,8 @@ export const addPlural = (count: number, word: string) => {
   } else {
     return word + 's'
   }
+}
+
+export const genId = () => {
+  return uuidv4()
 }

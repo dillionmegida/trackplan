@@ -16,6 +16,7 @@ import App from './App.vue'
 import router from './router'
 import { useAuthStore } from './stores/auth'
 import { queryClient } from './configs/react-query'
+import { LoggerPlugin } from './services/logger/logger'
 
 const app = createApp(App)
 
@@ -31,5 +32,5 @@ app.component('v-select', VueSelect)
 app.use(VueEllipseProgress)
 app.use(FloatingVue)
 app.use(Vue3Toastify)
-
+app.use(LoggerPlugin)
 app.mount('#app')

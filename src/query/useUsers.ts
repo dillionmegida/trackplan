@@ -7,6 +7,8 @@ import { queryClient } from '@/configs/react-query'
 import { toValue, type MaybeRefOrGetter } from 'vue'
 
 export const NOT_FOUND = 'not-found'
+import { onboardingLogger } from '@/services/logger/onboardingLogger'
+import { CustomError } from '@/utils/error'
 
 export const useUsers = () => {
   return useQuery({
@@ -27,7 +29,7 @@ export const useUser = (userId: string | MaybeRefOrGetter<string | undefined | n
   return useQuery({
     queryKey: ['user', userId],
     queryFn: async () => {
-      const userRef = doc(db, 'users', toValue(userId))
+      const userRef = doc(db, 'users', toValue(userId) ?? '')
       const userSnapshot = await getDoc(userRef)
       if (!userSnapshot.exists()) {
         return { name: NOT_FOUND } as UserType
@@ -65,9 +67,12 @@ export const useCreateUser = (authId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user', authId] })
+      onboardingLogger.confirmAccountSuccess()
     },
-    onError: () => {
+    onError: (error: CustomError) => {
       toast.error('Failed to create user. Please try again.')
+      const customError = new CustomError(error.message, error.statusCode ?? 500)
+      onboardingLogger.confirmAccountFailed(customError)
     },
   })
 }

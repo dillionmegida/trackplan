@@ -10,6 +10,8 @@ import { RouterLink } from 'vue-router'
 import { NOT_FOUND, useUser } from '@/query/useUsers'
 import { useOrganization } from '@/query/useOrganizations'
 import { computed } from 'vue'
+import { authLogger } from '@/services/logger/authLogger'
+import { CustomError } from '@/utils/error'
 const router = useRouter()
 const authStore = useAuthStore()
 const authUser = authStore.user
@@ -31,10 +33,13 @@ const {
 const handleLogout = async () => {
   try {
     await signOut(auth)
+    authLogger.userSignedOutSuccess()
     router.push(LINKS.login)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error signing out:', error)
+    const customError = new CustomError(error.message, error.statusCode ?? 500)
     toast.error('Failed to sign out. Please try again.')
+    authLogger.userSignedOutFailed(customError)
   }
 }
 </script>

@@ -7,6 +7,7 @@ import Layout from '@/components/Layout.vue'
 import { NOT_FOUND, useCreateUser, useUser } from '@/query/useUsers'
 import type { UserType } from '@/types/User'
 import { Timestamp } from 'firebase/firestore'
+import { toast } from 'vue3-toastify'
 import { LINKS } from '@/constants/links'
 
 const authStore = useAuthStore()
@@ -29,12 +30,17 @@ watch(
 )
 
 const confirmDetails = async () => {
+  if (!authStore.user) {
+    toast.error('You must be logged in to confirm your details.')
+    return
+  }
+
   const userId = authStore.user.uid
 
   const userObj: UserType = {
     id: userId,
-    name: authStore.user.displayName,
-    email: authStore.user.email,
+    name: authStore.user.displayName!,
+    email: authStore.user.email!,
     organizationIds: [userId], // TODO: only do this when they create organization
     createdAt: serverTimestamp() as Timestamp,
     updatedAt: serverTimestamp() as Timestamp,
@@ -59,7 +65,7 @@ const confirmDetails = async () => {
           <img
             v-if="authStore.user?.photoURL"
             :src="authStore.user.photoURL"
-            :alt="authStore.user.displayName"
+            :alt="authStore.user?.displayName ?? 'User'"
             class="avatar"
           />
           <div v-else class="avatar-placeholder">
