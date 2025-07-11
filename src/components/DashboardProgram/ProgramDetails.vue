@@ -75,7 +75,7 @@ const shouldBeAbleToDeleteProgram = computed(() => {
 
 <template>
   <div class="program-details">
-    <div v-if="program" class="program-content">
+    <div v-if="program && checklists" class="program-content">
       <div
         :style="{
           '--color': program.color,
