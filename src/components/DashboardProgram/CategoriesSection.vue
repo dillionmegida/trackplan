@@ -100,7 +100,7 @@ async function deleteCategory(categoryId: string, categoryName: string) {
         :disabled="deleteCategoryPending"
         class="delete-button"
       >
-        <CloseIcon size="12" />
+        <CloseIcon :size="12" />
       </button>
     </div>
   </div>
