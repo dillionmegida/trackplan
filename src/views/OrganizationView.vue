@@ -72,10 +72,7 @@ const shouldBeAbleToEditOrganizationName = computed(() => {
     return false
   }
 
-  // If this is the user's default organization created when they signed up,
-  // they should not be able to edit the name
-  // They can only edit the names of other organizations they created
-  return !isUserDefaultOrganization.value && organization.value.createdBy === user.value.id
+  return organization.value.createdBy === user.value.id
 })
 
 const startEditing = () => {
@@ -152,10 +149,6 @@ const onBlur = async () => {
               >Invite Someone</RouterLink
             >
           </div>
-        </div>
-
-        <div v-if="isUserDefaultOrganization" class="default-organization-warning">
-          You cannot edit the name of your default organization.
         </div>
 
         <!-- TODO: Add organization content -->
@@ -249,12 +242,6 @@ const onBlur = async () => {
     font-size: 0.7rem;
   }
 }
-
-.default-organization-warning {
-  color: #9ca3af;
-  font-size: 0.8rem;
-}
-
 .organization-actions {
   display: flex;
   gap: 0.5rem;
