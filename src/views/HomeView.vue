@@ -8,14 +8,11 @@ import { RouterLink } from 'vue-router'
 import { useProgramsForOrganization } from '@/query/usePrograms'
 import { LINKS } from '@/constants/links'
 import { format } from 'date-fns'
-import {
-  useOrganizationsForUser,
-  useSelectActiveOrganization,
-} from '@/query/useOrganizations'
+import { useOrganizationsForUser, useSelectActiveOrganization } from '@/query/useOrganizations'
 import { toast } from 'vue3-toastify'
 import LoaderIcon from '@/components/icons/LoaderIcon.vue'
 import NoOrganizationsYet from '@/components/NoOrganizationsYet.vue'
-import { getWhiteMixAmount } from '@/utils/color'
+import { getIntensity, getWhiteMixAmount } from '@/utils/color'
 
 const router = useRouter()
 const userId = useAuthStore().user?.uid
@@ -129,8 +126,27 @@ watch(user, () => {
               }"
               class="program-item"
             >
-              <span class="program-title">{{ program.title }}</span>
-              <span class="program-date">{{ format(program.date.toDate(), 'PP') }}</span>
+              <div>
+                <span class="program-title">{{ program.title }}</span>
+                <span class="program-date">{{ format(program.date.toDate(), 'PP') }}</span>
+              </div>
+              <div v-if="program.meta" class="progress">
+                <ve-progress
+                  :size="40"
+                  :progress="
+                    (program.meta.totalCompletedItems / (program.meta?.totalItems || 1)) * 100
+                  "
+                  :color="getIntensity(program.color) > 230 ? '#333' : program.color"
+                  :empty-color="getIntensity(program.color) < 20 ? '#000' : '#fff'"
+                  :thickness="2"
+                >
+                  {{
+                    Math.round(
+                      (program.meta.totalCompletedItems / (program.meta.totalItems || 1)) * 100
+                    )
+                  }}%
+                </ve-progress>
+              </div>
             </RouterLink>
           </div>
         </section>
@@ -240,7 +256,7 @@ watch(user, () => {
 
 .programs-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
   margin: 1rem 0;
 }
@@ -256,7 +272,21 @@ watch(user, () => {
   cursor: pointer;
   transition: background-color 0.2s;
   background-color: color-mix(in srgb, var(--color), white var(--white-level));
-  // background-color: var(--color);
+  display: flex;
+  justify-content: space-between;
+
+  .progress {
+    position: relative;
+    font-size: 0.6rem;
+
+    .ep-legend--value {
+      height: unset;
+    }
+
+    .ve-progress__circle {
+      stroke-width: 6px !important;
+    }
+  }
 }
 
 .program-item:hover {

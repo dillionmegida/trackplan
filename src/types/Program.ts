@@ -12,4 +12,8 @@ export type ProgramType = {
   updatedAt: Timestamp
   trashDate: Timestamp | null
   color?: string
+  meta: {
+    totalItems: number
+    totalCompletedItems: number
+  }
 }

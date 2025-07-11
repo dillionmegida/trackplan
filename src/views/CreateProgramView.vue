@@ -46,6 +46,10 @@ const submit = async () => {
     updatedBy: user.value.id,
     trashDate: null,
     color: program.value.color,
+    meta: {
+      totalItems: 0,
+      totalCompletedItems: 0,
+    },
   }
 
   try {

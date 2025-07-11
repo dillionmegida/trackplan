@@ -4,6 +4,7 @@ import { collection, getDocs, doc, addDoc, deleteDoc, getDoc, updateDoc } from '
 import type { ProgramChecklistItemType } from '@/types/ProgramChecklist'
 import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
+import { calculateProgramMeta } from '@/utils/programMeta'
 
 export const useProgramChecklists = (programId: string) => {
   return useQuery({
@@ -32,7 +33,11 @@ export const useAddProgramChecklist = () => {
     mutationFn: async ({ programId, data }: UseAddProgramChecklistArgs) => {
       const programRef = doc(db, 'programs', programId)
       const checklistsRef = collection(programRef, 'checklists')
+
       const docRef = await addDoc(checklistsRef, data)
+
+      calculateProgramMeta(programId)
+
       return { programId, id: docRef.id }
     },
     onSuccess: ({ programId }) => {
@@ -63,6 +68,7 @@ export const useDeleteProgramChecklistItem = () => {
       }
 
       await deleteDoc(checklistRef)
+      calculateProgramMeta(programId)
       return { programId }
     },
     onSuccess: ({ programId }) => {
@@ -98,7 +104,7 @@ export const useUpdateProgramChecklistItem = () => {
       }
 
       await updateDoc(checklistRef, checklistItemObj)
-
+      calculateProgramMeta(programId)
       return { programId, checklistId }
     },
     onError: (error) => {

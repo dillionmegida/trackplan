@@ -115,10 +115,16 @@ export const useUpdateOrganizationName = (organizationId: string) => {
         throw new CustomError('Organization not found', 404)
       }
 
+      const organizationData = organizationSnapshot.data()
+      const userId = organizationData.createdBy
+
       await updateDoc(organizationRef, { name })
+
+      return { userId }
     },
-    onSuccess: () => {
+    onSuccess: ({ userId }) => {
       queryClient.invalidateQueries({ queryKey: ['organization', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['organizations', userId] })
     },
     onError: (error: any) => {
       toast.error('Failed to update organization name. Please try again.')

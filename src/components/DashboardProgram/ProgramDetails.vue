@@ -114,7 +114,7 @@ const shouldBeAbleToDeleteProgram = computed(() => {
               <ve-progress
                 :size="80"
                 :progress="(howManyChecked / (checklists?.length || 1)) * 100"
-                :color="program.color"
+                :color="getIntensity(program.color) > 230 ? '#333' : program.color"
                 :empty-color="getIntensity(program.color) < 20 ? '#000' : '#fff'"
               >
                 {{ howManyChecked }} / {{ checklists?.length }}
