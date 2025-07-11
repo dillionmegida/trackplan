@@ -97,6 +97,7 @@ const selectOrganization = async (orgId: string) => {
 
         <NoOrganizationsYet v-if="!organizations?.length" :user="user" />
         <div v-else class="organizations-section">
+          <h2>Organizations I Belong To</h2>
           <div class="organizations-grid">
             <div v-for="org in sortedOrganizations" :key="org.id" class="organization-item">
               <RouterLink
@@ -135,6 +136,8 @@ const selectOrganization = async (orgId: string) => {
           <RouterLink class="archived-link" :to="LINKS.archived">View Archived Programs</RouterLink>
 
         </div>
+
+        <div class="line"></div>
 
         <div class="delete-account-card">
           <h3>Danger Zone</h3>
@@ -264,6 +267,14 @@ const selectOrganization = async (orgId: string) => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   margin-bottom: 1rem;
+
+  h2 {
+    text-transform: uppercase;
+    font-weight: 300;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    color: #64748b;
+    margin-bottom: 1rem;
+  }
 
   @media (max-width: 768px) {
     padding: 0;
@@ -444,6 +455,13 @@ const selectOrganization = async (orgId: string) => {
 
 .error {
   color: #ef4444;
+}
+
+.line {
+  width: 1px;
+  height: 400px;
+  background-color: #d48888;
+  margin: 30px;
 }
 
 .delete-account-card {
