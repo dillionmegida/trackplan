@@ -18,6 +18,7 @@ import type { ProgramType } from '@/types/Program'
 import { Ref } from 'vue'
 import { useOrganization } from '@/query/useOrganizations'
 import type { OrganizationType } from '@/types/Organization'
+import { useUser } from '@/query/useUsers'
 
 const router = useRouter()
 const route = useRoute()
@@ -31,6 +32,8 @@ const {
   isLoading: checklistsLoading,
   error: checklistsError,
 } = useProgramChecklists(programId)
+
+const { data: user, isLoading: userLoading, error: userError } = useUser(program.value?.createdBy)
 
 const formatDate = (timestamp: any) => {
   return format(timestamp.toDate(), 'MMMM d, yyyy')
@@ -75,7 +78,7 @@ const shouldBeAbleToDeleteProgram = computed(() => {
 
 <template>
   <div class="program-details">
-    <div v-if="program && checklists" class="program-content">
+    <div v-if="program && checklists && user" class="program-content">
       <div
         :style="{
           '--color': program.color,
@@ -108,7 +111,7 @@ const shouldBeAbleToDeleteProgram = computed(() => {
                 </button>
               </div>
               <p class="program-date">{{ formatDate(program.date) }}</p>
-              <p class="organization-name" v-if="organization">Under {{ organization.name }}</p>
+              <p class="creaed-by">created by {{ user.name }}</p>
             </div>
             <div class="progress">
               <ve-progress
@@ -215,7 +218,7 @@ const shouldBeAbleToDeleteProgram = computed(() => {
     margin-bottom: 1rem;
   }
 
-  .organization-name {
+  .creaed-by {
     font-size: 0.8rem;
     display: inline-block;
     font-weight: 300;
