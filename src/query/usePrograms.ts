@@ -113,7 +113,9 @@ type UseCreateProgramArgs = {
 
 export const useCreateProgram = () => {
   return useMutation({
-    mutationFn: async ({ data }: UseCreateProgramArgs): Promise<{ id: string; organizationId: string }> => {
+    mutationFn: async ({
+      data,
+    }: UseCreateProgramArgs): Promise<{ id: string; organizationId: string }> => {
       const programRef = collection(db, 'programs')
       const docRef = await addDoc(programRef, data)
       return { id: docRef.id, organizationId: data.organizationId }

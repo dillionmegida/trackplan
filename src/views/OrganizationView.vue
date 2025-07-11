@@ -14,6 +14,8 @@ import { computed, nextTick, ref, watch } from 'vue'
 import EditIcon from '@/components/icons/EditIcon.vue'
 import LoaderIcon from '@/components/icons/LoaderIcon.vue'
 import CheckIcon from '@/components/icons/CheckIcon.vue'
+import type { UserType } from '@/types/User'
+import OrganizationMembers from '@/components/DashboardOrganization/OrganizationMembers.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -155,29 +157,17 @@ const onBlur = async () => {
         <div class="organization-content">
           <p>Created since {{ format(organization?.createdAt?.toDate(), 'MMMM dd, yyyy') }}</p>
 
-          <div class="members-section" v-if="members?.length">
-            <h3>Members</h3>
-            <div class="members-list">
-              <div v-for="member in members" :key="member.id" class="member-card">
-                <div class="member-avatar">
-                  {{ member.displayName?.charAt(0)?.toUpperCase() || 'U' }}
-                </div>
-                <div class="member-info">
-                  <div class="member-name">{{ member.name }}</div>
-                  <div class="member-email">{{ member.email }}</div>
-                </div>
-                <div
-                  class="member-status"
-                  :class="{ active: member.id === organization.createdBy }"
-                >
-                  {{ member.id === organization.createdBy ? 'Admin' : 'Member' }}
-                </div>
-              </div>
-            </div>
-          </div>
+          <div v-if="members && organization">
+            <OrganizationMembers
+              v-if="members.length"
+              :members="members"
+              :shouldBeAbleToInvite="shouldBeAbleToInvite"
+              :organization="organization"
+            />
 
-          <div v-else class="no-members">
-            <p>No members found in this organization.</p>
+            <div v-else class="no-members">
+              <p>No members found in this organization.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -276,87 +266,6 @@ const onBlur = async () => {
   p {
     margin: 0.5rem 0;
     color: #334155;
-  }
-}
-
-.members-section {
-  margin-top: 2rem;
-
-  h3 {
-    font-size: 1.1rem;
-    color: #1e293b;
-    margin-bottom: 1rem;
-    font-weight: 600;
-  }
-}
-
-.members-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.member-card {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.member-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #e2e8f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: #475569;
-  margin-right: 1rem;
-  flex-shrink: 0;
-}
-
-.member-info {
-  flex: 1;
-  min-width: 0;
-
-  .member-name {
-    font-weight: 500;
-    color: #1e293b;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .member-email {
-    font-size: 0.85rem;
-    color: #64748b;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
-.member-status {
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  background-color: #e2e8f0;
-  color: #475569;
-
-  &.active {
-    background-color: #dbeafe;
-    color: #1e40af;
   }
 }
 

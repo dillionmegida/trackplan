@@ -52,6 +52,34 @@ class OrganizationLogger extends Logger {
       error,
     )
   }
+
+  public memberAddedFailed(error: CustomError) {
+    return this.error(
+      {
+        action: LogAction.MEMBER_ADDED_FAILED,
+        message: 'Failed to add member',
+        targetType: 'organization',
+        createdAt: new Date(),
+        statusCode: error.statusCode,
+        pagePath: window.location.pathname,
+      },
+      error,
+    )
+  }
+
+  public memberRemovedFailed(error: CustomError) {
+    return this.error(
+      {
+        action: LogAction.MEMBER_REMOVED_FAILED,
+        message: 'Failed to remove member',
+        targetType: 'organization',
+        createdAt: new Date(),
+        statusCode: error.statusCode,
+        pagePath: window.location.pathname,
+      },
+      error,
+    )
+  }
     
 }
 

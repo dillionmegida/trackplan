@@ -75,6 +75,7 @@ const router = createRouter({
       component: MyAccountView,
       meta: { requiresAuth: true },
     },
+    // TODO: create 404
   ],
 })
 

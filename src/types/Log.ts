@@ -35,7 +35,9 @@ export enum LogAction {
   ORGANIZATION_UPDATED_SUCCESS = 'organization_updated_success',
   ORGANIZATION_UPDATED_FAILED = 'organization_updated_failed',
   MEMBER_ADDED = 'member_added',
+  MEMBER_ADDED_FAILED = 'member_added_failed',
   MEMBER_REMOVED = 'member_removed',
+  MEMBER_REMOVED_FAILED = 'member_removed_failed',
   
   // System
   ERROR_OCCURRED = 'error_occurred',

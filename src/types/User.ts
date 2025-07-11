@@ -5,7 +5,7 @@ export type UserType = {
   name: string
   email: string
   organizationIds: string[]
-  activeOrganizationId?: string
+  activeOrganizationId: string
   createdAt: Timestamp
   updatedAt: Timestamp
   onboarded: boolean

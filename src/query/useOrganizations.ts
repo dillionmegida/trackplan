@@ -160,3 +160,48 @@ export const useMembersInOrganization = (organizationId: string) => {
     enabled: !!organizationId,
   })
 }
+
+export const useRemoveMemberFromOrganization = (organizationId: string) => {
+  return useMutation({
+    mutationFn: async ({ authId, userId }: { authId: string; userId: string }) => {
+      const organizationRef = doc(db, 'organizations', organizationId)
+      const organizationSnapshot = await getDoc(organizationRef)
+
+      if (!organizationSnapshot.exists()) {
+        throw new CustomError('Organization not found', 404)
+      }
+
+      const organizationData = organizationSnapshot.data()
+      const createdById = organizationData.createdBy
+
+      if (createdById !== authId) {
+        throw new CustomError(
+          'You are not authorized to remove a member from this organization',
+          400,
+        )
+      }
+
+      const userRef = doc(db, 'users', userId)
+      const userSnapshot = await getDoc(userRef)
+
+      if (!userSnapshot.exists()) {
+        throw new CustomError('The member you are trying to remove is not found', 404)
+      }
+
+      const userData = userSnapshot.data()
+      const organizationIds = userData.organizationIds.filter((id: string) => id !== organizationId)
+
+      await updateDoc(userRef, { organizationIds })
+
+      return { userId }
+    },
+    onSuccess: ({ userId }) => {
+      queryClient.invalidateQueries({ queryKey: ['organization-members', organizationId] })
+    },
+    onError: (error: any) => {
+      toast.error(error.message ?? 'Failed to remove member from organization. Please try again.')
+      const customError = new CustomError(error.message, error.statusCode || 500)
+      organizationLogger.memberRemovedFailed(customError)
+    },
+  })
+}
