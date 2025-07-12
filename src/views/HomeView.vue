@@ -6,7 +6,7 @@ import { computed, ref, watch, onMounted } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
-import { useProgramsForOrganization } from '@/query/usePrograms'
+import { useProgramsUserHasAccessTo } from '@/query/usePrograms'
 import { LINKS } from '@/constants/links'
 import { format } from 'date-fns'
 import { useOrganizationsForUser, useSelectActiveOrganization } from '@/query/useOrganizations'
@@ -23,8 +23,6 @@ const userId = useAuthStore().user?.uid
 const newAccount = router.currentRoute.value.query.new === 'true'
 
 onBeforeRouteLeave((to, from) => {
-  console.log(to.name, from.name, organizationId.value)
-
   if (!organizationId.value) return
   if (from.name === to.name) return
 
@@ -41,14 +39,8 @@ const { data: user, isLoading, error } = useUser(userId ?? '')
 
 const organizationId = computed(() => {
   if (!user.value) return
-
-  if (user.value.name === NOT_FOUND) {
-    return ''
-  }
-
-  if (!user.value.organizationIds.includes(user.value.activeOrganizationId)) {
-    return ''
-  }
+  if (user.value.name === NOT_FOUND) return ''
+  if (!user.value.organizationIds.includes(user.value.activeOrganizationId)) return ''
 
   return user.value.activeOrganizationId
 })
@@ -68,7 +60,7 @@ const {
   data: programs,
   isLoading: programsLoading,
   error: programsError,
-} = useProgramsForOrganization(organizationId)
+} = useProgramsUserHasAccessTo({ organizationId, authUserId: userId ?? '' })
 
 const {
   mutateAsync: selectActiveOrganization,
@@ -171,7 +163,9 @@ watch(user, () => {
             >
               <div>
                 <span class="program-title">{{ program.title }}</span>
-                <span class="program-date"> <ClockIcon :size="16" /> {{ format(program.date.toDate(), 'PP') }}</span>
+                <span class="program-date">
+                  <ClockIcon :size="16" /> {{ format(program.date.toDate(), 'PP') }}</span
+                >
               </div>
               <div v-if="program.meta" class="progress">
                 <ve-progress

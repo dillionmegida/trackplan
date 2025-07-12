@@ -1,21 +1,13 @@
 <script lang="ts" setup>
-import { useRemoveMemberFromOrganization } from '@/query/useOrganizations'
-import { useAuthStore } from '@/stores/auth'
 import type { OrganizationType } from '@/types/Organization'
 import type { UserType } from '@/types/User'
+import OrganizationMemberCard from './OrganizationMemberCard.vue'
 
 const props = defineProps<{
   members: UserType[]
   shouldBeAbleToInvite: boolean
   organization: OrganizationType
 }>()
-
-const {
-  mutateAsync: removeMemberFromOrganization,
-  isPending: removeMemberFromOrganizationPending,
-} = useRemoveMemberFromOrganization(props.organization.id)
-
-const authStore = useAuthStore()
 
 const membersObj: {
   admins: UserType[]
@@ -32,18 +24,6 @@ props.members.forEach((member) => {
     membersObj.members.push(member)
   }
 })
-
-const removeMember = async (id: string) => {
-  if (!authStore.user?.uid) return
-
-  const decision = window.confirm('Are you sure you want to remove this member?')
-  if (!decision) return
-
-  await removeMemberFromOrganization({
-    authId: authStore.user.uid,
-    userId: id,
-  })
-}
 </script>
 
 
@@ -64,25 +44,12 @@ const removeMember = async (id: string) => {
     <div class="members-category">
       <h3>Members</h3>
       <div class="members-list">
-        <div v-for="member in membersObj.members" :key="member.id" class="member-card">
-          <div class="member-avatar">
-            {{ member.displayName?.charAt(0)?.toUpperCase() || 'U' }}
-          </div>
-          <div class="member-info">
-            <div class="member-name">{{ member.name }}</div>
-            <div class="member-email">{{ member.email }}</div>
-          </div>
-          <div class="member-actions">
-            <button
-              :disabled="removeMemberFromOrganizationPending"
-              v-if="shouldBeAbleToInvite"
-              class="remove-btn"
-              @click="removeMember(member.id)"
-            >
-              Remove
-            </button>
-          </div>
-        </div>
+        <OrganizationMemberCard
+          v-for="member in membersObj.members"
+          :key="member.id"
+          :member="member"
+          :organizationId="organization.id"
+        />
       </div>
     </div>
   </div>
@@ -157,31 +124,6 @@ const removeMember = async (id: string) => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-}
-
-.member-actions {
-  display: flex;
-  gap: 0.5rem;
-
-  button {
-    padding: 0.25rem 0.5rem;
-    border-radius: 3px;
-    font-size: 0.9rem;
-    transition: background-color 0.2s;
-
-    @media (max-width: 768px) {
-      padding: 0.25rem 0.5rem;
-    }
-
-    &.remove-btn {
-      background-color: #ef4444;
-      color: white;
-
-      &:hover {
-        background-color: #dc2626;
-      }
-    }
   }
 }
 </style>

@@ -51,6 +51,8 @@ export const useInviteUser = (organizationId: string) => {
       const organizationIds = [...user.organizationIds, organizationId]
 
       await updateDoc(userRef, { organizationIds })
+
+      return user.id
     },
     onSuccess: () => {
       toast.success('Invitation sent successfully!')

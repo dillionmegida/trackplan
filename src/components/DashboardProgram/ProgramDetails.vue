@@ -16,9 +16,9 @@ import { useRouter } from 'vue-router'
 import { getIntensity, getWhiteMixAmount } from '@/utils/color'
 import type { ProgramType } from '@/types/Program'
 import { Ref } from 'vue'
-import { useOrganization } from '@/query/useOrganizations'
 import type { OrganizationType } from '@/types/Organization'
 import { useUser } from '@/query/useUsers'
+import InfoBlock from '@/components/InfoBlock.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -78,7 +78,10 @@ const shouldBeAbleToDeleteProgram = computed(() => {
 
 <template>
   <div class="program-details">
-    <div v-if="program && checklists && user" class="program-content">
+    <div class="container" v-if="!program.memberIds?.includes(authStore.user?.uid)">
+      <InfoBlock variant="error" message="You do not have access to this program." />
+    </div>
+    <div v-else-if="program && checklists && user" class="program-content">
       <div
         :style="{
           '--color': program.color,

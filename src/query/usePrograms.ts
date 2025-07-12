@@ -3,11 +3,13 @@ import { QueryClient, useQuery } from '@tanstack/vue-query'
 import { db } from '@/configs/firebase'
 import {
   addDoc,
+  and,
   collection,
   deleteDoc,
   doc,
   getDoc,
   getDocs,
+  or,
   query,
   serverTimestamp,
   setDoc,
@@ -25,11 +27,15 @@ import { toValue } from 'vue'
 import { programsLogger } from '@/services/logger/programsLogger'
 import { CustomError } from '@/utils/error'
 
-export const useProgramsForOrganization = (
-  organizationId: MaybeRefOrGetter<string | undefined | null>,
-) => {
+export const useProgramsUserHasAccessTo = ({
+  organizationId,
+  authUserId,
+}: {
+  organizationId: MaybeRefOrGetter<string | undefined | null>
+  authUserId: string
+}) => {
   return useQuery({
-    queryKey: ['programs', () => toValue(organizationId)],
+    queryKey: ['user-programs', () => toValue(organizationId)],
     queryFn: async () => {
       const orgId = toValue(organizationId)
       if (!orgId) return []
@@ -37,9 +43,50 @@ export const useProgramsForOrganization = (
       const programsRef = collection(db, 'programs')
       const q = query(
         programsRef,
-        where('organizationId', '==', orgId),
-        where('trashDate', '==', null),
+        and(
+          where('organizationId', '==', orgId),
+          where('trashDate', '==', null),
+          or(
+            where('memberIds', 'array-contains', authUserId),
+            where('createdBy', '==', authUserId),
+          ),
+        ),
       )
+
+      const programsSnapshot = await getDocs(q)
+      const programs = programsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+
+      return programs as ProgramType[]
+    },
+    throwOnError(error: CustomError, query) {
+      programsLogger.programsForOrganizationFetchFailed(error)
+      return false
+    },
+    enabled: () => !!toValue(organizationId),
+  })
+}
+
+export const useProgramsForOrganization = (
+  organizationId: MaybeRefOrGetter<string | undefined | null>
+) => {
+  return useQuery({
+    queryKey: ['org-programs', () => toValue(organizationId)],
+    queryFn: async () => {
+      const orgId = toValue(organizationId)
+      if (!orgId) return []
+
+      const programsRef = collection(db, 'programs')
+      const q = query(
+        programsRef,
+        and(
+          where('organizationId', '==', orgId),
+          where('trashDate', '==', null),
+        ),
+      )
+
       const programsSnapshot = await getDocs(q)
       const programs = programsSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -122,7 +169,7 @@ export const useCreateProgram = () => {
     },
     onSuccess: ({ organizationId }) => {
       toast.success('Program created successfully')
-      queryClient.invalidateQueries({ queryKey: ['programs', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['user-programs', organizationId] })
       programsLogger.programCreationSuccess()
     },
     onError: (error) => {
@@ -161,7 +208,7 @@ export const useUpdateProgram = () => {
     onSuccess: ({ id, organizationId }) => {
       toast.success('Program updated successfully')
       queryClient.invalidateQueries({ queryKey: ['program', id] })
-      queryClient.invalidateQueries({ queryKey: ['programs', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['user-programs', organizationId] })
     },
     onError: (error: CustomError) => {
       toast.error(error.message ?? 'Failed to update program. Please try again.')
@@ -190,7 +237,7 @@ export const useAddProgramToTrash = () => {
     },
     onSuccess: ({ userId }) => {
       toast.success('Program deleted successfully')
-      queryClient.invalidateQueries({ queryKey: ['programs', userId] })
+      queryClient.invalidateQueries({ queryKey: ['user-programs', userId] })
       queryClient.invalidateQueries({ queryKey: ['programs-trash', userId] })
     },
     onError: (error: CustomError) => {
@@ -220,7 +267,7 @@ export const useDeleteProgram = () => {
     },
     onSuccess: ({ userId }) => {
       toast.success('Program deleted successfully')
-      queryClient.invalidateQueries({ queryKey: ['programs', userId] })
+      queryClient.invalidateQueries({ queryKey: ['user-programs', userId] })
     },
     onError: (error: CustomError) => {
       toast.error('Failed to delete program. Please try again.')
@@ -249,7 +296,7 @@ export const useRestoreProgramFromTrash = () => {
     },
     onSuccess: ({ userId }) => {
       toast.success('Program restored successfully')
-      queryClient.invalidateQueries({ queryKey: ['programs', userId] })
+      queryClient.invalidateQueries({ queryKey: ['user-programs', userId] })
     },
     onError: (error: CustomError) => {
       toast.error('Failed to restore program. Please try again.')
