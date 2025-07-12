@@ -31,6 +31,7 @@ async function updateAccess(programId: string, checked: boolean) {
   if (!organizationId || !memberId) return
 
   await updateMemberAccess({
+    organizationId,
     memberId,
     programId,
     shouldHaveAccess: checked,
