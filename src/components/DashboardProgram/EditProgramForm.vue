@@ -45,9 +45,10 @@ const submit = async () => {
     updatedBy: authStore.user?.uid,
     color: form.value.color,
     trashDate: null,
+    meta: program.value.meta,
   }
 
-  await updateProgram({ data: programData })
+  await updateProgram({ data: programData, userId: authStore.user.uid })
   router.push(LINKS.program(programId))
 }
 
