@@ -74,42 +74,41 @@ const shouldBeAbleToDeleteProgram = computed(() => {
 
   return authStore.user.uid === organization.value.createdBy
 })
+
+const userHasAccess = computed(() => {
+  if (!authStore.user || !program.value) {
+    return false
+  }
+
+  return program.value.memberIds?.includes(authStore.user.uid) || authStore.user.uid === program.value.createdBy
+})
 </script>
 
 <template>
   <div class="program-details">
-    <div class="container" v-if="!program.memberIds?.includes(authStore.user?.uid)">
+    <div class="container" v-if="!userHasAccess">
       <InfoBlock variant="error" message="You do not have access to this program." />
     </div>
     <div v-else-if="program && checklists && user" class="program-content">
-      <div
-        :style="{
-          '--color': program.color,
-          '--white-level': getWhiteMixAmount(program.color) + '%',
-          '--dark-color': getIntensity(program.color) > 20 ? program.color : '#333',
-        }"
-        class="program-content"
-      >
+      <div :style="{
+        '--color': program.color,
+        '--white-level': getWhiteMixAmount(program.color) + '%',
+        '--dark-color': getIntensity(program.color) > 20 ? program.color : '#333',
+      }" class="program-content">
         <div class="container">
-          <RouterLink class="back-link" :to="LINKS.home"><BackIcon /> Back to Programs</RouterLink>
+          <RouterLink class="back-link" :to="LINKS.home">
+            <BackIcon /> Back to Programs
+          </RouterLink>
           <div class="program-info">
             <div>
               <div class="title-block">
                 <h1>{{ program.title }}</h1>
 
-                <RouterLink
-                  v-if="shouldBeAbleToEditProgram"
-                  :to="LINKS.program_edit(program.id)"
-                  class="edit-program"
-                >
+                <RouterLink v-if="shouldBeAbleToEditProgram" :to="LINKS.program_edit(program.id)" class="edit-program">
                   <EditIcon :size="24" />
                 </RouterLink>
-                <button
-                  class="delete-program"
-                  @click="deleteProgram(program.id)"
-                  :disabled="addProgramToTrashPending"
-                  v-if="shouldBeAbleToDeleteProgram"
-                >
+                <button class="delete-program" @click="deleteProgram(program.id)" :disabled="addProgramToTrashPending"
+                  v-if="shouldBeAbleToDeleteProgram">
                   <TrashIcon :size="24" />
                 </button>
               </div>
@@ -117,12 +116,9 @@ const shouldBeAbleToDeleteProgram = computed(() => {
               <p class="creaed-by">created by {{ user.name }}</p>
             </div>
             <div class="progress">
-              <ve-progress
-                :size="80"
-                :progress="(howManyChecked / (checklists?.length || 1)) * 100"
+              <ve-progress :size="80" :progress="(howManyChecked / (checklists?.length || 1)) * 100"
                 :color="getIntensity(program.color) > 230 ? '#333' : program.color"
-                :empty-color="getIntensity(program.color) < 20 ? '#000' : '#fff'"
-              >
+                :empty-color="getIntensity(program.color) < 20 ? '#000' : '#fff'">
                 {{ howManyChecked }} / {{ checklists?.length }}
               </ve-progress>
             </div>
@@ -137,10 +133,8 @@ const shouldBeAbleToDeleteProgram = computed(() => {
           <ChecklistsForm />
         </div>
 
-        <ChecklistsSection
-          :themeColor="getIntensity(program.color) > 20 ? program.color : '#000'"
-          :organizationId="organization.id"
-        />
+        <ChecklistsSection :themeColor="getIntensity(program.color) > 20 ? program.color : '#000'"
+          :organizationId="organization.id" />
         <div v-if="checklists?.length === 0" class="no-checklists">
           You have no checklist items yet. Create one above.
         </div>
@@ -150,8 +144,7 @@ const shouldBeAbleToDeleteProgram = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-.program-details {
-}
+.program-details {}
 
 .checklist-form {
   margin-bottom: 2rem;
@@ -245,8 +238,7 @@ const shouldBeAbleToDeleteProgram = computed(() => {
   row-gap: 0.5rem;
   flex-wrap: wrap;
 
-  .progress {
-  }
+  .progress {}
 }
 
 .info-item {
