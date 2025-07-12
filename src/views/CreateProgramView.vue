@@ -11,6 +11,7 @@ import BackIcon from '@/components/icons/BackIcon.vue'
 import { RouterLink } from 'vue-router'
 import { useUser } from '@/query/useUsers'
 import { NOT_FOUND } from '@/query/useUsers'
+import InfoBlock from '@/components/InfoBlock.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -24,9 +25,20 @@ const program = ref({
   color: '#000',
 })
 
+const isAbleToCreateProgramInThisOrganization = computed(() => {
+  if (!user.value) return false
+
+  return user.value.activeOrganizationId === user.value.id
+})
+
 const submit = async () => {
   if (!authStore.user || !user.value || user.value?.name === NOT_FOUND) {
     toast('You must be logged in to create a program.')
+    return
+  }
+
+  if (!isAbleToCreateProgramInThisOrganization.value) {
+    toast('You do not have permission to create a program in this organization.')
     return
   }
 
@@ -68,7 +80,13 @@ const allFieldsFilled = computed(() => {
 
 <template>
   <Layout>
-    <form @submit.prevent="submit" class="form-container">
+    <div v-if="!isAbleToCreateProgramInThisOrganization" class="container">
+      <InfoBlock
+        variant="error"
+        :message="'You do not have permission to create a program in this organization.'"
+      />
+    </div>
+    <form v-else @submit.prevent="submit" class="form-container">
       <div class="container">
         <div class="form-wrapper">
           <RouterLink class="back-link" :to="LINKS.home"><BackIcon /> Back to Programs</RouterLink>

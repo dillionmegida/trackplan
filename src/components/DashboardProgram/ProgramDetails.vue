@@ -228,7 +228,6 @@ const shouldBeAbleToDeleteProgram = computed(() => {
     margin-bottom: 1rem;
     color: var(--color);
     border-radius: 6px;
-    display: none;
   }
 
   .program-description {

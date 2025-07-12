@@ -137,13 +137,25 @@ watch(user, () => {
       <div v-else>
         <div class="top-header">
           <h1>Programs</h1>
-          <RouterLink class="create-link" :to="LINKS.createProgram"> Create </RouterLink>
+          <RouterLink
+            class="create-link"
+            :to="LINKS.createProgram"
+            v-if="user?.activeOrganizationId === user?.id"
+          >
+            Create
+          </RouterLink>
         </div>
         <section class="programs-section">
           <p v-if="programsLoading">Loading programs...</p>
           <p v-else-if="programsError">{{ programsError }}</p>
           <div v-else-if="programs?.length === 0" class="no-programs">
-            Create a program to get started
+            <span v-if="user?.activeOrganizationId === user?.id"
+              >Create a program to get started</span
+            >
+            <span v-else
+              >You do not have access to any programs in this organization you were added to. Ask
+              the organization owner to add you to programs.</span
+            >
           </div>
           <div v-else class="programs-list">
             <RouterLink
