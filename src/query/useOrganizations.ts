@@ -9,6 +9,8 @@ import {
   query,
   updateDoc,
   getDoc,
+  writeBatch,
+  arrayRemove,
 } from 'firebase/firestore'
 import type { OrganizationType } from '@/types/Organization'
 import type { UserType } from '@/types/User'
@@ -18,6 +20,7 @@ import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import { CustomError } from '@/utils/error'
 import { organizationLogger } from '@/services/logger/organizationLogger'
+import type { ProgramType } from '@/types/Program'
 
 export const useCreateOrganization = () => {
   return useMutation({
@@ -188,13 +191,27 @@ export const useRemoveMemberFromOrganization = (organizationId: string) => {
         throw new CustomError('The member you are trying to remove is not found', 404)
       }
 
+      const batch = writeBatch(db)
+
+      const programsRef = collection(db, 'programs')
+      const programsQ = query(programsRef, where('memberIds', 'array-contains', userId))
+      const programsSnapshot = await getDocs(programsQ)
+      
+      programsSnapshot.forEach((programDoc) => {
+        const programData = programDoc.data() as ProgramType
+        if (!programData.memberIds) return
+
+        batch.update(programDoc.ref, { memberIds: arrayRemove(userId) })
+      })
+
       const userData = userSnapshot.data()
       const organizationIds = userData.organizationIds.filter((id: string) => id !== organizationId)
+      batch.update(userRef, { organizationIds })
 
-      await updateDoc(userRef, { organizationIds })
+      await batch.commit()
     },
     onSuccess: () => {
-      toast.success('Member removed from organization successfully')
+      toast.success('Member removed from organization successfully. Please refresh the page to see the changes.')
       queryClient.invalidateQueries({ queryKey: ['organization-members', organizationId] })
     },
     onError: (error: any) => {

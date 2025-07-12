@@ -4,6 +4,7 @@ import type { UserType } from '@/types/User'
 import { useAuthStore } from '@/stores/auth'
 import { RouterLink } from 'vue-router';
 import { LINKS } from '@/constants/links';
+import { collection, query, where } from 'firebase/firestore';
 
 const authStore = useAuthStore()
 
@@ -17,7 +18,7 @@ const {
 const removeMember = async (id: string) => {
   if (!authStore.user?.uid) return
 
-  const decision = window.confirm('Are you sure you want to remove this member?')
+  const decision = window.confirm('Are you sure you want to remove this member? This will also remove them from all programs they are a member of.')
   if (!decision) return
 
   await removeMemberFromOrganization({

@@ -61,14 +61,6 @@ const { mutateAsync: updateOrganizationName, isPending: updateOrganizationNamePe
   useUpdateOrganizationName(organizationId)
 const orgNameInputRef = ref<HTMLTextAreaElement | null>(null)
 
-const isUserDefaultOrganization = computed(() => {
-  if (!organization.value || !user.value || user.value?.name === NOT_FOUND) {
-    return false
-  }
-
-  return organization.value.id === user.value.id
-})
-
 const shouldBeAbleToEditOrganizationName = computed(() => {
   if (!organization.value || !user.value || user.value?.name === NOT_FOUND) {
     return false

@@ -10,6 +10,7 @@ import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { NOT_FOUND, useUser } from '@/query/useUsers'
 import InfoBlock from '@/components/InfoBlock.vue'
+import router from '@/router'
 
 const route = useRoute()
 const organizationId = route.params.organizationId as string
@@ -31,7 +32,8 @@ const handleSubmit = async () => {
     return
   }
 
-  await inviteUser({ email: email.value })
+  const invitedUserId = await inviteUser({ email: email.value })
+  router.push(LINKS.organizationMemberAccess(organizationId, invitedUserId))
   email.value = ''
 }
 
