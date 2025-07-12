@@ -3,11 +3,13 @@ import { QueryClient, useQuery } from '@tanstack/vue-query'
 import { db } from '@/configs/firebase'
 import {
   addDoc,
+  and,
   collection,
   deleteDoc,
   doc,
   getDoc,
   getDocs,
+  or,
   query,
   serverTimestamp,
   setDoc,
@@ -25,9 +27,13 @@ import { toValue } from 'vue'
 import { programsLogger } from '@/services/logger/programsLogger'
 import { CustomError } from '@/utils/error'
 
-export const useProgramsForOrganization = (
-  organizationId: MaybeRefOrGetter<string | undefined | null>,
-) => {
+export const useProgramsForOrganization = ({
+  organizationId,
+  authUserId,
+}: {
+  organizationId: MaybeRefOrGetter<string | undefined | null>
+  authUserId: string
+}) => {
   return useQuery({
     queryKey: ['programs', () => toValue(organizationId)],
     queryFn: async () => {
@@ -37,9 +43,16 @@ export const useProgramsForOrganization = (
       const programsRef = collection(db, 'programs')
       const q = query(
         programsRef,
-        where('organizationId', '==', orgId),
-        where('trashDate', '==', null),
+        and(
+          where('organizationId', '==', orgId),
+          where('trashDate', '==', null),
+          or(
+            where('memberIds', 'array-contains', authUserId),
+            where('createdBy', '==', authUserId),
+          ),
+        ),
       )
+
       const programsSnapshot = await getDocs(q)
       const programs = programsSnapshot.docs.map((doc) => ({
         id: doc.id,
