@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {  computed } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProgramsUserHasAccessTo } from '@/query/useOrganizationMemberAccess'
@@ -104,6 +104,17 @@ async function updateAccess(programId: string, checked: boolean) {
       background: #fff;
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      text-align: left;
+
+      @media (max-width: 768px) {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .access-toggle {
+          margin-left: auto;
+        }
+      }
 
       .program-info {
         flex: 1;
