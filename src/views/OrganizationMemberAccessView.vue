@@ -7,6 +7,8 @@ import { useUpdateOrganizationMemberAccess } from '@/query/useOrganizationMember
 import { useMembersInOrganization } from '@/query/useOrganizations'
 import { useProgramsForOrganization } from '@/query/usePrograms'
 import Layout from '../components/Layout.vue'
+import { LINKS } from '@/constants/links'
+import BackIcon from '../components/icons/BackIcon.vue'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -43,6 +45,10 @@ async function updateAccess(programId: string, checked: boolean) {
       <div v-else-if="!member">Member not found</div>
       <div v-else>
         <div class="header">
+          <RouterLink class="back-link" :to="LINKS.organization(organizationId)">
+            <BackIcon />
+            Back to Organization
+          </RouterLink>
           <h1>Manage Program Access</h1>
           <p>What programs do you want "{{ member?.name }}" to have access to?</p>
         </div>
@@ -76,8 +82,26 @@ async function updateAccess(programId: string, checked: boolean) {
   .header {
     margin-bottom: 2rem;
 
+    .back-link {
+      align-items: center;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      border: 1px solid #d1d5db;
+      display: inline-flex;
+      padding: 0.2rem 0.4rem 0.2rem 0.2rem;
+      color: #64748b;
+      gap: 0.2rem;
+      margin-bottom: 1rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        background-color: #d5dee7;
+        color: #1e293b;
+      }
+    }
+
     h1 {
-      font-size: 2rem;
+      font-size: clamp(1.2rem, 2vw, 1.5rem);
       margin-bottom: 0.5rem;
     }
 

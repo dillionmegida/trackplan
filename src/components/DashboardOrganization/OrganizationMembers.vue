@@ -80,6 +80,7 @@ props.members.forEach((member) => {
 .member-card {
   display: flex;
   align-items: center;
+
   padding: 1rem;
   background: white;
   border-radius: 8px;

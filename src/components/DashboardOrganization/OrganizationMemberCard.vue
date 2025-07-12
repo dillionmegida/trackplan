@@ -52,7 +52,7 @@ const isAdmin = props.organizationId === authStore.user?.uid
 <style lang="scss" scoped>
 .member-card {
   display: flex;
-  align-items: center;
+  /* flex-wrap: wrap; */
   padding: 1rem;
   background: white;
   border-radius: 8px;
@@ -62,6 +62,13 @@ const isAdmin = props.organizationId === authStore.user?.uid
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 550px) {
+    flex-direction: column;
+    align-items: flex-start !important;
+    justify-content: flex-start;
+    gap: 0.5rem;
   }
 }
 
