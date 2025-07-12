@@ -34,6 +34,10 @@ import { LINKS } from '@/constants/links'
   padding: 2rem 0 6rem;
   position: relative;
   line-height: 1.5;
+
+  @media (max-width: 900px) {
+    padding-bottom: 2rem;
+  }
 }
 
 .navbar {
@@ -88,7 +92,7 @@ import { LINKS } from '@/constants/links'
     font-weight: 700;
     line-height: 1.2;
     margin-bottom: 1rem;
-    font-size: clamp(1.4rem, 8vw, 3.2rem);
+    font-size: clamp(1.3rem, 7vw, 3.2rem);
   }
 
   .lead {
@@ -118,7 +122,11 @@ import { LINKS } from '@/constants/links'
     max-width: 600px;
 
     @media (max-width: 900px) {
-      bottom: -350px;
+      position: relative;
+      inset: 0;
+      margin-top: 3rem;
+      max-width: 100%;
+      /* bottom: -350px; */
     }
 
     @media (max-width: 768px) {

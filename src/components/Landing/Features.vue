@@ -48,19 +48,7 @@ import { LINKS } from '@/constants/links';
   background-color: var(--white);
 
   @media (max-width: 900px) {
-   padding-top: 15rem;
-  }
-
-  @media (max-width: 768px) {
-    padding-top: 18rem;
-  }
-
-  @media (max-width: 550px) {
-    padding-top: 12rem;
-  }
-
-  @media (max-width: 400px) {
-    padding-top: 8rem;
+   padding-top: 3rem;
   }
 }
 
