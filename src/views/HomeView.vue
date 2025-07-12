@@ -15,6 +15,7 @@ import LoaderIcon from '@/components/icons/LoaderIcon.vue'
 import NoOrganizationsYet from '@/components/NoOrganizationsYet.vue'
 import { getIntensity, getWhiteMixAmount } from '@/utils/color'
 import InfoBlock from '@/components/InfoBlock.vue'
+import ClockIcon from '@/components/icons/ClockIcon.vue'
 
 const router = useRouter()
 const queryClient = useQueryClient()
@@ -158,7 +159,7 @@ watch(user, () => {
             >
               <div>
                 <span class="program-title">{{ program.title }}</span>
-                <span class="program-date">{{ format(program.date.toDate(), 'PP') }}</span>
+                <span class="program-date"> <ClockIcon :size="16" /> {{ format(program.date.toDate(), 'PP') }}</span>
               </div>
               <div v-if="program.meta" class="progress">
                 <ve-progress
@@ -286,7 +287,7 @@ watch(user, () => {
 
 .programs-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  /* grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); */
   gap: 1rem;
   margin: 1rem 0;
 }
@@ -337,7 +338,9 @@ watch(user, () => {
   margin-top: 5px;
   font-size: 0.8rem;
   color: #64748b;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
   font-weight: 300;
 }
 </style>
