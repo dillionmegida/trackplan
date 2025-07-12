@@ -48,7 +48,7 @@ const handleLogout = async () => {
   <div class="layout">
     <header class="header">
       <div class="container">
-        <RouterLink to="/" class="logo">
+        <RouterLink :to="LINKS.landing" class="logo">
           <img src="/logo-dark.png" alt="TrackPlan" />
         </RouterLink>
         <div class="user-menu">

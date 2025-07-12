@@ -1,6 +1,7 @@
 export const LINKS = {
   onboarding: '/onboarding',
-  home: '/',
+  landing: '/',
+  home: '/dashboard',
   login: '/login',
   createProgram: '/dashboard/program/create',
   program: (id: string) => `/dashboard/program/${id}`,

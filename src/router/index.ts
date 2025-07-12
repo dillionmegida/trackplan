@@ -11,10 +11,17 @@ import TrashView from '@/views/TrashView.vue'
 import InviteToOrganizationView from '../views/InviteToOrganization.vue'
 import OrganizationView from '../views/OrganizationView.vue'
 import MyAccountView from '../views/MyAccountView.vue'
+import LandingView from '../views/LandingView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: LINKS.landing,
+      name: 'landing',
+      component: LandingView,
+      meta: { requiresAuth: false },
+    },
     {
       path: LINKS.home,
       name: 'home',
