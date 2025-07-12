@@ -192,10 +192,9 @@ export const useRemoveMemberFromOrganization = (organizationId: string) => {
       const organizationIds = userData.organizationIds.filter((id: string) => id !== organizationId)
 
       await updateDoc(userRef, { organizationIds })
-
-      return { userId }
     },
-    onSuccess: ({ userId }) => {
+    onSuccess: () => {
+      toast.success('Member removed from organization successfully')
       queryClient.invalidateQueries({ queryKey: ['organization-members', organizationId] })
     },
     onError: (error: any) => {
