@@ -2,6 +2,8 @@
 import { useRemoveMemberFromOrganization } from '@/query/useOrganizations'
 import type { UserType } from '@/types/User'
 import { useAuthStore } from '@/stores/auth'
+import { RouterLink } from 'vue-router';
+import { LINKS } from '@/constants/links';
 
 const authStore = useAuthStore()
 
@@ -24,7 +26,7 @@ const removeMember = async (id: string) => {
   })
 }
 
-const shouldBeAbleToRemoveMember = props.organizationId === authStore.user?.uid
+const isAdmin = props.organizationId === authStore.user?.uid
 </script>
 
 <template>
@@ -36,13 +38,10 @@ const shouldBeAbleToRemoveMember = props.organizationId === authStore.user?.uid
       <div class="member-name">{{ member.name }}</div>
       <div class="member-email">{{ member.email }}</div>
     </div>
-    <div class="member-actions">
-      <button
-        :disabled="removeMemberFromOrganizationPending"
-        v-if="shouldBeAbleToRemoveMember"
-        class="remove-btn"
-        @click="removeMember(member.id)"
-      >
+    <div v-if="isAdmin" class="member-actions">
+      <RouterLink class="manage-access" :to="LINKS.organizationMemberAccess(props.organizationId, props.member.id)">Manage Access</RouterLink>
+      <button :disabled="removeMemberFromOrganizationPending"  class="remove-btn"
+        @click="removeMember(props.member.id)">
         Remove
       </button>
     </div>
@@ -104,7 +103,7 @@ const shouldBeAbleToRemoveMember = props.organizationId === authStore.user?.uid
   display: flex;
   gap: 0.5rem;
 
-  button {
+  button, a {
     padding: 0.25rem 0.5rem;
     border-radius: 3px;
     font-size: 0.9rem;
@@ -112,6 +111,15 @@ const shouldBeAbleToRemoveMember = props.organizationId === authStore.user?.uid
 
     @media (max-width: 768px) {
       padding: 0.25rem 0.5rem;
+    }
+
+    &.manage-access {
+      background-color: #219bc1;
+      color: #fff;
+
+      &:hover {
+        background-color: #1e88c7;
+      }
     }
 
     &.remove-btn {

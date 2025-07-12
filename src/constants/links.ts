@@ -10,6 +10,7 @@ export const LINKS = {
   archived: '/archived',
   my_account: '/my-account',
   organization: (id: string) => `/dashboard/organization/${id}`,
+  organizationMemberAccess: (id: string, memberId: string) => `/dashboard/organization/${id}/members/${memberId}`,
   organization_edit: (id: string) => `/dashboard/organization/${id}/edit`,
   inviteToOrganization: (id: string) => `/dashboard/organization/${id}/invite`
 }

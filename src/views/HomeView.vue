@@ -6,7 +6,7 @@ import { computed, ref, watch, onMounted } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
-import { useProgramsForOrganization } from '@/query/usePrograms'
+import { useProgramsUserHasAccessTo } from '@/query/usePrograms'
 import { LINKS } from '@/constants/links'
 import { format } from 'date-fns'
 import { useOrganizationsForUser, useSelectActiveOrganization } from '@/query/useOrganizations'
@@ -60,7 +60,7 @@ const {
   data: programs,
   isLoading: programsLoading,
   error: programsError,
-} = useProgramsForOrganization({ organizationId, authUserId: userId ?? '' })
+} = useProgramsUserHasAccessTo({ organizationId, authUserId: userId ?? '' })
 
 const {
   mutateAsync: selectActiveOrganization,

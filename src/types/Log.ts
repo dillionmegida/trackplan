@@ -38,6 +38,9 @@ export enum LogAction {
   MEMBER_ADDED_FAILED = 'member_added_failed',
   MEMBER_REMOVED = 'member_removed',
   MEMBER_REMOVED_FAILED = 'member_removed_failed',
+  MEMBER_ADDED_TO_PROGRAM = 'member_added_to_program',
+  MEMBER_ADDED_TO_PROGRAM_FAILED = 'member_added_to_program_failed',
+  
   
   // System
   ERROR_OCCURRED = 'error_occurred',

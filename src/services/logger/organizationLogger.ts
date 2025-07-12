@@ -80,6 +80,20 @@ class OrganizationLogger extends Logger {
       error,
     )
   }
+
+  public memberAddedToProgramFailed(error: CustomError) {
+    return this.error(
+      {
+        action: LogAction.MEMBER_ADDED_TO_PROGRAM_FAILED,
+        message: 'Failed to add member to program',
+        targetType: 'organization',
+        createdAt: new Date(),
+        statusCode: error.statusCode,
+        pagePath: window.location.pathname,
+      },
+      error,
+    )
+  }
     
 }
 
