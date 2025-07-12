@@ -99,22 +99,12 @@ async function updateAccess(programId: string, checked: boolean) {
     .program-item {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      gap: 0.5rem;
       padding: 1rem;
       background: #fff;
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       text-align: left;
-
-      @media (max-width: 768px) {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 0.5rem;
-
-        .access-toggle {
-          margin-left: auto;
-        }
-      }
 
       .program-info {
         flex: 1;
@@ -142,8 +132,8 @@ async function updateAccess(programId: string, checked: boolean) {
           display: inline-block;
           position: relative;
           cursor: pointer;
-          width: 60px;
-          height: 40px;
+          width: 40px;
+          height: 30px;
           background: #e0e0e0;
           border-radius: 20px;
           padding: 0;
@@ -152,8 +142,8 @@ async function updateAccess(programId: string, checked: boolean) {
 
 
           .knob {
-            width: 30px;
-            height: 30px;
+            width: 20px;
+            height: 20px;
             background: white;
             border-radius: 50%;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -176,7 +166,7 @@ async function updateAccess(programId: string, checked: boolean) {
           box-shadow: 0 2px 8px rgba(35, 147, 78, 0.2);
 
           .knob {
-            left: calc(100% - 35px)
+            left: calc(100% - 25px)
           }
         }
       }
