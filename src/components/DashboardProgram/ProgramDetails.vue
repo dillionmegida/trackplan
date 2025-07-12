@@ -125,7 +125,7 @@ const shouldBeAbleToDeleteProgram = computed(() => {
             </div>
           </div>
 
-          <p class="program-description">{{ program.description }}</p>
+          <p v-if="program.description" class="program-description">{{ program.description }}</p>
         </div>
       </div>
 
@@ -169,9 +169,9 @@ const shouldBeAbleToDeleteProgram = computed(() => {
   border-radius: 6px;
   font-size: 0.9rem;
   border: 1px solid var(--dark-color);
+  color: var(--dark-color);
   display: inline-flex;
   padding: 0.2rem 0.4rem 0.2rem 0.2rem;
-  color: #64748b;
   gap: 0.2rem;
   margin-bottom: 1rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -228,10 +228,11 @@ const shouldBeAbleToDeleteProgram = computed(() => {
     margin-bottom: 1rem;
     color: var(--color);
     border-radius: 6px;
+    display: none;
   }
 
   .program-description {
-    margin-bottom: 2.5rem;
+    /* margin-bottom: 2.5rem; */
   }
 }
 
@@ -241,7 +242,6 @@ const shouldBeAbleToDeleteProgram = computed(() => {
   column-gap: 1.5rem;
   row-gap: 0.5rem;
   flex-wrap: wrap;
-  margin-bottom: 2rem;
 
   .progress {
   }

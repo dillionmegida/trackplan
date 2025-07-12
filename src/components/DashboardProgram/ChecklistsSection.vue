@@ -132,7 +132,7 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
     <div
       v-for="(checklists, category) in groupedChecklists"
       :key="category"
-      class="checklist-category"
+      :class="'checklist-category' + (checklists.checked.length > 0 || checklists.unchecked.length > 0 ? '' : ' hidden')"
     >
       <!-- v-if here is so that the category header is not displayed if there are no checklists in that category -->
       <div
@@ -208,6 +208,11 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+
+  &.hidden {
+    display: none;
+  }
+
   /* margin: 2rem 0; */
 
   .category-header {
