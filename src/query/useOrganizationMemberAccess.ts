@@ -40,8 +40,9 @@ export function useUpdateOrganizationMemberAccess() {
   const auth = useAuthStore()
 
   return useMutation({
-    mutationFn: async ({memberId, programId, shouldHaveAccess }: {
+    mutationFn: async ({memberId, organizationId, programId, shouldHaveAccess }: {
       memberId: string
+      organizationId: string
       programId: string
       shouldHaveAccess: boolean
     }) => {
@@ -54,6 +55,12 @@ export function useUpdateOrganizationMemberAccess() {
         throw new Error('User not found')
       }
 
+      const userData = userSnap.data()
+
+      if (!userData.organizationIds.includes(organizationId)) {
+        throw new Error('User is not a member of this organization')
+      }
+
       const programRef = doc(db, 'programs', programId)
 
       // Get current access
@@ -63,7 +70,7 @@ export function useUpdateOrganizationMemberAccess() {
         throw new Error('Program not found')
       }
 
-      const programData = programSnap.data()
+      const programData = programSnap.data() as ProgramType
 
       if (programData.createdBy !== auth.user.uid) {
         throw new Error('You are not authorized to update access to this program')
