@@ -5,6 +5,7 @@ import type { ProgramChecklistItemType } from '@/types/ProgramChecklist'
 import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
 import { calculateProgramMeta } from '@/utils/programMeta'
+import { checkIfDocExists } from '@/helpers/firebase'
 
 export const useProgramChecklists = (programId: string) => {
   return useQuery({
@@ -61,11 +62,8 @@ export const useDeleteProgramChecklistItem = () => {
       const programRef = doc(db, 'programs', programId)
       const checklistsRef = collection(programRef, 'checklists')
       const checklistRef = doc(checklistsRef, checklistId)
-      const checklistDoc = await getDoc(checklistRef)
 
-      if (!checklistDoc.exists()) {
-        throw new Error('Checklist item not found')
-      }
+      await checkIfDocExists({ docRef: checklistRef, errorMsg: 'Checklist item not found' })
 
       await deleteDoc(checklistRef)
       calculateProgramMeta(programId)
@@ -97,11 +95,8 @@ export const useUpdateProgramChecklistItem = () => {
       const programRef = doc(db, 'programs', programId)
       const checklistsRef = collection(programRef, 'checklists')
       const checklistRef = doc(checklistsRef, checklistId)
-      const checklistDoc = await getDoc(checklistRef)
 
-      if (!checklistDoc.exists()) {
-        throw new Error('Checklist item not found')
-      }
+      await checkIfDocExists({ docRef: checklistRef, label: 'Checklist item' })
 
       await updateDoc(checklistRef, checklistItemObj)
       calculateProgramMeta(programId)

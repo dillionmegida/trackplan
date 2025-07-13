@@ -1,12 +1,23 @@
 import { useMutation, useQuery } from '@tanstack/vue-query'
 import { db } from '@/configs/firebase'
-import { collection, doc, getDoc, getDocs, query, updateDoc, where, writeBatch } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+  writeBatch,
+} from 'firebase/firestore'
 import { useAuthStore } from '@/stores/auth'
 import type { ProgramType } from '@/types/Program'
 import { toast } from 'vue3-toastify'
 import { CustomError } from '@/utils/error'
 import { organizationLogger } from '@/services/logger/organizationLogger'
 import { queryClient } from '@/configs/react-query'
+import { checkIfDocExists } from '@/helpers/firebase'
+import type { UserType } from '@/types/User'
 
 export function useProgramsUserHasAccessTo(memberId: string) {
   const auth = useAuthStore()
@@ -17,18 +28,12 @@ export function useProgramsUserHasAccessTo(memberId: string) {
       if (!auth.user) throw new Error('User not authenticated')
 
       const userRef = doc(db, 'users', memberId)
-      const userSnap = await getDoc(userRef)
-
-      if (!userSnap.exists()) {
-        throw new Error('User not found')
-      }
+      await checkIfDocExists<UserType>({ docRef: userRef, errorMsg: 'User not found' })
 
       const programsRef = collection(db, 'programs')
-      // get all programs with memberids array including the member
       const q = query(programsRef, where('memberIds', 'array-contains', memberId))
       const programsSnapshot = await getDocs(q)
       const programIds = programsSnapshot.docs.map((doc) => doc.id)
-      
 
       return programIds
     },
@@ -40,7 +45,12 @@ export function useUpdateOrganizationMemberAccess() {
   const auth = useAuthStore()
 
   return useMutation({
-    mutationFn: async ({memberId, organizationId, programId, shouldHaveAccess }: {
+    mutationFn: async ({
+      memberId,
+      organizationId,
+      programId,
+      shouldHaveAccess,
+    }: {
       memberId: string
       organizationId: string
       programId: string
@@ -49,13 +59,11 @@ export function useUpdateOrganizationMemberAccess() {
       if (!auth.user) throw new Error('User not authenticated')
 
       const userRef = doc(db, 'users', memberId)
-      const userSnap = await getDoc(userRef)
 
-      if (!userSnap.exists()) {
-        throw new Error('User not found')
-      }
-
-      const userData = userSnap.data()
+      const userData = await checkIfDocExists<UserType>({
+        docRef: userRef,
+        errorMsg: 'User is not a member of this organization',
+      })
 
       if (!userData.organizationIds.includes(organizationId)) {
         throw new Error('User is not a member of this organization')
@@ -63,14 +71,10 @@ export function useUpdateOrganizationMemberAccess() {
 
       const programRef = doc(db, 'programs', programId)
 
-      // Get current access
-      const programSnap = await getDoc(programRef)
-      
-      if (!programSnap.exists()) {
-        throw new Error('Program not found')
-      }
-
-      const programData = programSnap.data() as ProgramType
+      const programData = await checkIfDocExists<ProgramType>({
+        docRef: programRef,
+        errorMsg: 'Program not found',
+      })
 
       if (programData.createdBy !== auth.user.uid) {
         throw new Error('You are not authorized to update access to this program')
@@ -78,13 +82,12 @@ export function useUpdateOrganizationMemberAccess() {
 
       const currentAccess = programData?.memberIds || []
 
-      // Update access
       const newAccess = shouldHaveAccess
         ? [...currentAccess, memberId]
-        : currentAccess.filter(id => id !== memberId)
+        : currentAccess.filter((id) => id !== memberId)
 
       await updateDoc(programRef, {
-        memberIds: newAccess
+        memberIds: newAccess,
       })
 
       return newAccess
@@ -98,7 +101,6 @@ export function useUpdateOrganizationMemberAccess() {
       toast.error(error.message ?? 'Failed to update access')
       const customError = new CustomError(error.message, error.statusCode ?? 500)
       organizationLogger.memberAddedToProgramFailed(customError)
-
-    }
+    },
   })
 }

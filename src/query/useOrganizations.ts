@@ -21,6 +21,7 @@ import { toValue } from 'vue'
 import { CustomError } from '@/utils/error'
 import { organizationLogger } from '@/services/logger/organizationLogger'
 import type { ProgramType } from '@/types/Program'
+import { checkIfDocExists } from '@/helpers/firebase'
 
 export const useCreateOrganization = () => {
   return useMutation({
@@ -61,13 +62,12 @@ export const useOrganizationsForUser = (userId: string) => {
     queryKey: ['organizations', userId],
     queryFn: async () => {
       const userRef = doc(db, 'users', userId)
-      const userSnapshot = await getDoc(userRef)
 
-      if (!userSnapshot.exists()) {
-        throw new Error('User not found')
-      }
+      const userData = await checkIfDocExists<UserType>({
+        docRef: userRef,
+        errorMsg: 'User not found',
+      })
 
-      const userData = userSnapshot.data() as UserType
       const organizationIds = userData.organizationIds || []
 
       if (organizationIds.length === 0) {
@@ -93,16 +93,13 @@ export const useOrganization = (organizationId: MaybeRefOrGetter<string | undefi
     queryKey: ['organization', organizationId],
     queryFn: async () => {
       const organizationRef = doc(db, 'organizations', toValue(organizationId) as string)
-      const docSnap = await getDoc(organizationRef)
 
-      if (!docSnap.exists()) {
-        throw new Error('Organization not found')
-      }
+      const organizationData = await checkIfDocExists<OrganizationType>({
+        docRef: organizationRef,
+        errorMsg: 'Organization not found',
+      })
 
-      return {
-        id: docSnap.id,
-        ...docSnap.data(),
-      } as OrganizationType
+      return organizationData
     },
     enabled: !!organizationId,
   })
@@ -112,13 +109,12 @@ export const useUpdateOrganizationName = (organizationId: string) => {
   return useMutation({
     mutationFn: async (name: string) => {
       const organizationRef = doc(db, 'organizations', organizationId)
-      const organizationSnapshot = await getDoc(organizationRef)
 
-      if (!organizationSnapshot.exists()) {
-        throw new CustomError('Organization not found', 404)
-      }
+      const organizationData = await checkIfDocExists<OrganizationType>({
+        docRef: organizationRef,
+        errorMsg: 'Organization not found',
+      })
 
-      const organizationData = organizationSnapshot.data()
       const userId = organizationData.createdBy
 
       await updateDoc(organizationRef, { name })
@@ -142,11 +138,11 @@ export const useMembersInOrganization = (organizationId: string) => {
     queryKey: ['organization-members', organizationId],
     queryFn: async () => {
       const organizationRef = doc(db, 'organizations', organizationId)
-      const docSnap = await getDoc(organizationRef)
 
-      if (!docSnap.exists()) {
-        throw new Error('Organization not found')
-      }
+      await checkIfDocExists<OrganizationType>({
+        docRef: organizationRef,
+        errorMsg: 'Organization not found',
+      })
 
       // get all users where their organizationIds include the current organization
       const usersRef = collection(db, 'users')
@@ -168,13 +164,12 @@ export const useRemoveMemberFromOrganization = (organizationId: string) => {
   return useMutation({
     mutationFn: async ({ authId, userId }: { authId: string; userId: string }) => {
       const organizationRef = doc(db, 'organizations', organizationId)
-      const organizationSnapshot = await getDoc(organizationRef)
 
-      if (!organizationSnapshot.exists()) {
-        throw new CustomError('Organization not found', 404)
-      }
+      const organizationData = await checkIfDocExists<OrganizationType>({
+        docRef: organizationRef,
+        errorMsg: 'Organization not found',
+      })
 
-      const organizationData = organizationSnapshot.data()
       const createdById = organizationData.createdBy
 
       if (createdById !== authId) {
@@ -185,18 +180,18 @@ export const useRemoveMemberFromOrganization = (organizationId: string) => {
       }
 
       const userRef = doc(db, 'users', userId)
-      const userSnapshot = await getDoc(userRef)
 
-      if (!userSnapshot.exists()) {
-        throw new CustomError('The member you are trying to remove is not found', 404)
-      }
+      const userData = await checkIfDocExists<UserType>({
+        docRef: userRef,
+        errorMsg: 'The member you are trying to remove is not found',
+      })
 
       const batch = writeBatch(db)
 
       const programsRef = collection(db, 'programs')
       const programsQ = query(programsRef, where('memberIds', 'array-contains', userId))
       const programsSnapshot = await getDocs(programsQ)
-      
+
       programsSnapshot.forEach((programDoc) => {
         const programData = programDoc.data() as ProgramType
         if (!programData.memberIds) return
@@ -204,14 +199,15 @@ export const useRemoveMemberFromOrganization = (organizationId: string) => {
         batch.update(programDoc.ref, { memberIds: arrayRemove(userId) })
       })
 
-      const userData = userSnapshot.data()
       const organizationIds = userData.organizationIds.filter((id: string) => id !== organizationId)
       batch.update(userRef, { organizationIds })
 
       await batch.commit()
     },
     onSuccess: () => {
-      toast.success('Member removed from organization successfully. Please refresh the page to see the changes.')
+      toast.success(
+        'Member removed from organization successfully. Please refresh the page to see the changes.',
+      )
       queryClient.invalidateQueries({ queryKey: ['organization-members', organizationId] })
     },
     onError: (error: any) => {

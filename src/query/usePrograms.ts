@@ -26,6 +26,7 @@ import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import { programsLogger } from '@/services/logger/programsLogger'
 import { CustomError } from '@/utils/error'
+import { checkIfDocExists } from '@/helpers/firebase'
 
 export const useProgramsUserHasAccessTo = ({
   organizationId,
@@ -70,7 +71,7 @@ export const useProgramsUserHasAccessTo = ({
 }
 
 export const useProgramsForOrganization = (
-  organizationId: MaybeRefOrGetter<string | undefined | null>
+  organizationId: MaybeRefOrGetter<string | undefined | null>,
 ) => {
   return useQuery({
     queryKey: ['org-programs', () => toValue(organizationId)],
@@ -81,10 +82,7 @@ export const useProgramsForOrganization = (
       const programsRef = collection(db, 'programs')
       const q = query(
         programsRef,
-        and(
-          where('organizationId', '==', orgId),
-          where('trashDate', '==', null),
-        ),
+        and(where('organizationId', '==', orgId), where('trashDate', '==', null)),
       )
 
       const programsSnapshot = await getDocs(q)
@@ -135,15 +133,13 @@ export const useProgram = (programId: string) => {
     queryKey: ['program', programId],
     queryFn: async () => {
       const programRef = doc(db, 'programs', programId)
-      const programDoc = await getDoc(programRef)
-      if (!programDoc.exists()) {
-        throw new CustomError('Program not found', 404)
-      }
 
-      return {
-        id: programDoc.id,
-        ...programDoc.data(),
-      } as ProgramType
+      const programDoc = await checkIfDocExists<ProgramType>({
+        docRef: programRef,
+        errorMsg: 'Program not found',
+      })
+
+      return programDoc
     },
     throwOnError(error: CustomError, query) {
       programsLogger.programFetchFailed(error)
@@ -193,11 +189,11 @@ export const useUpdateProgram = () => {
     }: UseUpdateProgramArgs): Promise<{ id: string; organizationId: string }> => {
       const programRef = doc(db, 'programs', data.id)
 
-      const programDoc = await getDoc(programRef)
-      if (!programDoc.exists()) {
-        throw new CustomError('Program not found', 404)
-      }
-      const programData = programDoc.data()
+      const programData = await checkIfDocExists<ProgramType>({
+        docRef: programRef,
+        errorMsg: 'Program not found',
+      })
+
       if (programData.createdBy !== userId) {
         throw new CustomError('You are not authorized to update this program', 403)
       }
@@ -222,12 +218,12 @@ export const useAddProgramToTrash = () => {
   return useMutation({
     mutationFn: async ({ programId, userId }: { programId: string; userId: string }) => {
       const programRef = doc(db, 'programs', programId)
-      const programDoc = await getDoc(programRef)
-      if (!programDoc.exists()) {
-        throw new CustomError('Program not found', 404)
-      }
 
-      const programData = programDoc.data()
+      const programData = await checkIfDocExists<ProgramType>({
+        docRef: programRef,
+        errorMsg: 'Program not found',
+      })
+
       if (programData.organizationId !== userId) {
         throw new CustomError('You are not authorized to delete this program', 403)
       }
@@ -252,12 +248,12 @@ export const useDeleteProgram = () => {
   return useMutation({
     mutationFn: async ({ programId, userId }: { programId: string; userId: string }) => {
       const programRef = doc(db, 'programs', programId)
-      const programDoc = await getDoc(programRef)
-      if (!programDoc.exists()) {
-        throw new CustomError('Program not found', 404)
-      }
 
-      const programData = programDoc.data()
+      const programData = await checkIfDocExists<ProgramType>({
+        docRef: programRef,
+        errorMsg: 'Program not found',
+      })
+
       if (programData.organizationId !== userId) {
         throw new CustomError('You are not authorized to delete this program', 403)
       }
@@ -281,12 +277,12 @@ export const useRestoreProgramFromTrash = () => {
   return useMutation({
     mutationFn: async ({ programId, userId }: { programId: string; userId: string }) => {
       const programRef = doc(db, 'programs', programId)
-      const programDoc = await getDoc(programRef)
-      if (!programDoc.exists()) {
-        throw new CustomError('Program not found', 404)
-      }
 
-      const programData = programDoc.data()
+      const programData = await checkIfDocExists<ProgramType>({
+        docRef: programRef,
+        errorMsg: 'Program not found',
+      })
+
       if (programData.organizationId !== userId) {
         throw new CustomError('You are not authorized to restore this program', 403)
       }

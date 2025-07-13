@@ -15,6 +15,8 @@ import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
 import { inviteLogger } from '@/services/logger/inviteLogger'
 import { CustomError } from '@/utils/error'
+import { checkIfDocExists } from '@/helpers/firebase'
+import type { OrganizationType } from '@/types/Organization'
 
 export type InviteUserArgs = {
   email: string
@@ -26,11 +28,11 @@ export const useInviteUser = (organizationId: string) => {
       // TODO: keep track of pending invites so people can accept
 
       const organizationRef = doc(db, 'organizations', organizationId)
-      const organizationSnapshot = await getDoc(organizationRef)
+      await checkIfDocExists<OrganizationType>({
+        docRef: organizationRef,
+        errorMsg: 'Organization not found',
+      })
 
-      if (!organizationSnapshot.exists()) {
-        throw new Error('Organization not found')
-      }
 
       const usersRef = collection(db, 'users')
       const q = query(usersRef, where('email', '==', email))

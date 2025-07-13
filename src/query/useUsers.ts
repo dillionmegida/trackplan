@@ -9,6 +9,7 @@ import { toValue, type MaybeRefOrGetter } from 'vue'
 export const NOT_FOUND = 'not-found'
 import { onboardingLogger } from '@/services/logger/onboardingLogger'
 import { CustomError } from '@/utils/error'
+import { checkIfDocExists } from '@/helpers/firebase'
 
 export const useUsers = () => {
   return useQuery({
@@ -31,6 +32,8 @@ export const useUser = (userId: string | MaybeRefOrGetter<string | undefined | n
     queryFn: async () => {
       const userRef = doc(db, 'users', toValue(userId) ?? '')
       const userSnapshot = await getDoc(userRef)
+
+      // useful for onboarding
       if (!userSnapshot.exists()) {
         return { name: NOT_FOUND } as UserType
       }
@@ -81,10 +84,8 @@ export const useDeleteUser = () => {
   return useMutation({
     mutationFn: async (userId: string) => {
       const userRef = doc(db, 'users', userId)
-      const userSnapshot = await getDoc(userRef)
-      if (!userSnapshot.exists()) {
-        throw new Error('User not found')
-      }
+
+      await checkIfDocExists({ docRef: userRef, label: 'User' })
 
       const batch = writeBatch(db)
 
