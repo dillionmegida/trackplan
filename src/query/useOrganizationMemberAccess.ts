@@ -16,7 +16,7 @@ import { toast } from 'vue3-toastify'
 import { CustomError } from '@/utils/error'
 import { organizationLogger } from '@/services/logger/organizationLogger'
 import { queryClient } from '@/configs/react-query'
-import { checkIfDocExists } from '@/helpers/firebase'
+import { authorizedToUpdateProgram, checkIfDocExists } from '@/helpers/firebase'
 import type { UserType } from '@/types/User'
 
 export function useProgramsUserHasAccessTo(memberId: string) {
@@ -76,9 +76,7 @@ export function useUpdateOrganizationMemberAccess() {
         errorMsg: 'Program not found',
       })
 
-      if (programData.createdBy !== auth.user.uid) {
-        throw new Error('You are not authorized to update access to this program')
-      }
+      authorizedToUpdateProgram({ program: programData, userId: auth.user.uid })
 
       const currentAccess = programData?.memberIds || []
 

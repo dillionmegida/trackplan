@@ -1,4 +1,4 @@
-import { QueryClient, useQuery } from '@tanstack/vue-query'
+import { useQuery } from '@tanstack/vue-query'
 
 import { db } from '@/configs/firebase'
 import {
@@ -7,12 +7,9 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDoc,
-  getDocs,
   or,
   query,
   serverTimestamp,
-  setDoc,
   Timestamp,
   updateDoc,
   where,
@@ -26,7 +23,12 @@ import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import { programsLogger } from '@/services/logger/programsLogger'
 import { CustomError } from '@/utils/error'
-import { checkIfDocExists } from '@/helpers/firebase'
+import {
+  authorizedToDeleteProgram,
+  authorizedToUpdateProgram,
+  checkIfDocExists,
+  getDocsData,
+} from '@/helpers/firebase'
 
 export const useProgramsUserHasAccessTo = ({
   organizationId,
@@ -54,13 +56,8 @@ export const useProgramsUserHasAccessTo = ({
         ),
       )
 
-      const programsSnapshot = await getDocs(q)
-      const programs = programsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-
-      return programs as ProgramType[]
+      const programsData = await getDocsData(q)
+      return programsData as ProgramType[]
     },
     throwOnError(error: CustomError, query) {
       programsLogger.programsForOrganizationFetchFailed(error)
@@ -85,13 +82,8 @@ export const useProgramsForOrganization = (
         and(where('organizationId', '==', orgId), where('trashDate', '==', null)),
       )
 
-      const programsSnapshot = await getDocs(q)
-      const programs = programsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-
-      return programs as ProgramType[]
+      const programsData = await getDocsData<ProgramType>(q)
+      return programsData
     },
     throwOnError(error: CustomError, query) {
       programsLogger.programsForOrganizationFetchFailed(error)
@@ -116,13 +108,9 @@ export const useTrashedProgramsForOrganization = (
         where('organizationId', '==', orgId),
         where('trashDate', '!=', null),
       )
-      const programsSnapshot = await getDocs(q)
-      const programs = programsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
 
-      return programs as ProgramType[]
+      const programsData = await getDocsData<ProgramType>(q)
+      return programsData
     },
     enabled: !!organizationId,
   })
@@ -194,9 +182,7 @@ export const useUpdateProgram = () => {
         errorMsg: 'Program not found',
       })
 
-      if (programData.createdBy !== userId) {
-        throw new CustomError('You are not authorized to update this program', 403)
-      }
+      authorizedToUpdateProgram({ program: programData, userId })
 
       await updateDoc(programRef, { ...programData, ...data })
       return { id: data.id, organizationId: data.organizationId }
@@ -224,9 +210,7 @@ export const useAddProgramToTrash = () => {
         errorMsg: 'Program not found',
       })
 
-      if (programData.organizationId !== userId) {
-        throw new CustomError('You are not authorized to delete this program', 403)
-      }
+      authorizedToDeleteProgram({ program: programData, userId })
 
       await updateDoc(programRef, { trashDate: serverTimestamp() as Timestamp })
       return { userId }
@@ -254,9 +238,7 @@ export const useDeleteProgram = () => {
         errorMsg: 'Program not found',
       })
 
-      if (programData.organizationId !== userId) {
-        throw new CustomError('You are not authorized to delete this program', 403)
-      }
+      authorizedToDeleteProgram({ program: programData, userId })
 
       await deleteDoc(programRef)
       return { userId }
@@ -283,9 +265,7 @@ export const useRestoreProgramFromTrash = () => {
         errorMsg: 'Program not found',
       })
 
-      if (programData.organizationId !== userId) {
-        throw new CustomError('You are not authorized to restore this program', 403)
-      }
+      authorizedToDeleteProgram({ program: programData, userId })
 
       await updateDoc(programRef, { trashDate: null })
       return { userId }
