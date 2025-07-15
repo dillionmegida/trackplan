@@ -59,7 +59,9 @@ const updateChecklist = (checklistId: string, isCompleted: boolean) => {
   const itemInArrayIndex = checklistsCopy.value.findIndex(
     (checklist) => checklist.id === checklistId
   )
-  checklistsCopy.value[itemInArrayIndex].isCompleted = isCompleted
+  const duplicateChecklists = [...checklistsCopy.value]
+  duplicateChecklists[itemInArrayIndex].isCompleted = isCompleted
+  checklistsCopy.value = duplicateChecklists
 }
 
 const deleteChecklist = (checklistId: string) => {
@@ -150,7 +152,7 @@ const addChecklist = (c: ProgramChecklistItemType) => {
           <DemoChecklistsSection
             :themeColor="program.color ? getIntensity(program.color) > 20 ? program.color : '#000' : '#000'"
             :checklists="checklistsCopy"
-            @update="updateChecklist"
+            @update="(id,newValue) => updateChecklist(id, newValue)"
             @delete="deleteChecklist"
           />
           <div v-if="checklistsCopy.length === 0" class="no-checklists">
