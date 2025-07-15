@@ -9,9 +9,9 @@ import { LINKS } from '@/constants/links'
         <div class="logo">
           <img src="/logo-black.png" alt="" />
         </div>
-        <!-- <div class="nav-links">
-          <RouterLink :to="LINKS.login" class="get-started-link">Get Started</RouterLink>
-        </div> -->
+        <div class="nav-links">
+          <RouterLink :to="LINKS.login" class="get-started-link">Dashboard</RouterLink>
+        </div>
       </nav>
 
       <div class="hero-content">
@@ -59,7 +59,7 @@ import { LINKS } from '@/constants/links'
       color: #fff;
       font-weight: 600;
       background-color: #000;
-      padding: 0.75rem 1.5rem;
+      padding: 0.5rem 1rem;
       border-radius: 0.375rem;
       transition: background-color 0.2s;
 

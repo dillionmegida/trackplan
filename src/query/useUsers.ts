@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/vue-query'
 import { db } from '@/configs/firebase'
-import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where, writeBatch, type DocumentReference } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where, writeBatch, type DocumentReference } from 'firebase/firestore'
 import type { UserType } from '@/types/User'
 import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
@@ -10,10 +10,11 @@ export const NOT_FOUND = 'not-found'
 import { onboardingLogger } from '@/services/logger/onboardingLogger'
 import { CustomError } from '@/utils/error'
 import { checkIfDocExists } from '@/helpers/firebase'
+import { QEURY_KEY } from './QueryKey'
 
 export const useUsers = () => {
   return useQuery({
-    queryKey: ['users'],
+    queryKey: QEURY_KEY.users(),
     queryFn: async () => {
       const usersRef = collection(db, 'users')
       const usersSnapshot = await getDocs(usersRef)
@@ -28,7 +29,7 @@ export const useUsers = () => {
 
 export const useUser = (userId: string | MaybeRefOrGetter<string | undefined | null>) => {
   return useQuery({
-    queryKey: ['user', userId],
+    queryKey: QEURY_KEY.user(toValue(userId) ?? ''),
     queryFn: async () => {
       const userRef = doc(db, 'users', toValue(userId) ?? '')
       const userSnapshot = await getDoc(userRef)
@@ -55,6 +56,7 @@ export const useUpdateUser = () => {
       const userRef = doc(db, 'users', userId)
       await updateDoc(userRef, data)
     },
+    // TODO: invalidate stuff, onsuccess stuff
   })
 }
 
@@ -69,7 +71,7 @@ export const useCreateUser = (authId: string) => {
       await setDoc(userRef, data)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user', authId] })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.user(authId) })
       onboardingLogger.confirmAccountSuccess()
     },
     onError: (error: CustomError) => {
@@ -85,7 +87,7 @@ export const useDeleteUser = () => {
     mutationFn: async (userId: string) => {
       const userRef = doc(db, 'users', userId)
 
-      await checkIfDocExists({ docRef: userRef, label: 'User' })
+      await checkIfDocExists({ docRef: userRef, errorMsg: 'User not found' })
 
       const batch = writeBatch(db)
 
@@ -127,7 +129,7 @@ export const useDeleteUser = () => {
       // await batch.commit()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.users() })
     },
     onError: (error) => {
       toast.error(error.message ?? 'Failed to delete user. Please try again.')

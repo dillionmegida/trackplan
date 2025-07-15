@@ -6,10 +6,11 @@ import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
 import { calculateProgramMeta } from '@/utils/programMeta'
 import { checkIfDocExists } from '@/helpers/firebase'
+import { QEURY_KEY } from './QueryKey'
 
 export const useProgramChecklists = (programId: string) => {
   return useQuery({
-    queryKey: ['program-checklists', programId],
+    queryKey: QEURY_KEY.programChecklists(programId),
     queryFn: async () => {
       const programRef = doc(db, 'programs', programId)
       const checklistsRef = collection(programRef, 'checklists')
@@ -42,7 +43,7 @@ export const useAddProgramChecklist = () => {
       return { programId, id: docRef.id }
     },
     onSuccess: ({ programId }) => {
-      queryClient.invalidateQueries({ queryKey: ['program-checklists', programId] })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programChecklists(programId) })
     },
     onError: (error) => {
       const errorMsg = error.message ?? 'Failed to add checklist item. Please try again.'
@@ -70,7 +71,7 @@ export const useDeleteProgramChecklistItem = () => {
       return { programId }
     },
     onSuccess: ({ programId }) => {
-      queryClient.invalidateQueries({ queryKey: ['program-checklists', programId] })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programChecklists(programId) })
     },
     onError: (error) => {
       const errorMsg = error.message ?? 'Failed to delete checklist item. Please try again.'
@@ -96,7 +97,7 @@ export const useUpdateProgramChecklistItem = () => {
       const checklistsRef = collection(programRef, 'checklists')
       const checklistRef = doc(checklistsRef, checklistId)
 
-      await checkIfDocExists({ docRef: checklistRef, label: 'Checklist item' })
+      await checkIfDocExists({ docRef: checklistRef, errorMsg: 'Checklist item not found' })
 
       await updateDoc(checklistRef, checklistItemObj)
       calculateProgramMeta(programId)
@@ -107,7 +108,7 @@ export const useUpdateProgramChecklistItem = () => {
       toast.error(errorMsg)
     },
     onSuccess: ({ programId }) => {
-      queryClient.invalidateQueries({ queryKey: ['program-checklists', programId] })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programChecklists(programId) })
     },
   })
 }

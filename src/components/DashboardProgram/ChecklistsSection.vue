@@ -13,6 +13,7 @@ import { ref } from 'vue'
 import ChecklistItem from './ChecklistItem.vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import { queryClient } from '@/configs/react-query'
+import { QEURY_KEY } from '@/query/QueryKey'
 
 const props = defineProps<{ themeColor: 'string'; organizationId: string }>()
 
@@ -28,7 +29,7 @@ const somethingChanged = ref(false)
 
 onBeforeRouteLeave(() => {
   if (!props.organizationId || !somethingChanged.value) return
-  queryClient.invalidateQueries({ queryKey: ['programs', props.organizationId] })
+  queryClient.invalidateQueries({ queryKey: QEURY_KEY.programsForUser(props.organizationId) })
 })
 
 const groupedChecklists = computed(() => {

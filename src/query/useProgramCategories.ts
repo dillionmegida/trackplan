@@ -5,10 +5,11 @@ import { useMutation } from '@tanstack/vue-query'
 import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
 import type { ProgramChecklistCategoryType } from '@/types/ProgramChecklist'
+import { QEURY_KEY } from './QueryKey'
 
 export const useProgramCategories = (programId: string) => {
   return useQuery({
-    queryKey: ['program-categories', programId],
+    queryKey: QEURY_KEY.programCategories(programId),
     queryFn: async () => {
       const programRef = doc(db, 'programs', programId)
       const categoriesRef = collection(programRef, 'categories')
@@ -48,7 +49,7 @@ export const useCreateProgramCategory = () => {
       return { id: categoryDoc.id, programId }
     },
     onSuccess: ({ programId }) => {
-      queryClient.invalidateQueries({ queryKey: ['program-categories', programId] })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programCategories(programId) })
     },
     onError: (error) => {
       const errorMsg = error.message ?? 'Failed to create category. Please try again.'
@@ -69,7 +70,7 @@ export const useDeleteProgramCategory = () => {
     },
     onSuccess: ({ programId }) => {
       toast.success('Category deleted successfully')
-      queryClient.invalidateQueries({ queryKey: ['program-categories', programId] })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programCategories(programId) })
     },
     onError: (error) => {
       toast.error('Failed to delete category. Please try again.')

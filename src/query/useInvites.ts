@@ -17,6 +17,7 @@ import { inviteLogger } from '@/services/logger/inviteLogger'
 import { CustomError } from '@/utils/error'
 import { checkIfDocExists } from '@/helpers/firebase'
 import type { OrganizationType } from '@/types/Organization'
+import { QEURY_KEY } from './QueryKey'
 
 export type InviteUserArgs = {
   email: string
@@ -57,9 +58,9 @@ export const useInviteUser = (organizationId: string) => {
       return user.id
     },
     onSuccess: () => {
-      toast.success('Invitation sent successfully!')
       inviteLogger.inviteUserToOrganizationSuccess()
-      queryClient.invalidateQueries({ queryKey: ['organization-members', organizationId] })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.organizationMembers(organizationId) })
+      toast.success('Invitation sent successfully!')
       // TODO:
       // queryClient.invalidateQueries({ queryKey: ['invites', organizationId] })
     },

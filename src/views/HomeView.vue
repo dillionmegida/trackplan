@@ -16,18 +16,12 @@ import NoOrganizationsYet from '@/components/NoOrganizationsYet.vue'
 import { getIntensity, getWhiteMixAmount } from '@/utils/color'
 import InfoBlock from '@/components/InfoBlock.vue'
 import ClockIcon from '@/components/icons/ClockIcon.vue'
+import { QEURY_KEY } from '@/query/QueryKey'
 
 const router = useRouter()
 const queryClient = useQueryClient()
 const userId = useAuthStore().user?.uid
 const newAccount = router.currentRoute.value.query.new === 'true'
-
-onBeforeRouteLeave((to, from) => {
-  if (!organizationId.value) return
-  if (from.name === to.name) return
-
-  queryClient.invalidateQueries({ queryKey: ['programs', organizationId.value] })
-})
 
 const organizationBeenSelected = ref('')
 

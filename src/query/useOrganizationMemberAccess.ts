@@ -18,12 +18,13 @@ import { organizationLogger } from '@/services/logger/organizationLogger'
 import { queryClient } from '@/configs/react-query'
 import { authorizedToUpdateProgram, checkIfDocExists } from '@/helpers/firebase'
 import type { UserType } from '@/types/User'
+import { QEURY_KEY } from './QueryKey'
 
 export function useProgramsUserHasAccessTo(memberId: string) {
   const auth = useAuthStore()
 
   return useQuery({
-    queryKey: ['organizationMemberAccess', memberId],
+    queryKey: QEURY_KEY.organizationMemberAccess(memberId),
     queryFn: async () => {
       if (!auth.user) throw new Error('User not authenticated')
 
@@ -92,8 +93,6 @@ export function useUpdateOrganizationMemberAccess() {
     },
     onSuccess: () => {
       toast.success('Updated user access')
-      queryClient.invalidateQueries({ queryKey: ['org-programs', auth.user?.uid] })
-      queryClient.invalidateQueries({ queryKey: ['user-programs', auth.user?.uid] })
     },
     onError: (error: any) => {
       toast.error(error.message ?? 'Failed to update access')

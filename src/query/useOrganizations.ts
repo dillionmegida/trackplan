@@ -22,6 +22,7 @@ import { CustomError } from '@/utils/error'
 import { organizationLogger } from '@/services/logger/organizationLogger'
 import type { ProgramType } from '@/types/Program'
 import { checkIfDocExists } from '@/helpers/firebase'
+import { QEURY_KEY } from './QueryKey'
 
 export const useCreateOrganization = () => {
   return useMutation({
@@ -32,7 +33,7 @@ export const useCreateOrganization = () => {
       return { id: data.id }
     },
     onSuccess: ({ id }) => {
-      queryClient.invalidateQueries({ queryKey: ['organizations', id] })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.organization(id) })
     },
     onError: (error: any) => {
       toast.error('Failed to create organization. Please try again.')
@@ -49,7 +50,7 @@ export const useSelectActiveOrganization = (userId: string) => {
       await updateDoc(userRef, { activeOrganizationId: organizationId })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user', userId] })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.user(userId) })
     },
     onError: () => {
       toast.error('Failed to select organization. Please try again.')
@@ -59,7 +60,7 @@ export const useSelectActiveOrganization = (userId: string) => {
 
 export const useOrganizationsForUser = (userId: string) => {
   return useQuery({
-    queryKey: ['organizations', userId],
+    queryKey: QEURY_KEY.organizationsForUser(userId),
     queryFn: async () => {
       const userRef = doc(db, 'users', userId)
 
@@ -90,7 +91,7 @@ export const useOrganizationsForUser = (userId: string) => {
 
 export const useOrganization = (organizationId: MaybeRefOrGetter<string | undefined | null>) => {
   return useQuery({
-    queryKey: ['organization', organizationId],
+    queryKey: QEURY_KEY.organization(toValue(organizationId) as string),
     queryFn: async () => {
       const organizationRef = doc(db, 'organizations', toValue(organizationId) as string)
 
@@ -122,8 +123,8 @@ export const useUpdateOrganizationName = (organizationId: string) => {
       return { userId }
     },
     onSuccess: ({ userId }) => {
-      queryClient.invalidateQueries({ queryKey: ['organization', organizationId] })
-      queryClient.invalidateQueries({ queryKey: ['organizations', userId] })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.organization(organizationId) })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.organizationsForUser(userId) })
     },
     onError: (error: any) => {
       toast.error('Failed to update organization name. Please try again.')
@@ -135,7 +136,7 @@ export const useUpdateOrganizationName = (organizationId: string) => {
 
 export const useMembersInOrganization = (organizationId: string) => {
   return useQuery({
-    queryKey: ['organization-members', organizationId],
+    queryKey: QEURY_KEY.membersInOrganization(organizationId),
     queryFn: async () => {
       const organizationRef = doc(db, 'organizations', organizationId)
 
@@ -208,7 +209,7 @@ export const useRemoveMemberFromOrganization = (organizationId: string) => {
       toast.success(
         'Member removed from organization successfully. Please refresh the page to see the changes.',
       )
-      queryClient.invalidateQueries({ queryKey: ['organization-members', organizationId] })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.membersInOrganization(organizationId) })
     },
     onError: (error: any) => {
       toast.error(error.message ?? 'Failed to remove member from organization. Please try again.')
