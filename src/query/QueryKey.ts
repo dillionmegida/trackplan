@@ -4,6 +4,7 @@ export const QEURY_KEY = {
   programsForOrganization: (organizationId: string) => ['org-programs', organizationId],
   trashedProgramsForOrganization: (organizationId: string) => ['org-programs-trash', organizationId],
   program: (programId: string) => ['program', programId],
+  demoPrograms: () => ['demo-programs'],
 
   // Organizations
   organizationsForUser: (userId: string) => ['user-organizations', userId],

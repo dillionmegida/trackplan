@@ -31,6 +31,18 @@ import {
 } from '@/helpers/firebase'
 import { QEURY_KEY } from './QueryKey'
 
+export const useDemoPrograms = () => {
+  return useQuery({
+    queryKey: QEURY_KEY.demoPrograms(),
+    queryFn: async () => {
+      const programsRef = collection(db, 'programs-demo')
+
+      const programsData = await getDocsData(programsRef)
+      return programsData as ProgramType[]
+    },
+  })
+}
+
 export const useProgramsUserHasAccessTo = ({
   organizationId,
   authUserId,
@@ -139,6 +151,23 @@ export const useProgram = (programId: string) => {
   })
 }
 
+export const useDemoProgram = (programId: string) => {
+  return useQuery({
+    queryKey: QEURY_KEY.program(programId),
+    queryFn: async () => {
+      const programRef = doc(db, 'programs-demo', programId)
+
+      const programDoc = await checkIfDocExists<ProgramType>({
+        docRef: programRef,
+        errorMsg: 'Program not found',
+      })
+
+      return programDoc
+    },
+    enabled: !!programId,
+  })
+}
+
 type UseCreateProgramArgs = {
   data: Omit<ProgramType, 'id'>
 }
@@ -219,7 +248,9 @@ export const useAddProgramToTrash = () => {
     onSuccess: ({ userId, organizationId }) => {
       toast.success('Program deleted successfully')
       queryClient.invalidateQueries({ queryKey: QEURY_KEY.programsForUser(organizationId) })
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.trashedProgramsForOrganization(organizationId) })
+      queryClient.invalidateQueries({
+        queryKey: QEURY_KEY.trashedProgramsForOrganization(organizationId),
+      })
     },
     onError: (error: CustomError) => {
       toast.error('Failed to delete program. Please try again.')

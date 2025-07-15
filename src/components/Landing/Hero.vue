@@ -10,7 +10,8 @@ import { LINKS } from '@/constants/links'
           <img src="/logo-black.png" alt="" />
         </div>
         <div class="nav-links">
-          <RouterLink :to="LINKS.login" class="get-started-link">Dashboard</RouterLink>
+          <RouterLink :to="LINKS.demo" class="get-started-link">Demo</RouterLink>
+          <RouterLink :to="LINKS.login" class="dashboard-link">Dashboard</RouterLink>
         </div>
       </nav>
 
@@ -56,6 +57,20 @@ import { LINKS } from '@/constants/links'
     gap: 1rem;
 
     .get-started-link {
+      color: #000;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border: 1px solid #000;
+      border-radius: 0.375rem;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #3b82f6;
+        color: #fff;
+      }
+    }
+
+    .dashboard-link {
       color: #fff;
       font-weight: 600;
       background-color: #000;

@@ -1,6 +1,8 @@
 export const LINKS = {
   onboarding: '/onboarding',
   landing: '/',
+  demo: '/demo',
+  demo_program_details: (id: string) => `/demo/program/${id}`,
   home: '/dashboard',
   login: '/login',
   createProgram: '/dashboard/program/create',

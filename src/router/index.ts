@@ -13,6 +13,8 @@ import OrganizationView from '../views/OrganizationView.vue'
 import MyAccountView from '../views/MyAccountView.vue'
 import LandingView from '../views/LandingView.vue'
 import OrganizationMemberAccessView from '../views/OrganizationMemberAccessView.vue'
+import DemoView from '@/views/DemoView.vue'
+import DemoProgramDetailsView from '@/views/DemoProgramDetailsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -88,6 +90,16 @@ const router = createRouter({
       name: 'myAccount',
       component: MyAccountView,
       meta: { requiresAuth: true },
+    },
+    {
+      path: LINKS.demo,
+      name: 'demo',
+      component: DemoView,
+    },
+    {
+      path: LINKS.demo_program_details(':id'),
+      name: 'demoProgramDetails',
+      component: DemoProgramDetailsView,
     },
     // TODO: create 404
   ],
