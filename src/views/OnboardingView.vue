@@ -13,7 +13,7 @@ import { LINKS } from '@/constants/links'
 const authStore = useAuthStore()
 const router = useRouter()
 const isLoading = ref(false)
-const { mutateAsync: createUser, isPending, error } = useCreateUser(authStore.user?.uid ?? '')
+const { mutateAsync: createUser, isPending: createUserPending, error: createUserError } = useCreateUser(authStore.user?.uid ?? '')
 
 const userId = useAuthStore().user?.uid
 const { data: user, isLoading: userLoading, error: userError } = useUser(userId ?? '')
@@ -41,6 +41,7 @@ const confirmDetails = async () => {
     id: userId,
     name: authStore.user.displayName!,
     email: authStore.user.email!,
+    activeOrganizationId: userId,
     organizationIds: [userId], // TODO: only do this when they create organization
     createdAt: serverTimestamp() as Timestamp,
     updatedAt: serverTimestamp() as Timestamp,
@@ -82,11 +83,11 @@ const confirmDetails = async () => {
           Click the button below to confirm your details. This will create a TrackPlan account.
         </p>
 
-        <div v-if="error" class="error-message">{{ error }}</div>
+        <div v-if="createUserError" class="error-message">{{ createUserError }}</div>
 
         <div class="form-actions">
-          <button @click="confirmDetails" class="btn btn-primary" :disabled="isLoading">
-            <span v-if="isLoading">Confirming...</span>
+          <button @click="confirmDetails" class="btn btn-primary" :disabled="createUserPending || isLoading">
+            <span v-if="createUserPending">Confirming...</span>
             <span v-else>Yes, Continue to Dashboard</span>
           </button>
         </div>
@@ -127,7 +128,9 @@ const confirmDetails = async () => {
 }
 
 .user-avatar {
-  margin-bottom: 1.5rem;
+  margin: 1.5rem auto;
+  display: flex;
+  justify-content: center;
 
   .avatar {
     width: 80px;

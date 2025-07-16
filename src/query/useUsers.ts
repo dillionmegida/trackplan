@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/vue-query'
 import { db } from '@/configs/firebase'
-import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where, writeBatch, type DocumentReference } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, query, setDoc, Timestamp, updateDoc, where, writeBatch, type DocumentReference } from 'firebase/firestore'
 import type { UserType } from '@/types/User'
 import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
@@ -67,11 +67,24 @@ type UseCreateUserArgs = {
 export const useCreateUser = (authId: string) => {
   return useMutation({
     mutationFn: async ({ data }: UseCreateUserArgs) => {
+      const batch = writeBatch(db)
       const userRef = doc(db, 'users', data.id)
-      await setDoc(userRef, data)
+      batch.set(userRef, data)
+
+      const organizationRef = doc(db, 'organizations', data.id)
+      batch.set(organizationRef, {
+        id: data.id,
+        name: data.name,
+        createdAt: Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(new Date()),
+        createdBy: data.id,
+        updatedBy: data.id,
+      })
+
+      await batch.commit()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.user(authId) })
+      queryClient.invalidateQueries()
       onboardingLogger.confirmAccountSuccess()
     },
     onError: (error: CustomError) => {
@@ -111,7 +124,6 @@ export const useDeleteUser = () => {
         
         // Add each program document reference to the batch
         programSnapshot.docs.forEach((doc) => {
-          console.log(doc.data())
           programDocRefs.push(doc.ref)
         })
         
@@ -129,7 +141,8 @@ export const useDeleteUser = () => {
       await batch.commit()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.users() })
+      // invalidate all queries
+      queryClient.invalidateQueries()
       toast.success('User deleted successfully')
     },
     onError: (error) => {

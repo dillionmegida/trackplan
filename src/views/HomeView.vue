@@ -2,9 +2,7 @@
 import Layout from '@/components/Layout.vue'
 import { NOT_FOUND, useUser } from '@/query/useUsers'
 import { useAuthStore } from '@/stores/auth'
-import { computed, ref, watch, onMounted } from 'vue'
-import { useQueryClient } from '@tanstack/vue-query'
-import { onBeforeRouteLeave, onBeforeRouteUpdate, useRouter } from 'vue-router'
+import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useProgramsUserHasAccessTo } from '@/query/usePrograms'
 import { LINKS } from '@/constants/links'
@@ -19,7 +17,6 @@ import ClockIcon from '@/components/icons/ClockIcon.vue'
 import { QEURY_KEY } from '@/query/QueryKey'
 
 const router = useRouter()
-const queryClient = useQueryClient()
 const userId = useAuthStore().user?.uid
 const newAccount = router.currentRoute.value.query.new === 'true'
 
@@ -85,7 +82,7 @@ watch(user, () => {
     console.log('User not found')
     router.push({ name: 'onboarding' })
   }
-})
+}, { immediate: true })
 </script>
 
 

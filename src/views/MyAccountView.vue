@@ -84,6 +84,7 @@ const deleteUser = async () => {
     usersLogger.userDeleteSuccess()
     authLogger.userSignedOutSuccess()
     router.push(LINKS.landing)
+
   } catch (error: any) {
     console.error('Error signing out:', error)
     const customError = new CustomError(error.message, error.statusCode ?? 500)
