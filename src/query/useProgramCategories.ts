@@ -24,23 +24,6 @@ export const useProgramCategories = (programId: string) => {
   })
 }
 
-export const useDemoProgramCategories = (programId: string) => {
-  return useQuery({
-    queryKey: QEURY_KEY.programCategories(programId),
-    queryFn: async () => {
-      const programRef = doc(db, 'programs-demo', programId)
-      const categoriesRef = collection(programRef, 'categories')
-      const categoriesSnapshot = await getDocs(categoriesRef)
-      const categories = categoriesSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-      return categories as ProgramChecklistCategoryType[]
-    },
-    enabled: !!programId,
-  })
-}
-
 type UseCreateCategoryArgs = {
   programId: string
   data: Omit<ProgramChecklistCategoryType, 'id'>

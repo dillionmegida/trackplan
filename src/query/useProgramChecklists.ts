@@ -25,23 +25,6 @@ export const useProgramChecklists = (programId: string) => {
   })
 }
 
-export const useDemoProgramChecklists = (programId: string) => {
-  return useQuery({
-    queryKey: QEURY_KEY.programChecklists(programId),
-    queryFn: async () => {
-      const programRef = doc(db, 'programs-demo', programId)
-      const checklistsRef = collection(programRef, 'checklists')
-      const checklistsSnapshot = await getDocs(checklistsRef)
-      const checklists = checklistsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-      return checklists as ProgramChecklistItemType[]
-    },
-    enabled: !!programId,
-  })
-}
-
 type UseAddProgramChecklistArgs = {
   programId: string
   data: Omit<ProgramChecklistItemType, 'id'>

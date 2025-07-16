@@ -2,11 +2,8 @@
 import { computed, inject, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { format } from 'date-fns'
-import { useAddProgramToTrash, useDemoProgram } from '@/query/usePrograms'
-import EditIcon from '@/components/icons/EditIcon.vue'
 import { LINKS } from '@/constants/links'
 import BackIcon from '@/components/icons/BackIcon.vue'
-import { useDemoProgramChecklists, useProgramChecklists } from '@/query/useProgramChecklists'
 import ChecklistsForm from '@/components/DashboardProgram/ChecklistsForm.vue'
 import ChecklistsSection from '@/components/DashboardProgram/ChecklistsSection.vue'
 import TrashIcon from '@/components/icons/TrashIcon.vue'
@@ -22,30 +19,15 @@ import DemoChecklistsSection from '@/components/DashboardProgram/DemoChecklistsS
 import DemoChecklistsForm from '@/components/DashboardProgram/DemoChecklistsForm.vue'
 import type { ProgramChecklistItemType } from '@/types/ProgramChecklist'
 import ClockIcon from '@/components/icons/ClockIcon.vue'
+import { DEMO_PROGRAMS } from '@/constants/demoData'
+import type { Timestamp } from 'firebase/firestore'
 
 const router = useRouter()
 const route = useRoute()
 const programId = route.params.id as string
 
-const { data: program, isLoading: programLoading, error: programError } = useDemoProgram(programId)
-
-const {
-  data: checklists,
-  isLoading: checklistsLoading,
-  error: checklistsError,
-} = useDemoProgramChecklists(programId)
-
-const checklistsCopy = ref<ProgramChecklistItemType[]>([])
-
-watch(checklists, () => {
-  if (!checklists.value) return
-
-  checklistsCopy.value = checklists.value
-}, { immediate: true })
-
-const formatDate = (timestamp: any) => {
-  return format(timestamp.toDate(), 'MMMM d, yyyy')
-}
+const program = DEMO_PROGRAMS.find((program) => program.id === programId)
+const checklistsCopy = ref(program?.checklists)
 
 const howManyChecked = computed(() => {
   if (!checklistsCopy.value) {
@@ -88,8 +70,7 @@ const addChecklist = (c: ProgramChecklistItemType) => {
 <template>
   <DemoLayout>
     <div class="program-details">
-      <div class="container" v-if="programLoading || checklistsLoading">Loading...</div>
-      <div v-else-if="program && checklistsCopy.length">
+      <div>
         <div
           :style="{
             '--color': program.color,
@@ -112,7 +93,7 @@ const addChecklist = (c: ProgramChecklistItemType) => {
                 <div class="title-block">
                   <h1>{{ program.title }}</h1>
                 </div>
-                <p class="program-date"><ClockIcon :size="18" /> {{ formatDate(program.date) }}</p>
+                <p class="program-date"><ClockIcon :size="18" /> {{ format(new Date(program.date._seconds * 1000), 'PP') }}</p>
                 <p class="creaed-by">created by {{ demoUser.name }}</p>
               </div>
               <div class="progress">
@@ -152,6 +133,7 @@ const addChecklist = (c: ProgramChecklistItemType) => {
           <DemoChecklistsSection
             :themeColor="program.color ? getIntensity(program.color) > 20 ? program.color : '#000' : '#000'"
             :checklists="checklistsCopy"
+            :categories="program.categories"
             @update="(id,newValue) => updateChecklist(id, newValue)"
             @delete="deleteChecklist"
           />

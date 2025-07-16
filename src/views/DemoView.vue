@@ -12,23 +12,21 @@ import { getIntensity, getWhiteMixAmount } from '@/utils/color'
 import ClockIcon from '@/components/icons/ClockIcon.vue'
 import DemoLayout from '@/components/DemoLayout.vue'
 
-const { data: programs, isLoading: programsLoading, error: programsError } = useDemoPrograms()
+import { DEMO_PROGRAMS } from '@/constants/demoData'
 </script>
 
 
 <template>
   <DemoLayout>
     <main class="main-content container">
-      <p v-if="programsLoading">Loading...</p>
-      <p v-else-if="programsError">{{ programsError }}</p>
-      <div v-else>
+      <div>
         <div class="top-header">
           <h1>Programs</h1>
         </div>
         <section class="programs-section">
           <div class="programs-list">
             <RouterLink
-              v-for="program in programs"
+              v-for="program in DEMO_PROGRAMS"
               :key="program.id"
               :to="LINKS.demo_program_details(program.id)"
               :style="{
@@ -41,7 +39,7 @@ const { data: programs, isLoading: programsLoading, error: programsError } = use
               <div>
                 <span class="program-title">{{ program.title }}</span>
                 <span class="program-date">
-                  <ClockIcon :size="16" /> {{ format(program.date.toDate(), 'PP') }}</span
+                  <ClockIcon :size="16" /> {{ format(new Date(program.date._seconds * 1000), 'PP') }}</span
                 >
               </div>
               <div v-if="program.meta" class="progress">

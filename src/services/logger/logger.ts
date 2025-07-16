@@ -77,6 +77,7 @@ export const LoggerPlugin = {
   install: (app: App) => {
     app.config.globalProperties.$logger = logger
     app.config.errorHandler = (err: Error, vm: any, info: string) => {
+      console.log(err)
       const customError = new CustomError(err.message, 500)
 
       logger.error(

@@ -39,7 +39,6 @@ const iconColor = computed(() => {
       <component :is="icon" :size="20" :color="iconColor" />
     </div>
     <div class="content">
-      <div class="title" v-if="title">{{ title }}</div>
       <div class="message">{{ message }}</div>
     </div>
     <div class="action" v-if="$slots.action">

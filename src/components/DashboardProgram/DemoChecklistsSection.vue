@@ -1,9 +1,7 @@
 <script lang="ts" setup>
-import { useDemoProgramChecklists } from '@/query/useProgramChecklists'
 import { useRoute } from 'vue-router'
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import type { ProgramChecklistItemType } from '@/types/ProgramChecklist'
-import { useDemoProgramCategories } from '@/query/useProgramCategories'
 import { ref } from 'vue'
 import DemoChecklistItem from './DemoChecklistItem.vue'
 import type { ProgramChecklistCategoryType } from '@/types/ProgramChecklist'
@@ -11,25 +9,20 @@ import { addPlural, snakeToWordCase } from '@/utils/string'
 
 const emit = defineEmits(['update', 'delete'])
 
-const props = defineProps<{ themeColor: 'string'; checklists: ProgramChecklistItemType[] }>()
+const props = defineProps<{
+  themeColor: 'string'
+  checklists: ProgramChecklistItemType[]
+  categories: ProgramChecklistCategoryType[]
+}>()
+const categories = [...props.categories]
 
 const themeColor = props.themeColor || '#fff'
 
 const route = useRoute()
 const programId = route.params.id as string
 
-const { data: categories } = useDemoProgramCategories(programId)
-
-const categoriesCopy = ref<ProgramChecklistCategoryType[]>([])
-
-watch(categories, () => {
-  if (!categories.value) return
-
-  categoriesCopy.value = [...categories.value]
-}, { immediate: true })
-
 const groupedChecklists = computed(() => {
-  if (!props.checklists || !categoriesCopy.value) {
+  if (!props.checklists || !props.categories) {
     return {} as Record<
       string,
       {
@@ -39,7 +32,7 @@ const groupedChecklists = computed(() => {
     >
   }
 
-  const categoryMap = new Map(categoriesCopy.value.map((category) => [category.id, category.name]))
+  const categoryMap = new Map(categories.map((category) => [category.id, category.name]))
   const group: Record<
     string,
     {
@@ -52,7 +45,7 @@ const groupedChecklists = computed(() => {
   group['uncategorized'] = { unchecked: [], checked: [] }
 
   // Initialize all categories from the categories list to maintain order
-  const sortedCategories = [...categoriesCopy.value]
+  const sortedCategories = [...categories]
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach((category) => {
       group[category.name] = { unchecked: [], checked: [] }
@@ -100,8 +93,7 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
 
 
 <template>
-  <div v-if="!props.checklists.length || !categoriesCopy">Loading...</div>
-  <div v-else class="checklists-section" :style="{ '--theme-color': themeColor }">
+  <div class="checklists-section" :style="{ '--theme-color': themeColor }">
     <div
       v-for="(checklists, category) in groupedChecklists"
       :key="category"
