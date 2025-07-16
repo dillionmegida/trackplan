@@ -95,7 +95,7 @@ watch(user, () => {
       <p v-if="isLoading || organizationsLoading || programsLoading">Loading...</p>
       <p v-else-if="error">{{ error }}</p>
       <InfoBlock
-        v-else-if="!isUserPartOfActiveOrganization"
+        v-else-if="user?.activeOrganizationId && !isUserPartOfActiveOrganization"
         variant="error"
         :message="'You have been removed from your active organization. Please activate another organization by clicking your user icon in the top right corner.'"
       />
