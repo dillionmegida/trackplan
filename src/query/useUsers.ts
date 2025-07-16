@@ -126,10 +126,11 @@ export const useDeleteUser = () => {
       // Add user deletion to the batch
       batch.delete(userRef)
 
-      // await batch.commit()
+      await batch.commit()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QEURY_KEY.users() })
+      toast.success('User deleted successfully')
     },
     onError: (error) => {
       toast.error(error.message ?? 'Failed to delete user. Please try again.')

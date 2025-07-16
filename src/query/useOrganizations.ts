@@ -34,6 +34,7 @@ export const useCreateOrganization = () => {
     },
     onSuccess: ({ id }) => {
       queryClient.invalidateQueries({ queryKey: QEURY_KEY.organization(id) })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.organizationsForUser(id) })
     },
     onError: (error: any) => {
       toast.error('Failed to create organization. Please try again.')

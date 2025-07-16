@@ -3,7 +3,7 @@ import { Timestamp } from 'firebase/firestore'
 export enum LogLevel {
   INFO = 'info',
   WARNING = 'warning',
-  ERROR = 'error'
+  ERROR = 'error',
 }
 
 export enum LogAction {
@@ -12,7 +12,7 @@ export enum LogAction {
   USER_SIGNED_IN_FAILED = 'user_signed_in_failed',
   USER_SIGNED_OUT_SUCCESS = 'user_signed_out_success',
   USER_SIGNED_OUT_FAILED = 'user_signed_out_failed',
-  
+
   // Programs
   PROGRAM_FETCH_FAILED = 'program_fetch_failed',
   PROGRAM_FETCH_SUCCESS = 'program_fetch_success',
@@ -28,7 +28,7 @@ export enum LogAction {
   PROGRAM_TRASHED_FAILED = 'program_trashed_failed',
   PROGRAM_RESTORED_SUCCESS = 'program_restored_success',
   PROGRAM_RESTORED_FAILED = 'program_restore_failed',
-  
+
   // Organization
   ORGANIZATION_CREATED_SUCCESS = 'organization_created_success',
   ORGANIZATION_CREATED_FAILED = 'organization_created_failed',
@@ -40,18 +40,17 @@ export enum LogAction {
   MEMBER_REMOVED_FAILED = 'member_removed_failed',
   MEMBER_ADDED_TO_PROGRAM = 'member_added_to_program',
   MEMBER_ADDED_TO_PROGRAM_FAILED = 'member_added_to_program_failed',
-  
-  
+
   // System
   ERROR_OCCURRED = 'error_occurred',
   PERMISSION_DENIED = 'permission_denied',
-  
+
   // Auth
   USER_PASSWORD_RESET = 'user_password_reset',
-  
+
   // Program Actions
   PROGRAM_CREATION_FAILED = 'program_creation_failed',
-  
+
   // Page Visits
   PAGE_VISIT = 'page_visit',
 
@@ -62,13 +61,23 @@ export enum LogAction {
   // Invites
   INVITE_USER_TO_ORGANIZATION_SUCCESS = 'invite_user_to_organization_success',
   INVITE_USER_TO_ORGANIZATION_FAILED = 'invite_user_to_organization_failed',
+
+  // Users
+  USER_FETCH_FAILED = 'user_fetch_failed',
+  USER_FETCH_SUCCESS = 'user_fetch_success',
+  USER_CREATE_FAILED = 'user_create_failed',
+  USER_CREATE_SUCCESS = 'user_create_success',
+  USER_UPDATE_FAILED = 'user_update_failed',
+  USER_UPDATE_SUCCESS = 'user_update_success',
+  USER_DELETED_SUCCESS = 'user_deleted_success',
+  USER_DELETED_FAILED = 'user_deleted_failed',
 }
 
 export type LogEntry = {
   id: string
   level: LogLevel
   action: LogAction
-  targetType: "program" | "organization" | "user" | "system"
+  targetType: 'program' | 'organization' | 'user' | 'system'
   message: string
   metadata?: Record<string, any>
   createdAt: Date

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useUser } from '@/query/useUsers'
+import { useDeleteUser, useUser } from '@/query/useUsers'
 import { useOrganizationsForUser } from '@/query/useOrganizations'
 import { useSelectActiveOrganization } from '@/query/useOrganizations'
 import Layout from '@/components/Layout.vue'
@@ -10,6 +10,12 @@ import { format } from 'date-fns'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import NoOrganizationsYet from '@/components/NoOrganizationsYet.vue'
+import { usersLogger } from '@/services/logger/usersLogger'
+import { authLogger } from '@/services/logger/authLogger'
+import { CustomError } from '@/utils/error'
+import { signOut } from 'firebase/auth'
+import { auth } from '@/configs/firebase'
+
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -60,6 +66,31 @@ const selectOrganization = async (orgId: string) => {
 
   await selectActiveOrg({ organizationId: orgId })
   toast.success('Organization switched successfully')
+}
+
+const { mutateAsync: deleteUserMutation, isPending: isDeletingUser } = useDeleteUser()
+
+const deleteUser = async () => {
+  if (!userId) return
+
+  const decision = window.confirm('Are you sure you want to delete your account?')
+
+  if (!decision) return
+
+  await deleteUserMutation(userId)
+
+  try {
+    await signOut(auth)
+    usersLogger.userDeleteSuccess()
+    authLogger.userSignedOutSuccess()
+    router.push(LINKS.landing)
+  } catch (error: any) {
+    console.error('Error signing out:', error)
+    const customError = new CustomError(error.message, error.statusCode ?? 500)
+    toast.error('Failed to delete account. Please try again.')
+    usersLogger.userDeleteFailed(customError)
+    authLogger.userSignedOutFailed(customError)
+  }
 }
 </script>
 
@@ -156,7 +187,9 @@ const selectOrganization = async (orgId: string) => {
             If you're sure you want to proceed, please click the button below to delete your
             account.
           </p>
-          <button class="delete-account-btn">Delete My Account</button>
+          <button @click="deleteUser" :disabled="isDeletingUser" class="delete-account-btn">
+            {{ isDeletingUser ? 'Deleting your account...' : 'Delete My Account' }}
+          </button>
         </div>
       </div>
     </div>
