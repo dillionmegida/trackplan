@@ -5,7 +5,6 @@ export const demoUser: UserType = {
   id: 'demo',
   name: 'Demo User',
   email: 'demo@trackplan.com',
-  organizationIds: ['demo'],
   activeOrganizationId: 'demo',
   createdAt: serverTimestamp() as Timestamp,
   updatedAt: serverTimestamp() as Timestamp,

@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { serverTimestamp } from 'firebase/firestore'
 import Layout from '@/components/Layout.vue'
-import { NOT_FOUND, useCreateUser, useUser } from '@/query/useUsers'
+import { NOT_FOUND, useOnboardUser, useUser } from '@/query/useUsers'
 import type { UserType } from '@/types/User'
 import { Timestamp } from 'firebase/firestore'
 import { toast } from 'vue3-toastify'
@@ -13,7 +13,11 @@ import { LINKS } from '@/constants/links'
 const authStore = useAuthStore()
 const router = useRouter()
 const isLoading = ref(false)
-const { mutateAsync: createUser, isPending: createUserPending, error: createUserError } = useCreateUser(authStore.user?.uid ?? '')
+const {
+  mutateAsync: onboardUser,
+  isPending: onboardingPending,
+  error: onboardingError,
+} = useOnboardUser()
 
 const userId = useAuthStore().user?.uid
 const { data: user, isLoading: userLoading, error: userError } = useUser(userId ?? '')
@@ -42,13 +46,12 @@ const confirmDetails = async () => {
     name: authStore.user.displayName!,
     email: authStore.user.email!,
     activeOrganizationId: userId,
-    organizationIds: [userId], // TODO: only do this when they create organization
     createdAt: serverTimestamp() as Timestamp,
     updatedAt: serverTimestamp() as Timestamp,
     onboarded: true,
   }
 
-  await createUser({ data: userObj })
+  await onboardUser({ data: userObj })
   router.push(LINKS.home + '?new=true')
 }
 </script>
@@ -83,11 +86,15 @@ const confirmDetails = async () => {
           Click the button below to confirm your details. This will create a TrackPlan account.
         </p>
 
-        <div v-if="createUserError" class="error-message">{{ createUserError }}</div>
+        <div v-if="onboardingError" class="error-message">{{ onboardingError }}</div>
 
         <div class="form-actions">
-          <button @click="confirmDetails" class="btn btn-primary" :disabled="createUserPending || isLoading">
-            <span v-if="createUserPending">Confirming...</span>
+          <button
+            @click="confirmDetails"
+            class="btn btn-primary"
+            :disabled="onboardingPending || isLoading"
+          >
+            <span v-if="onboardingPending">Confirming...</span>
             <span v-else>Yes, Continue to Dashboard</span>
           </button>
         </div>

@@ -7,4 +7,5 @@ export type OrganizationType = {
   updatedAt: Timestamp
   createdBy: string
   updatedBy: string
+  memberIds: string[]
 }

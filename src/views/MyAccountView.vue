@@ -65,7 +65,7 @@ const selectOrganization = async (orgId: string) => {
   if (!userId) return
 
   await selectActiveOrg({ organizationId: orgId })
-  toast.success('Organization switched successfully')
+  location.reload()
 }
 
 const { mutateAsync: deleteUserMutation, isPending: isDeletingUser } = useDeleteUser()

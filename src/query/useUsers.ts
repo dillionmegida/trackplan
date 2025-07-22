@@ -60,13 +60,13 @@ export const useUpdateUser = () => {
   })
 }
 
-type UseCreateUserArgs = {
+type UseOnboardUserArgs = {
   data: UserType
 }
 
-export const useCreateUser = (authId: string) => {
+export const useOnboardUser = () => {
   return useMutation({
-    mutationFn: async ({ data }: UseCreateUserArgs) => {
+    mutationFn: async ({ data }: UseOnboardUserArgs) => {
       const batch = writeBatch(db)
       const userRef = doc(db, 'users', data.id)
       batch.set(userRef, data)
@@ -79,6 +79,7 @@ export const useCreateUser = (authId: string) => {
         updatedAt: Timestamp.fromDate(new Date()),
         createdBy: data.id,
         updatedBy: data.id,
+        memberIds: [data.id],
       })
 
       await batch.commit()

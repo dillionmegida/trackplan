@@ -155,6 +155,7 @@ export const useCreateProgram = () => {
     onSuccess: ({ organizationId }) => {
       toast.success('Program created successfully')
       queryClient.invalidateQueries({ queryKey: QEURY_KEY.programsForUser(organizationId) })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programsForOrganization(organizationId) })
       programsLogger.programCreationSuccess()
     },
     onError: (error) => {
@@ -192,6 +193,7 @@ export const useUpdateProgram = () => {
       toast.success('Program updated successfully')
       queryClient.invalidateQueries({ queryKey: QEURY_KEY.program(id) })
       queryClient.invalidateQueries({ queryKey: QEURY_KEY.programsForUser(organizationId) })
+      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programsForOrganization(organizationId) })
     },
     onError: (error: CustomError) => {
       toast.error(error.message ?? 'Failed to update program. Please try again.')

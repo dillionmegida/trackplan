@@ -65,19 +65,13 @@ export const useOrganizationsForUser = (userId: string) => {
     queryFn: async () => {
       const userRef = doc(db, 'users', userId)
 
-      const userData = await checkIfDocExists<UserType>({
+      await checkIfDocExists<UserType>({
         docRef: userRef,
         errorMsg: 'User not found',
       })
 
-      const organizationIds = userData.organizationIds || []
-
-      if (organizationIds.length === 0) {
-        return []
-      }
-
       const organizationsRef = collection(db, 'organizations')
-      const q = query(organizationsRef, where('id', 'in', organizationIds))
+      const q = query(organizationsRef, where('memberIds', 'array-contains', userId))
       const organizationsSnapshot = await getDocs(q)
 
       const organizations = organizationsSnapshot.docs.map((doc) => ({
@@ -146,9 +140,11 @@ export const useMembersInOrganization = (organizationId: string) => {
         errorMsg: 'Organization not found',
       })
 
-      // get all users where their organizationIds include the current organization
+      const organizationData = (await getDoc(organizationRef)).data() as OrganizationType;
+
+      // get all members from organization memberIds
       const usersRef = collection(db, 'users')
-      const q = query(usersRef, where('organizationIds', 'array-contains', organizationId))
+      const q = query(usersRef, where("id", 'in', organizationData.memberIds))
       const usersSnapshot = await getDocs(q)
 
       const users = usersSnapshot.docs.map((doc) => ({
@@ -201,8 +197,7 @@ export const useRemoveMemberFromOrganization = (organizationId: string) => {
         batch.update(programDoc.ref, { memberIds: arrayRemove(userId) })
       })
 
-      const organizationIds = userData.organizationIds.filter((id: string) => id !== organizationId)
-      batch.update(userRef, { organizationIds })
+      batch.update(organizationRef, { memberIds: arrayRemove(userId) })
 
       await batch.commit()
     },

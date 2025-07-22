@@ -19,6 +19,7 @@ import { queryClient } from '@/configs/react-query'
 import { authorizedToUpdateProgram, checkIfDocExists } from '@/helpers/firebase'
 import type { UserType } from '@/types/User'
 import { QEURY_KEY } from './QueryKey'
+import type { OrganizationType } from '@/types/Organization'
 
 export function useProgramsUserHasAccessTo(memberId: string) {
   const auth = useAuthStore()
@@ -59,14 +60,13 @@ export function useUpdateOrganizationMemberAccess() {
     }) => {
       if (!auth.user) throw new Error('User not authenticated')
 
-      const userRef = doc(db, 'users', memberId)
-
-      const userData = await checkIfDocExists<UserType>({
-        docRef: userRef,
-        errorMsg: 'User is not a member of this organization',
+      const organizationRef = doc(db, 'organizations', organizationId)
+      const organizationData = await checkIfDocExists<OrganizationType>({
+        docRef: organizationRef,
+        errorMsg: 'Organization not found',
       })
 
-      if (!userData.organizationIds.includes(organizationId)) {
+      if (!organizationData.memberIds.includes(memberId)) {
         throw new Error('User is not a member of this organization')
       }
 

@@ -2,6 +2,7 @@
 import type { OrganizationType } from '@/types/Organization'
 import type { UserType } from '@/types/User'
 import OrganizationMemberCard from './OrganizationMemberCard.vue'
+import NoContent from '@/components/NoContent.vue'
 
 const props = defineProps<{
   members: UserType[]
@@ -41,7 +42,10 @@ props.members.forEach((member) => {
         </div>
       </div>
     </div>
-    <div class="members-category">
+    <NoContent v-if="membersObj.members.length === 0">
+      No members found in this organization.
+    </NoContent>
+    <div v-else class="members-category">
       <h3>Members</h3>
       <div class="members-list">
         <OrganizationMemberCard

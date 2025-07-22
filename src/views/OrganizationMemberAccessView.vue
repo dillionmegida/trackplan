@@ -54,8 +54,11 @@ async function updateAccess(programId: string, checked: boolean) {
           <p>What programs do you want "{{ member?.name }}" to have access to?</p>
         </div>
 
+        <div v-if="programsForOrganization?.length === 0" class="no-programs">
+          You do not have any programs in this organization.
+        </div>
 
-        <div class="programs-list">
+        <div v-else class="programs-list">
           <div v-for="program in programsForOrganization" :key="program.id" class="program-item">
             <div class="program-info">
               <span class="program-title">{{ program.title }}</span>
@@ -110,6 +113,17 @@ async function updateAccess(programId: string, checked: boolean) {
       color: #64748b;
     }
   }
+
+  .no-programs {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  border: 1px solid #d3d9e2;
+  margin: 2rem 0;
+}
 
   .loading {
     text-align: center;

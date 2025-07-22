@@ -28,18 +28,12 @@ const {
 
 const authStore = useAuthStore()
 
-const { data: user, isLoading: userLoading, error: userError } = useUser(authStore.user?.uid || '')
-
 const userHasAccess = computed(() => {
-  if (programLoading.value || userLoading.value || organizationLoading.value) return 'loading'
+  if (programLoading.value || organizationLoading.value) return 'loading'
+  if (programError.value || !program.value) return 'noAccess'
+  if (!organization.value) return 'noAccess'
 
-  if (programError.value || userError.value || !program.value) return 'noAccess'
-
-  const userOrganizationIds = user.value?.organizationIds
-  if (!userOrganizationIds || !userOrganizationIds.length || user.value?.name === NOT_FOUND)
-    return 'noAccess'
-
-  return userOrganizationIds.includes(program.value.organizationId) ? 'hasAccess' : 'noAccess'
+  return organization.value.memberIds.includes(authStore.user?.uid || '') ? 'hasAccess' : 'noAccess'
 })
 
 provide('program', program)

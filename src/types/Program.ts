@@ -11,7 +11,7 @@ export type ProgramType = {
   updatedBy: string
   updatedAt: Timestamp
   trashDate: Timestamp | null
-  color?: string
+  color: string
   memberIds: string[]
   meta: {
     totalItems: number

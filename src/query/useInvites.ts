@@ -18,6 +18,7 @@ import { CustomError } from '@/utils/error'
 import { checkIfDocExists } from '@/helpers/firebase'
 import type { OrganizationType } from '@/types/Organization'
 import { QEURY_KEY } from './QueryKey'
+import type { UserType } from '@/types/User'
 
 export type InviteUserArgs = {
   email: string
@@ -34,6 +35,7 @@ export const useInviteUser = (organizationId: string) => {
         errorMsg: 'Organization not found',
       })
 
+      const organizationData = (await getDoc(organizationRef)).data() as OrganizationType;
 
       const usersRef = collection(db, 'users')
       const q = query(usersRef, where('email', '==', email))
@@ -43,17 +45,15 @@ export const useInviteUser = (organizationId: string) => {
         throw new Error('This email does not exist')
       }
 
-      const user = userSnapshot.docs[0].data()
+      const user = userSnapshot.docs[0].data() as UserType;
 
-      if (user.organizationIds.includes(organizationId)) {
+      if (organizationData.memberIds.includes(user.id)) {
         throw new Error('This user is already a member of this organization')
       }
 
-      const userRef = doc(db, 'users', user.id)
+      const memberIds = [...organizationData.memberIds, user.id]
 
-      const organizationIds = [...user.organizationIds, organizationId]
-
-      await updateDoc(userRef, { organizationIds })
+      await updateDoc(organizationRef, { memberIds })
 
       return user.id
     },

@@ -28,25 +28,34 @@ if (newAccount) {
 
 const { data: user, isLoading, error } = useUser(userId ?? '')
 
-const organizationId = computed(() => {
-  if (!user.value) return
-  if (user.value.name === NOT_FOUND) return ''
-  if (!user.value.organizationIds.includes(user.value.activeOrganizationId)) return ''
-
-  return user.value.activeOrganizationId
-})
-
-const isUserPartOfActiveOrganization = computed(() => {
-  if (!user.value) return false
-
-  return user.value.organizationIds.includes(user.value.activeOrganizationId)
-})
-
 const {
   data: organizations,
   isLoading: organizationsLoading,
   error: organizationsError,
 } = useOrganizationsForUser(userId ?? '')
+
+const organizationId = computed(() => {
+  if (!user.value) return
+  if (user.value.name === NOT_FOUND) return ''
+  if (!organizations.value) return
+
+  const activeOrganization = organizations.value.find((org) => org.id === user.value.activeOrganizationId)
+
+  if (!activeOrganization) return ''
+
+  return activeOrganization.id
+})
+
+const isUserPartOfActiveOrganization = computed(() => {
+  if (!user.value) return false
+  if (!organizations.value) return false
+
+  const activeOrganization = organizations.value.find((org) => org.id === user.value.activeOrganizationId)
+
+  return !!activeOrganization
+})
+
+
 const {
   data: programs,
   isLoading: programsLoading,
@@ -97,6 +106,7 @@ watch(user, () => {
         :message="'You have been removed from your active organization. Please activate another organization by clicking your user icon in the top right corner.'"
       />
       <p v-else-if="user?.name === NOT_FOUND">Redirecting to onboarding...</p>
+      <p v-else-if="!user">Unable to load user</p>
       <NoOrganizationsYet v-else-if="organizations?.length === 0" :user="user" />
       <div v-else-if="!user?.activeOrganizationId" class="organizations">
         <div class="organization">
