@@ -7,6 +7,7 @@ import { queryClient } from '@/configs/react-query'
 import { calculateProgramMeta } from '@/utils/programMeta'
 import { checkIfDocExists } from '@/helpers/firebase'
 import { QEURY_KEY } from './QueryKey'
+import { updateItemInChecklistsQueryData } from '@/helpers/queryData'
 
 export const useProgramChecklists = (programId: string) => {
   return useQuery({
@@ -101,14 +102,14 @@ export const useUpdateProgramChecklistItem = () => {
 
       await updateDoc(checklistRef, checklistItemObj)
       calculateProgramMeta(programId)
-      return { programId, checklistId }
+      return { programId, checklistId, checklistItemObj }
     },
     onError: (error) => {
       const errorMsg = error.message ?? 'Failed to update checklist item. Please try again.'
       toast.error(errorMsg)
     },
-    onSuccess: ({ programId }) => {
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programChecklists(programId) })
+    onSuccess: ({ programId, checklistId, checklistItemObj }) => {
+      updateItemInChecklistsQueryData(checklistId, programId, checklistItemObj)
     },
   })
 }

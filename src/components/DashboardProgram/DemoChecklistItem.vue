@@ -4,7 +4,6 @@ import CheckIcon from '@/components/icons/CheckIcon.vue'
 import { ref, defineEmits, nextTick } from 'vue'
 import type { ProgramChecklistItemType } from '@/types/ProgramChecklist'
 import EditIcon from '../icons/EditIcon.vue'
-import { useUpdateProgramChecklistItem } from '@/query/useProgramChecklists'
 import LoaderIcon from '../icons/LoaderIcon.vue'
 import EllipsisVerticalIcon from '../icons/EllipsisVerticalIcon.vue'
 
