@@ -285,6 +285,9 @@ export const useRestoreProgramFromTrash = () => {
     onSuccess: ({ organizationId }) => {
       toast.success('Program restored successfully')
       queryClient.invalidateQueries({ queryKey: QEURY_KEY.programsForUser(organizationId) })
+      queryClient.invalidateQueries({
+        queryKey: QEURY_KEY.trashedProgramsForOrganization(organizationId),
+      })
     },
     onError: (error: CustomError) => {
       toast.error('Failed to restore program. Please try again.')

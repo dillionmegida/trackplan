@@ -15,6 +15,7 @@ import {
 import { useUser } from '@/query/useUsers'
 import { LINKS } from '@/constants/links'
 import BackIcon from '@/components/icons/BackIcon.vue'
+import ProgramItem from '@/components/TrashedPrograms/ProgramItem.vue'
 
 const authStore = useAuthStore()
 
@@ -35,22 +36,6 @@ const {
   isLoading: trashedProgramsLoading,
   error: trashedProgramsError,
 } = useTrashedProgramsForOrganization(organizationId, authStore.user?.uid ?? '')
-
-const restoreProgram = async (programId: string) => {}
-
-const permanentlyDeleteProgram = async (programId: string) => {
-  if (
-    !confirm(
-      'Are you sure you want to permanently delete this program? This action cannot be undone.'
-    )
-  ) {
-    return
-  }
-}
-
-const formatDate = (date: Timestamp) => {
-  return format(date.toDate(), 'MMM d, yyyy')
-}
 </script>
 
 <template>
@@ -77,20 +62,7 @@ const formatDate = (date: Timestamp) => {
         <p>No programs in trash</p>
       </div>
       <div v-else class="trash-list">
-        <div v-for="program in trashedProgramsData" :key="program.id" class="trash-item">
-          <div class="program-info">
-            <h3>{{ program.title }}</h3>
-            <p class="date">Deleted on {{ formatDate(program.trashDate) }}</p>
-          </div>
-          <div class="actions">
-            <button class="btn-restore" :disabled="restoreProgramPending">
-              {{ restoreProgramPending ? 'Restoring...' : 'Restore' }}
-            </button>
-            <button class="btn-delete" :disabled="deleteProgramPending">
-              {{ deleteProgramPending ? 'Deleting...' : 'Delete Permanently' }}
-            </button>
-          </div>
-        </div>
+        <ProgramItem v-for="program in trashedProgramsData" :key="program.id" :program="program" />
       </div>
     </div>
   </Layout>
@@ -136,18 +108,7 @@ const formatDate = (date: Timestamp) => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-.trash-item {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 0 0 10rem;
 }
 
 .program-info h3 {
@@ -159,46 +120,6 @@ const formatDate = (date: Timestamp) => {
   color: #64748b;
   font-size: 0.875rem;
   margin: 0;
-}
-
-.actions {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.btn-restore,
-.btn-delete {
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-restore {
-  background: #f0f9ff;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
-}
-
-.btn-restore:hover {
-  background: #e0f2fe;
-}
-
-.btn-delete {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-}
-
-.btn-delete:hover {
-  background: #fee2e2;
-}
-
-.btn-restore:disabled,
-.btn-delete:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .empty-state,
