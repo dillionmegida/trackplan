@@ -21,3 +21,27 @@ export function updateItemInChecklistsQueryData(
     },
   )
 }
+
+export function addItemToChecklistsQueryData(
+  checklistItemObj: ProgramChecklistItemType,
+  programId: string,
+) {
+  queryClient.setQueryData(
+    QEURY_KEY.programChecklists(programId),
+    (oldData: ProgramChecklistItemType[]) => {
+      return [...oldData, checklistItemObj]
+    },
+  )
+}
+
+export function removeItemFromChecklistsQueryData(
+  checklistId: string,
+  programId: string,
+) {
+  queryClient.setQueryData(
+    QEURY_KEY.programChecklists(programId),
+    (oldData: ProgramChecklistItemType[]) => {
+      return oldData.filter((checklist) => checklist.id !== checklistId)
+    },
+  )
+}
