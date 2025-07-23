@@ -16,8 +16,7 @@ const auth = useAuthStore()
 const organizationId = route.params.organizationId as string
 const memberId = route.params.memberId as string
 
-const { data: programsForOrganization, isLoading: programsForOrganizationLoading } = useProgramsForOrganization(organizationId)
-const { data: programsUserHasAccessTo, isLoading: programsUserHasAccessToLoading } = useProgramsUserHasAccessTo(memberId)
+const { data: programsForOrganization, isLoading: programsForOrganizationLoading } = useProgramsForOrganization(organizationId, auth.user?.uid as string)
 const { mutateAsync: updateMemberAccess, isPending: updateMemberAccessPending } = useUpdateOrganizationMemberAccess()
 const { data: members } = useMembersInOrganization(organizationId)
 
@@ -42,7 +41,7 @@ async function updateAccess(programId: string, checked: boolean) {
 <template>
   <Layout>
     <div class="organization-member-access container">
-      <div v-if="programsForOrganizationLoading || programsUserHasAccessToLoading">Loading...</div>
+      <div v-if="programsForOrganizationLoading">Loading...</div>
       <div v-else-if="!member">Member not found</div>
       <div v-else>
         <div class="header">

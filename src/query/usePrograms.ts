@@ -70,6 +70,7 @@ export const useProgramsUserHasAccessTo = ({
 
 export const useProgramsForOrganization = (
   organizationId: MaybeRefOrGetter<string | undefined | null>,
+  authUserId: string,
 ) => {
   return useQuery({
     queryKey: QEURY_KEY.programsForOrganization(toValue(organizationId) as string),
@@ -80,7 +81,7 @@ export const useProgramsForOrganization = (
       const programsRef = collection(db, 'programs')
       const q = query(
         programsRef,
-        and(where('organizationId', '==', orgId), where('trashDate', '==', null)),
+        and(where('organizationId', '==', orgId), where('trashDate', '==', null), where('createdBy', '==', authUserId)),
       )
 
       const programsData = await getDocsData<ProgramType>(q)
