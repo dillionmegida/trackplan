@@ -78,8 +78,8 @@ const formatDate = (date: Timestamp) => {
             <p class="date">Deleted on {{ formatDate(program.trashDate) }}</p>
           </div>
           <div class="actions">
-            <button class="btn-restore" :disabled="restoreProgramPending">Restore</button>
-            <button class="btn-delete" :disabled="deleteProgramPending">Delete Permanently</button>
+            <button class="btn-restore" :disabled="restoreProgramPending">{{ restoreProgramPending ? 'Restoring...' : 'Restore' }}</button>
+            <button class="btn-delete" :disabled="deleteProgramPending">{{ deleteProgramPending ? 'Deleting...' : 'Delete Permanently' }}</button>
           </div>
         </div>
       </div>

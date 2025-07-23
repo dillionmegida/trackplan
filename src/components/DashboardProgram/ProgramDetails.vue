@@ -80,7 +80,10 @@ const userHasAccess = computed(() => {
     return false
   }
 
-  return program.value.memberIds?.includes(authStore.user.uid) || authStore.user.uid === program.value.createdBy
+  return (
+    program.value.memberIds?.includes(authStore.user.uid) ||
+    authStore.user.uid === program.value.createdBy
+  )
 })
 </script>
 
@@ -89,12 +92,18 @@ const userHasAccess = computed(() => {
     <div class="container" v-if="!userHasAccess">
       <InfoBlock variant="error" message="You do not have access to this program." />
     </div>
-    <div v-else-if="program && checklists && user" class="program-content">
-      <div :style="{
-        '--color': program.color,
-        '--white-level': getWhiteMixAmount(program.color) + '%',
-        '--dark-color': getIntensity(program.color) > 20 ? program.color : '#333',
-      }" class="program-content">
+    <div class="container" v-if="userError">
+      <InfoBlock variant="error" message="Something went wrong." />
+    </div>
+    <div v-else-if="program" class="program-content">
+      <div
+        :style="{
+          '--color': program.color,
+          '--white-level': getWhiteMixAmount(program.color) + '%',
+          '--dark-color': getIntensity(program.color) > 20 ? program.color : '#333',
+        }"
+        class="program-content"
+      >
         <div class="container">
           <RouterLink class="back-link" :to="LINKS.home">
             <BackIcon /> Back to Programs
@@ -104,11 +113,19 @@ const userHasAccess = computed(() => {
               <div class="title-block">
                 <h1>{{ program.title }}</h1>
 
-                <RouterLink v-if="shouldBeAbleToEditProgram" :to="LINKS.program_edit(program.id)" class="edit-program">
+                <RouterLink
+                  v-if="shouldBeAbleToEditProgram"
+                  :to="LINKS.program_edit(program.id)"
+                  class="edit-program"
+                >
                   <EditIcon :size="24" />
                 </RouterLink>
-                <button class="delete-program" @click="deleteProgram(program.id)" :disabled="addProgramToTrashPending"
-                  v-if="shouldBeAbleToDeleteProgram">
+                <button
+                  class="delete-program"
+                  @click="deleteProgram(program.id)"
+                  :disabled="addProgramToTrashPending"
+                  v-if="shouldBeAbleToDeleteProgram"
+                >
                   <TrashIcon :size="24" />
                 </button>
               </div>
@@ -116,9 +133,12 @@ const userHasAccess = computed(() => {
               <p class="creaed-by">created by {{ user.name }}</p>
             </div>
             <div class="progress">
-              <ve-progress :size="80" :progress="(howManyChecked / (checklists?.length || 1)) * 100"
+              <ve-progress
+                :size="80"
+                :progress="(howManyChecked / (checklists?.length || 1)) * 100"
                 :color="getIntensity(program.color) > 230 ? '#333' : program.color"
-                :empty-color="getIntensity(program.color) < 20 ? '#000' : '#fff'">
+                :empty-color="getIntensity(program.color) < 20 ? '#000' : '#fff'"
+              >
                 {{ howManyChecked }} / {{ checklists?.length }}
               </ve-progress>
             </div>
@@ -133,10 +153,23 @@ const userHasAccess = computed(() => {
           <ChecklistsForm />
         </div>
 
-        <ChecklistsSection :themeColor="getIntensity(program.color) > 20 ? program.color : '#000'"
-          :organizationId="organization.id" />
-        <div v-if="checklists?.length === 0" class="no-checklists">
-          You have no checklist items yet. Create one above.
+        <div v-if="checklistsError">
+          <InfoBlock variant="error" message="Something went wrong while loading the checklists." />
+        </div>
+
+        <div v-else-if="checklistsLoading">
+          Loading checklists...
+        </div>
+
+        <div v-else-if="checklists">
+          <div v-if="checklists?.length === 0" class="no-checklists">
+            You have no checklist items yet. Create one above.
+          </div>
+          <ChecklistsSection
+            v-else
+            :themeColor="getIntensity(program.color) > 20 ? program.color : '#000'"
+            :organizationId="organization.id"
+          />
         </div>
       </div>
     </div>
@@ -144,7 +177,8 @@ const userHasAccess = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-.program-details {}
+.program-details {
+}
 
 .checklist-form {
   margin-bottom: 2rem;
@@ -238,7 +272,8 @@ const userHasAccess = computed(() => {
   row-gap: 0.5rem;
   flex-wrap: wrap;
 
-  .progress {}
+  .progress {
+  }
 }
 
 .info-item {

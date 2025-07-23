@@ -99,8 +99,11 @@ const deleteUser = async () => {
   <Layout>
     <div class="user-view container">
       <div v-if="userLoading || organizationsLoading" class="loading">Loading user...</div>
-      <div v-else-if="userError || organizationsError" class="error">
-        Error loading user: {{ userError?.message || organizationsError?.message }}
+      <div v-else-if="userError" class="error">
+        Error loading user: {{ userError?.message }}
+      </div>
+      <div v-else-if="organizationsError" class="error">
+        Error loading organizations: {{ organizationsError?.message }}
       </div>
       <div v-else-if="!user" class="empty-state">
         <p>User not found</p>

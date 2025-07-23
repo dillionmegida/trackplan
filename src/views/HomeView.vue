@@ -55,7 +55,6 @@ const isUserPartOfActiveOrganization = computed(() => {
   return !!activeOrganization
 })
 
-
 const {
   data: programs,
   isLoading: programsLoading,
