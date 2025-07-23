@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import CloseIcon from '@/components/icons/CloseIcon.vue'
 import CheckIcon from '@/components/icons/CheckIcon.vue'
 import { ref, defineEmits, nextTick } from 'vue'
 import type { ProgramChecklistItemType } from '@/types/ProgramChecklist'
@@ -8,7 +7,11 @@ import { useUpdateProgramChecklistItem } from '@/query/useProgramChecklists'
 import LoaderIcon from '../icons/LoaderIcon.vue'
 import EllipsisVerticalIcon from '../icons/EllipsisVerticalIcon.vue'
 
-const props = defineProps<{ checklist: ProgramChecklistItemType; programId: string }>()
+const props = defineProps<{ 
+  checklist: ProgramChecklistItemType; 
+  programId: string;
+  categories: Array<{ id: string; name: string }>;
+ }>()
 
 const emit = defineEmits(['delete', 'update'])
 
@@ -74,6 +77,23 @@ const onBlur = async () => {
 }
 
 const showModal = ref(true)
+
+const handleCategoryChange = async (event: Event) => {
+  const select = event.target as HTMLSelectElement
+  const categoryId = select.value === '' ? null : select.value
+  
+  await updateProgramChecklistItemMutation({
+    programId: props.programId,
+    checklistId: props.checklist.id,
+    checklistItemObj: {
+      ...props.checklist,
+      categoryId
+    },
+  })
+  
+  // Reset to default to allow selecting the same category again
+  select.value = ''
+}
 </script>
 
 <template>
@@ -119,23 +139,46 @@ const showModal = ref(true)
       ></textarea>
     </div>
 
-    <VDropdown :distance="-6" placement="top-end">
-      <button class="dropdown-trigger">
-        <EllipsisVerticalIcon :size="20" color="#64748b" />
-      </button>
+    <div class="dropdown-container">
+      <VDropdown :distance="-6" placement="top-end">
+        <button class="dropdown-trigger">
+          <EllipsisVerticalIcon :size="20" color="#64748b" />
+        </button>
 
-      <template #popper>
-        <div class="actions">
-          <button
-            type="button"
-            :disabled="deleteChecklistPending || updateProgramChecklistItemPending || isEditing"
-            @click="onDelete"
-          >
-            Delete
-          </button>
-        </div>
-      </template>
-    </VDropdown>
+        <template #popper>
+          <div class="actions">
+            <div class="category-select">
+              <label class="select-label">Move to:</label>
+              <select 
+                class="category-select-element"
+                :value="props.checklist.categoryId || ''"
+                @change="handleCategoryChange"
+                :disabled="updateProgramChecklistItemPending || isEditing"
+              >
+                <option value="" disabled>Select a category</option>
+                <option :value="null">No Category</option>
+                <option 
+                  v-for="category in props.categories" 
+                  :key="category.id" 
+                  :value="category.id"
+                  :selected="props.checklist.categoryId === category.id"
+                >
+                  {{ category.name }}
+                </option>
+              </select>
+            </div>
+            <button
+              type="button"
+              class="action-button delete-button"
+              :disabled="deleteChecklistPending || updateProgramChecklistItemPending || isEditing"
+              @click="onDelete"
+            >
+              Delete
+            </button>
+          </div>
+        </template>
+      </VDropdown>
+    </div>
   </div>
 </template>
 
@@ -225,17 +268,68 @@ const showModal = ref(true)
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 180px;
+  padding: 0.5rem 0;
+  
+  .category-select {
+    padding: 0 0.5rem;
+    margin-bottom: 0.25rem;
+    
+    .select-label {
+      display: block;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-bottom: 0.25rem;
+    }
+    
+    .category-select-element {
+      width: 100%;
+      padding: 0.4rem 0.5rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background-color: white;
+      cursor: pointer;
+      
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      &:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 1px #3b82f6;
+      }
+    }
+  }
 
-  button {
+  .action-button {
     padding: 0.5rem 1rem;
-    font-size: 1rem;
-    background: #f8fafc;
-    color: #64748b;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
     &:hover {
-      background-color: #d5dee7;
-      color: #1e293b;
+      background-color: #f1f5f9;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    &.delete-button {
+      color: #ef4444;
+      margin-top: 0.25rem;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 0.75rem;
     }
   }
 }
