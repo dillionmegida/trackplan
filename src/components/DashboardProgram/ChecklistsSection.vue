@@ -142,7 +142,7 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
           }"></div>
         </div>
       </div>
-      <ChecklistItem v-for="checklist in checklists.unchecked" :key="checklist.id" :programId="programId"
+      <ChecklistItem :categories="categories" v-for="checklist in checklists.unchecked" :key="checklist.id" :programId="programId"
         :checklist="checklist" @delete="deleteChecklist(checklist.id)"
         @update="(newValue) => updateChecklist(checklist.id, newValue)" />
       <button v-if="checklists.checked.length > 0" @click="toggleCompletedCategories(category)"
@@ -155,7 +155,7 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
         {{ addPlural(checklists.checked.length, 'Item') }}
       </button>
       <div v-if="showCompletedCategories.includes(category)" class="completed-checklists">
-        <ChecklistItem v-for="checklist in checklists.checked" :key="checklist.id" :programId="programId"
+        <ChecklistItem :categories="categories" v-for="checklist in checklists.checked" :key="checklist.id" :programId="programId"
           :checklist="checklist" @delete="deleteChecklist(checklist.id)"
           @update="(newValue) => updateChecklist(checklist.id, newValue)" />
       </div>
