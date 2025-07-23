@@ -3,10 +3,9 @@ import { useProgramChecklists } from '@/query/useProgramChecklists'
 import { useRoute } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import { useDeleteProgramChecklistItem } from '@/query/useProgramChecklists'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import type { ProgramChecklistItemType } from '@/types/PrgramChecklist'
 import { addPlural, snakeToWordCase } from '@/utils/string'
-import { useProgramCategories } from '@/query/useProgramCategories'
 import { useUpdateProgramChecklistItem } from '@/query/useProgramChecklists'
 import { useAuthStore } from '@/stores/auth'
 import { ref } from 'vue'
@@ -14,16 +13,23 @@ import ChecklistItem from './ChecklistItem.vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import { queryClient } from '@/configs/react-query'
 import { QEURY_KEY } from '@/query/QueryKey'
+import type { ProgramChecklistCategoryType } from '@/types/ProgramChecklist'
 
-const props = defineProps<{ themeColor: 'string'; organizationId: string }>()
+const props = defineProps<{
+  themeColor: string;
+  organizationId: string;
+  checklists: ProgramChecklistItemType[];
+  categories: ProgramChecklistCategoryType[]
+}>()
+
+// Make checklists and categories reactive to prop changes
+const checklists = computed(() => [...props.checklists])
+const categories = computed(() => [...props.categories])
 
 const themeColor = props.themeColor || '#fff'
 
 const route = useRoute()
 const programId = route.params.id as string
-
-const { data: checklists } = useProgramChecklists(programId)
-const { data: categories } = useProgramCategories(programId)
 
 const somethingChanged = ref(false)
 
@@ -33,30 +39,18 @@ onBeforeRouteLeave(() => {
 })
 
 const groupedChecklists = computed(() => {
-  if (!checklists.value || !categories.value) {
-    return {} as Record<
-      string,
-      {
-        unchecked: ProgramChecklistItemType[]
-        checked: ProgramChecklistItemType[]
-      }
-    >
-  }
+  const group: Record<string, {
+    unchecked: ProgramChecklistItemType[]
+    checked: ProgramChecklistItemType[]
+  }> = {}
 
   const categoryMap = new Map(categories.value.map((category) => [category.id, category.name]))
-  const group: Record<
-    string,
-    {
-      unchecked: ProgramChecklistItemType[]
-      checked: ProgramChecklistItemType[]
-    }
-  > = {}
 
-  // Initialize with uncategorized first
+  // Initialize with uncategorized
   group['uncategorized'] = { unchecked: [], checked: [] }
 
   // Initialize all categories from the categories list to maintain order
-  const sortedCategories = [...categories.value]
+  categories.value
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach((category) => {
       group[category.name] = { unchecked: [], checked: [] }
@@ -130,47 +124,29 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
 
 <template>
   <div class="checklists-section" :style="{ '--theme-color': themeColor }">
-    <div
-      v-for="(checklists, category) in groupedChecklists"
-      :key="category"
-      :class="'checklist-category' + (checklists.checked.length > 0 || checklists.unchecked.length > 0 ? '' : ' hidden')"
-    >
+    <div v-for="(checklists, category) in groupedChecklists" :key="category"
+      :class="'checklist-category' + (checklists.checked.length > 0 || checklists.unchecked.length > 0 ? '' : ' hidden')">
       <!-- v-if here is so that the category header is not displayed if there are no checklists in that category -->
-      <div
-        v-if="checklists.checked.length > 0 || checklists.unchecked.length > 0"
-        class="category-header"
-      >
+      <div v-if="checklists.checked.length > 0 || checklists.unchecked.length > 0" class="category-header">
         <h2>
           {{ snakeToWordCase(category) }} - {{ checklists.checked.length }}/{{
             checklists.unchecked.length + checklists.checked.length
           }}
         </h2>
         <div class="progress-container">
-          <div
-            class="progress-bar"
-            :style="{
-              width: `${
-                (checklists.checked.length /
-                  (checklists.unchecked.length + checklists.checked.length)) *
-                100
+          <div class="progress-bar" :style="{
+            width: `${(checklists.checked.length /
+              (checklists.unchecked.length + checklists.checked.length)) *
+              100
               }%`,
-            }"
-          ></div>
+          }"></div>
         </div>
       </div>
-      <ChecklistItem
-        v-for="checklist in checklists.unchecked"
-        :key="checklist.id"
-        :programId="programId"
-        :checklist="checklist"
-        @delete="deleteChecklist(checklist.id)"
-        @update="(newValue) => updateChecklist(checklist.id, newValue)"
-      />
-      <button
-        v-if="checklists.checked.length > 0"
-        @click="toggleCompletedCategories(category)"
-        class="see-completed-button"
-      >
+      <ChecklistItem v-for="checklist in checklists.unchecked" :key="checklist.id" :programId="programId"
+        :checklist="checklist" @delete="deleteChecklist(checklist.id)"
+        @update="(newValue) => updateChecklist(checklist.id, newValue)" />
+      <button v-if="checklists.checked.length > 0" @click="toggleCompletedCategories(category)"
+        class="see-completed-button">
         {{
           showCompletedCategories.includes(category)
             ? `Hide ${checklists.checked.length} Completed `
@@ -179,14 +155,9 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
         {{ addPlural(checklists.checked.length, 'Item') }}
       </button>
       <div v-if="showCompletedCategories.includes(category)" class="completed-checklists">
-        <ChecklistItem
-          v-for="checklist in checklists.checked"
-          :key="checklist.id"
-          :programId="programId"
-          :checklist="checklist"
-          @delete="deleteChecklist(checklist.id)"
-          @update="(newValue) => updateChecklist(checklist.id, newValue)"
-        />
+        <ChecklistItem v-for="checklist in checklists.checked" :key="checklist.id" :programId="programId"
+          :checklist="checklist" @delete="deleteChecklist(checklist.id)"
+          @update="(newValue) => updateChecklist(checklist.id, newValue)" />
       </div>
     </div>
   </div>
