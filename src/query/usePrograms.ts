@@ -96,6 +96,7 @@ export const useProgramsForOrganization = (
 
 export const useTrashedProgramsForOrganization = (
   organizationId: MaybeRefOrGetter<string | undefined | null>,
+  authUserId: string,
 ) => {
   return useQuery({
     queryKey: QEURY_KEY.trashedProgramsForOrganization(toValue(organizationId) as string),
@@ -106,14 +107,20 @@ export const useTrashedProgramsForOrganization = (
       const programsRef = collection(db, 'programs')
       const q = query(
         programsRef,
-        where('organizationId', '==', orgId),
-        where('trashDate', '!=', null),
+        and(
+          where('organizationId', '==', orgId),
+          where('trashDate', '!=', null),
+          or(
+            where('memberIds', 'array-contains', authUserId),
+            where('createdBy', '==', authUserId)
+          )
+        )
       )
 
       const programsData = await getDocsData<ProgramType>(q)
       return programsData
     },
-    enabled: !!organizationId,
+    enabled: () => !!toValue(organizationId),
   })
 }
 

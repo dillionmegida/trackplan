@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { format } from 'date-fns'
 import { Timestamp } from 'firebase/firestore'
 import { useAuthStore } from '@/stores/auth'
@@ -22,16 +22,19 @@ const { mutateAsync: restoreProgramMutation, isPending: restoreProgramPending } 
   useRestoreProgramFromTrash()
 const { mutateAsync: deleteProgramMutation, isPending: deleteProgramPending } = useDeleteProgram()
 
-const { data: user, isLoading: userLoading } = useUser(authStore.user?.uid ?? '')
+const { data: user, isLoading: userLoading, error: userError } = useUser(authStore.user?.uid ?? '')
 
 const organizationId = computed(() => {
-  return user.value?.activeOrganizationId
+  if (!user.value) return null
+
+  return user.value.activeOrganizationId
 })
+
 const {
   data: trashedProgramsData,
   isLoading: trashedProgramsLoading,
   error: trashedProgramsError,
-} = useTrashedProgramsForOrganization(organizationId)
+} = useTrashedProgramsForOrganization(organizationId, authStore.user?.uid ?? '')
 
 const restoreProgram = async (programId: string) => {}
 
@@ -53,7 +56,9 @@ const formatDate = (date: Timestamp) => {
 <template>
   <Layout>
     <div class="trash-view container">
-      <RouterLink class="back-link" :to="LINKS.my_account"><BackIcon /> Back to My Account</RouterLink>
+      <RouterLink class="back-link" :to="LINKS.my_account"
+        ><BackIcon /> Back to My Account</RouterLink
+      >
       <div class="header">
         <h1>Trash</h1>
         <p>
@@ -65,7 +70,7 @@ const formatDate = (date: Timestamp) => {
       <div v-if="userLoading || trashedProgramsLoading" class="loading">
         Loading trashed programs...
       </div>
-      <div v-else-if="trashedProgramsError" class="error">
+      <div v-else-if="trashedProgramsError || userError" class="error">
         Error loading trashed programs. Please check back later.
       </div>
       <div v-else-if="!trashedProgramsData?.length" class="empty-state">
@@ -78,8 +83,12 @@ const formatDate = (date: Timestamp) => {
             <p class="date">Deleted on {{ formatDate(program.trashDate) }}</p>
           </div>
           <div class="actions">
-            <button class="btn-restore" :disabled="restoreProgramPending">{{ restoreProgramPending ? 'Restoring...' : 'Restore' }}</button>
-            <button class="btn-delete" :disabled="deleteProgramPending">{{ deleteProgramPending ? 'Deleting...' : 'Delete Permanently' }}</button>
+            <button class="btn-restore" :disabled="restoreProgramPending">
+              {{ restoreProgramPending ? 'Restoring...' : 'Restore' }}
+            </button>
+            <button class="btn-delete" :disabled="deleteProgramPending">
+              {{ deleteProgramPending ? 'Deleting...' : 'Delete Permanently' }}
+            </button>
           </div>
         </div>
       </div>
