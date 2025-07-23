@@ -7,7 +7,7 @@ import { queryClient } from '@/configs/react-query'
 import { calculateProgramMeta } from '@/utils/programMeta'
 import { checkIfDocExists } from '@/helpers/firebase'
 import { QEURY_KEY } from './QueryKey'
-import { updateItemInChecklistsQueryData } from '@/helpers/queryData'
+import { addItemToChecklistsQueryData, removeItemFromChecklistsQueryData, updateItemInChecklistsQueryData } from '@/helpers/setQueryDataChecklistItems'
 
 export const useProgramChecklists = (programId: string) => {
   return useQuery({
@@ -41,10 +41,10 @@ export const useAddProgramChecklist = () => {
 
       calculateProgramMeta(programId)
 
-      return { programId, id: docRef.id }
+      return { programId, id: docRef.id, data }
     },
-    onSuccess: ({ programId }) => {
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programChecklists(programId) })
+    onSuccess: ({ programId, id, data }) => {
+      addItemToChecklistsQueryData({ id, ...data }, programId)
     },
     onError: (error) => {
       const errorMsg = error.message ?? 'Failed to add checklist item. Please try again.'
@@ -69,10 +69,10 @@ export const useDeleteProgramChecklistItem = () => {
 
       await deleteDoc(checklistRef)
       calculateProgramMeta(programId)
-      return { programId }
+      return { programId, checklistId }
     },
-    onSuccess: ({ programId }) => {
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programChecklists(programId) })
+    onSuccess: ({ programId, checklistId }) => {
+      removeItemFromChecklistsQueryData(checklistId, programId)
     },
     onError: (error) => {
       const errorMsg = error.message ?? 'Failed to delete checklist item. Please try again.'
