@@ -23,7 +23,7 @@ import { organizationLogger } from '@/services/logger/organizationLogger'
 import type { ProgramType } from '@/types/Program'
 import { checkIfDocExists } from '@/helpers/firebase'
 import { QEURY_KEY } from './QueryKey'
-import { removeUserFromOrganizationQueryData } from '@/helpers/setQueryDataOrganization'
+import { removeUserFromOrganizationQueryData, updateOrganizationQueryData } from '@/helpers/setQueryDataOrganization'
 
 export const useCreateOrganization = () => {
   return useMutation({
@@ -51,7 +51,7 @@ export const useSelectActiveOrganization = (userId: string) => {
       await updateDoc(userRef, { activeOrganizationId: organizationId })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.user(userId) })
+      location.reload()
     },
     onError: () => {
       toast.error('Failed to select organization. Please try again.')
@@ -103,7 +103,7 @@ export const useOrganization = (organizationId: MaybeRefOrGetter<string | undefi
 
 export const useUpdateOrganizationName = (organizationId: string) => {
   return useMutation({
-    mutationFn: async (name: string) => {
+    mutationFn: async (name: string): Promise<{ userId: string; updatedOrganizationData: OrganizationType }> => {
       const organizationRef = doc(db, 'organizations', organizationId)
 
       const organizationData = await checkIfDocExists<OrganizationType>({
@@ -113,11 +113,12 @@ export const useUpdateOrganizationName = (organizationId: string) => {
 
       const userId = organizationData.createdBy
 
-      await updateDoc(organizationRef, { name })
+     await updateDoc(organizationRef, { name })
 
-      return { userId }
+      return { userId, updatedOrganizationData:  {...organizationData, name}}
     },
-    onSuccess: ({ userId }) => {
+    onSuccess: ({ userId, updatedOrganizationData }) => {
+      updateOrganizationQueryData(updatedOrganizationData, userId)
       queryClient.invalidateQueries({ queryKey: QEURY_KEY.organization(organizationId) })
       queryClient.invalidateQueries({ queryKey: QEURY_KEY.organizationsForUser(userId) })
     },

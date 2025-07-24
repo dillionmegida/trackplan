@@ -15,7 +15,7 @@ import InfoBlock from '@/components/InfoBlock.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const { mutateAsync: createProgram, isPending, error: createProgramError } = useCreateProgram()
+const { mutateAsync: createProgram, isPending } = useCreateProgram()
 const { data: user } = useUser(authStore.user?.uid ?? '')
 
 const program = ref({
@@ -58,6 +58,7 @@ const submit = async () => {
     updatedBy: user.value.id,
     trashDate: null,
     color: program.value.color,
+    memberIds: [user.value.id],
     meta: {
       totalItems: 0,
       totalCompletedItems: 0,

@@ -30,7 +30,7 @@ import {
   getDocsData,
 } from '@/helpers/firebase'
 import { QEURY_KEY } from './QueryKey'
-import { addProgramToTrashQueryData, deleteProgramQueryData, restoreProgramFromTrashQueryData, updateProgramQueryData } from '@/helpers/setQueryDataPrograms'
+import { addProgramToOrganizationQueryData, addProgramToTrashQueryData, deleteProgramQueryData, restoreProgramFromTrashQueryData, updateProgramQueryData } from '@/helpers/setQueryDataPrograms'
 
 export const useProgramsUserHasAccessTo = ({
   organizationId,
@@ -152,15 +152,14 @@ export const useCreateProgram = () => {
   return useMutation({
     mutationFn: async ({
       data,
-    }: UseCreateProgramArgs): Promise<{ id: string; organizationId: string }> => {
+    }: UseCreateProgramArgs): Promise<ProgramType> => {
       const programRef = collection(db, 'programs')
       const docRef = await addDoc(programRef, data)
-      return { id: docRef.id, organizationId: data.organizationId }
+      return { ...data, id: docRef.id }
     },
-    onSuccess: ({ organizationId }) => {
+    onSuccess: (programData) => {
       toast.success('Program created successfully')
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programsForUser(organizationId) })
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programsForOrganization(organizationId) })
+      addProgramToOrganizationQueryData(programData)
       programsLogger.programCreationSuccess()
     },
     onError: (error) => {

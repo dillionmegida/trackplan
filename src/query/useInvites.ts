@@ -61,8 +61,6 @@ export const useInviteUser = (organizationId: string) => {
       inviteLogger.inviteUserToOrganizationSuccess()
       addUserToOrganizationQueryData(user)
       toast.success('User has been added to the organization!')
-      // TODO:
-      // queryClient.invalidateQueries({ queryKey: ['invites', organizationId] })
     },
     onError: (error: any) => {
       toast.error(error.message ?? 'Failed to send invitation. Please try again.')

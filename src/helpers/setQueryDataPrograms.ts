@@ -2,8 +2,26 @@ import { queryClient } from '@/configs/react-query'
 import { QEURY_KEY } from '@/query/QueryKey'
 import type { ProgramType } from '@/types/Program'
 
+export function addProgramToOrganizationQueryData(programData: ProgramType) {
+  queryClient.setQueryData(
+    QEURY_KEY.programsForOrganization(programData.organizationId),
+    (oldData: ProgramType[] | undefined) => {
+      if (!oldData) return
+      
+      return [...oldData, programData]
+    },
+  )
+  queryClient.setQueryData(
+    QEURY_KEY.programsForUser(programData.organizationId),
+    (oldData: ProgramType[] | undefined) => {
+      if (!oldData) return
+      
+      return [...oldData, programData]
+    },
+  )
+}
+
 export function updateProgramQueryData(programData: ProgramType) {
-  console.log('hello')
   queryClient.setQueryData(
     QEURY_KEY.program(programData.id),
     (oldData: ProgramType) => {
