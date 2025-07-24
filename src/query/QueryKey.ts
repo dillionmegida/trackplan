@@ -9,7 +9,6 @@ export const QEURY_KEY = {
   // Organizations
   organizationsForUser: (userId: string) => ['user-organizations', userId],
   organization: (organizationId: string) => ['organization', organizationId],
-  membersInOrganization: (organizationId: string) => ['organization-members', organizationId],
 
   // Program Categories
   programCategories: (programId: string) => ['program-categories', programId],
@@ -22,7 +21,7 @@ export const QEURY_KEY = {
   programChecklists: (programId: string) => ['program-checklists', programId],
 
   // Orgaanization Members
-  organizationMembers: (organizationId: string) => ['organization-members'],
+  organizationMembers: () => ['organization-members'],
   organizationMemberAccess: (memberId: string) => ['organization-member-access', memberId],
 
 }
