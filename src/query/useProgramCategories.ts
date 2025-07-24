@@ -6,6 +6,7 @@ import { toast } from 'vue3-toastify'
 import { queryClient } from '@/configs/react-query'
 import type { ProgramChecklistCategoryType } from '@/types/ProgramChecklist'
 import { QEURY_KEY } from './QueryKey'
+import { addCategoryToProgramQueryData, removeCategoryFromProgramQueryData } from '@/helpers/setQueryDataCategories'
 
 export const useProgramCategories = (programId: string) => {
   return useQuery({
@@ -34,7 +35,10 @@ export const useCreateProgramCategory = () => {
     mutationFn: async ({
       programId,
       data,
-    }: UseCreateCategoryArgs): Promise<{ id: string; programId: string }> => {
+    }: UseCreateCategoryArgs): Promise<{
+      programId: string
+      categoryData: ProgramChecklistCategoryType
+    }> => {
       const programRef = doc(db, 'programs', programId)
       const categoriesRef = collection(programRef, 'categories')
 
@@ -46,10 +50,14 @@ export const useCreateProgramCategory = () => {
       }
 
       const categoryDoc = await addDoc(categoriesRef, data)
-      return { id: categoryDoc.id, programId }
+      const categoryData = {
+        id: categoryDoc.id,
+        ...data,
+      }
+      return { programId, categoryData }
     },
-    onSuccess: ({ programId }) => {
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programCategories(programId) })
+    onSuccess: ({ programId, categoryData }) => {
+      addCategoryToProgramQueryData(programId, categoryData)
     },
     onError: (error) => {
       const errorMsg = error.message ?? 'Failed to create category. Please try again.'
@@ -66,11 +74,10 @@ export const useDeleteProgramCategory = () => {
 
       await deleteDoc(categoryRef)
 
-      return { programId }
+      return { programId, categoryId }
     },
-    onSuccess: ({ programId }) => {
-      toast.success('Category deleted successfully')
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.programCategories(programId) })
+    onSuccess: ({ programId, categoryId }) => {
+      removeCategoryFromProgramQueryData(programId, categoryId)
     },
     onError: (error) => {
       toast.error('Failed to delete category. Please try again.')
