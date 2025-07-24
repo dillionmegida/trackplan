@@ -1,18 +1,49 @@
 <script lang="ts" setup>
 import CheckIcon from '@/components/icons/CheckIcon.vue'
-import { ref, defineEmits, nextTick } from 'vue'
-import type { ProgramChecklistItemType } from '@/types/ProgramChecklist'
+import { ref, defineEmits, nextTick, computed, defineComponent } from 'vue'
+import type { PropType } from 'vue'
+import type { ProgramChecklistCategoryType, ProgramChecklistItemType } from '@/types/ProgramChecklist'
 import EditIcon from '../icons/EditIcon.vue'
 import { useUpdateProgramChecklistItem } from '@/query/useProgramChecklists'
 import LoaderIcon from '../icons/LoaderIcon.vue'
 import EllipsisVerticalIcon from '../icons/EllipsisVerticalIcon.vue'
+import { snakeToWordCase } from '@/utils/string'
+import vSelect from 'vue-select'
+import 'vue-select/dist/vue-select.css'
 
-const props = defineProps<{ 
-  checklist: ProgramChecklistItemType; 
-  programId: string;
-  categories: Array<{ id: string; name: string }>;
- }>()
+const props = defineProps({
+  checklist: {
+    type: Object as PropType<ProgramChecklistItemType>,
+    required: true
+  },
+  programId: {
+    type: String,
+    required: true
+  },
+  categories: {
+    type: Array as PropType<ProgramChecklistCategoryType[]>,
+    required: true
+  }
+})
 
+const categories = computed(() => [
+  { value: null, label: 'Uncategorized' },
+  ...props.categories.map((category) => ({
+    value: category.id,
+    label: snakeToWordCase(category.name),
+  }))
+])
+
+const selectedCategory = computed({
+  get: () => {
+    const category = categories.value.find((category) => category.value === props.checklist.categoryId)
+    return category || { value: null, label: 'Uncategorized' }
+  },
+  set: (category: { value: string; label: string } | null) => {
+    handleCategoryChange(category?.value || null)
+    return category
+  }
+})
 const emit = defineEmits(['delete', 'update'])
 
 const {
@@ -76,12 +107,10 @@ const onBlur = async () => {
   isEditing.value = false
 }
 
-const showModal = ref(true)
 
-const handleCategoryChange = async (event: Event) => {
-  const select = event.target as HTMLSelectElement
-  const categoryId = select.value === '' ? null : select.value
-  
+const handleCategoryChange = async (value: string | null) => {
+  const categoryId = value === null ? null : value
+
   await updateProgramChecklistItemMutation({
     programId: props.programId,
     checklistId: props.checklist.id,
@@ -90,9 +119,6 @@ const handleCategoryChange = async (event: Event) => {
       categoryId
     },
   })
-  
-  // Reset to default to allow selecting the same category again
-  select.value = ''
 }
 </script>
 
@@ -101,13 +127,8 @@ const handleCategoryChange = async (event: Event) => {
     <label v-if="!isEditing" :for="checklist.id" class="checklist-item">
       <!-- TODO: while item is being checked, show loading icon and disable input -->
       <div class="checklist-checkbox">
-        <input
-          :id="checklist.id"
-          @change="$emit('update', $event.target.checked)"
-          type="checkbox"
-          :checked="checklist.isCompleted"
-          class="checklist-checkbox-input"
-        />
+        <input :id="checklist.id" @change="$emit('update', $event.target.checked)" type="checkbox"
+          :checked="checklist.isCompleted" class="checklist-checkbox-input" />
         <span class="checklist-checkbox-custom">
           <CheckIcon color="#23934e" :size="16" />
         </span>
@@ -120,23 +141,12 @@ const handleCategoryChange = async (event: Event) => {
     </span>
 
     <div class="checklist-title-wrapper">
-      <div
-        v-if="!isEditing"
-        class="checklist-title block"
-        :class="{ checked: checklist.isCompleted }"
-        @click="startEditing"
-      >
+      <div v-if="!isEditing" class="checklist-title block" :class="{ checked: checklist.isCompleted }"
+        @click="startEditing">
         {{ checklist.title }}
       </div>
-      <textarea
-        :disabled="updateProgramChecklistItemPending"
-        v-else
-        ref="inputRef"
-        class="checklist-title input"
-        v-model="checklist.title"
-        @blur="onBlur"
-        @keydown.enter.exact.prevent="onEnterPress"
-      ></textarea>
+      <textarea :disabled="updateProgramChecklistItemPending" v-else ref="inputRef" class="checklist-title input"
+        v-model="checklist.title" @blur="onBlur" @keydown.enter.exact.prevent="onEnterPress"></textarea>
     </div>
 
     <div class="dropdown-container">
@@ -148,31 +158,13 @@ const handleCategoryChange = async (event: Event) => {
         <template #popper>
           <div class="actions">
             <div class="category-select">
-              <label class="select-label">Move to:</label>
-              <select 
-                class="category-select-element"
-                :value="props.checklist.categoryId || ''"
-                @change="handleCategoryChange"
-                :disabled="updateProgramChecklistItemPending || isEditing"
-              >
-                <option value="" disabled>Select a category</option>
-                <option :value="null">No Category</option>
-                <option 
-                  v-for="category in props.categories" 
-                  :key="category.id" 
-                  :value="category.id"
-                  :selected="props.checklist.categoryId === category.id"
-                >
-                  {{ category.name }}
-                </option>
-              </select>
+              <v-select v-model="selectedCategory" :options="categories"
+                :disabled="updateProgramChecklistItemPending || isEditing" :clearable="false" :searchable="false"
+                class="v-select-category">
+              </v-select>
             </div>
-            <button
-              type="button"
-              class="action-button delete-button"
-              :disabled="deleteChecklistPending || updateProgramChecklistItemPending || isEditing"
-              @click="onDelete"
-            >
+            <button type="button" class="action-button delete-button"
+              :disabled="deleteChecklistPending || updateProgramChecklistItemPending || isEditing" @click="onDelete">
               Delete
             </button>
           </div>
@@ -181,6 +173,47 @@ const handleCategoryChange = async (event: Event) => {
     </div>
   </div>
 </template>
+
+<style>
+.v-select-category .vs__selected-options {
+  padding: 0.1rem 1rem !important;
+  font-size: 0.9rem;
+}
+
+.v-select-category .vs__dropdown-toggle {
+  border: none !important;
+}
+
+.v-select-category .vs__selected {
+  padding: 0;
+  margin-inline: 0;
+}
+
+.v-select-category .vs__actions {
+  margin-right:0.5rem;
+}
+
+.v-select-category .vs__dropdown-menu {
+  border: none;
+  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 6px;
+  padding: 0;
+}
+
+.v-select-category .vs__dropdown-option--highlight {
+  background-color: #f1f5f9;
+  color: #1e293b;
+}
+
+.v-select-category .vs__dropdown-option--selected {
+  background-color: #e2e8f0;
+}
+
+.v-select-category .vs__dropdown-option {
+  font-size: 0.9rem;
+  padding-block: 0.5rem;
+}
+</style>
 
 <style lang="scss" scoped>
 .checklist-item-wrapper {
@@ -207,7 +240,7 @@ const handleCategoryChange = async (event: Event) => {
       position: absolute;
       left: -20px;
 
-      &:checked + .checklist-checkbox-custom {
+      &:checked+.checklist-checkbox-custom {
         display: block;
       }
     }
@@ -264,48 +297,77 @@ const handleCategoryChange = async (event: Event) => {
   top: 5px;
 }
 
+.v-popper__inner {
+  border-radius: 0px;
+}
+
+
+
+
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
   min-width: 180px;
-  padding: 0.5rem 0;
-  
+  height: max-content;
+
   .category-select {
-    padding: 0 0.5rem;
-    margin-bottom: 0.25rem;
-    
-    .select-label {
-      display: block;
-      font-size: 0.8rem;
-      color: #64748b;
-      margin-bottom: 0.25rem;
-    }
-    
-    .category-select-element {
-      width: 100%;
-      padding: 0.4rem 0.5rem;
-      border: 1px solid #e2e8f0;
-      border-radius: 4px;
-      font-size: 0.9rem;
-      background-color: white;
-      cursor: pointer;
+
+    .v-select-category {
+      --vs-dropdown-option--active-bg: #f1f5f9;
+      --vs-dropdown-option--selected-bg: #e2e8f0;
+      --vs-border-radius: 0px;
+      --vs-controls-color: #64748b;
+      --vs-line-height: 1.5;
+      --vs-controls-size: 0.8;
+      --vs-dropdown-min-width: 160px;
+     
+
+
       
-      &:disabled {
+
+      .vs__selected {
+        
+        padding: 0 1rem;
+        border: none;
+        background: none;
+        color: #334155;
+      }
+
+      .vs__actions {
+        padding: 0 4px 0 0;
+      }
+
+      .vs__dropdown-menu {
+        padding: 0.25rem 0;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+      }
+
+      .vs__dropdown-option {
+        padding: 0.4rem 0.75rem;
+        margin: 0;
+        font-size: 0.9rem;
+        white-space: nowrap;
+
+        &--highlight {
+          background: #f8fafc;
+          color: #1e40af;
+        }
+      }
+
+      &.vs--disabled {
         opacity: 0.6;
         cursor: not-allowed;
-      }
-      
-      &:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 1px #3b82f6;
+
+        .vs__dropdown-toggle {
+          background-color: #f8fafc;
+        }
       }
     }
   }
 
   .action-button {
-    padding: 0.5rem 1rem;
+    padding: 1rem;
     text-align: left;
     background: none;
     border: none;
@@ -324,12 +386,10 @@ const handleCategoryChange = async (event: Event) => {
       opacity: 0.5;
       cursor: not-allowed;
     }
-    
+
     &.delete-button {
       color: #ef4444;
-      margin-top: 0.25rem;
       border-top: 1px solid #e2e8f0;
-      padding-top: 0.75rem;
     }
   }
 }
