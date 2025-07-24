@@ -50,10 +50,7 @@ export const useProgramsUserHasAccessTo = ({
         and(
           where('organizationId', '==', orgId),
           where('trashDate', '==', null),
-          or(
-            where('memberIds', 'array-contains', authUserId),
-            where('createdBy', '==', authUserId),
-          ),
+          where('memberIds', 'array-contains', authUserId),
         ),
       )
 
@@ -81,7 +78,9 @@ export const useProgramsForOrganization = (
       const programsRef = collection(db, 'programs')
       const q = query(
         programsRef,
-        and(where('organizationId', '==', orgId), where('trashDate', '==', null), where('createdBy', '==', authUserId)),
+        where('trashDate', '==', null),
+        where('memberIds', 'array-contains', authUserId),
+        where('organizationId', '==', organizationId),
       )
 
       const programsData = await getDocsData<ProgramType>(q)
@@ -111,11 +110,8 @@ export const useTrashedProgramsForOrganization = (
         and(
           where('organizationId', '==', orgId),
           where('trashDate', '!=', null),
-          or(
-            where('memberIds', 'array-contains', authUserId),
-            where('createdBy', '==', authUserId)
-          )
-        )
+          where('memberIds', 'array-contains', authUserId),
+        ),
       )
 
       const programsData = await getDocsData<ProgramType>(q)
