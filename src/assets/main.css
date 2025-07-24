@@ -65,3 +65,7 @@ img {
 .v-popper__arrow-inner {
   display: none !important;
 }
+
+.v-popper__inner {
+  overflow: visible !important;
+}
