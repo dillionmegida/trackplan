@@ -120,10 +120,12 @@ const handleCategoryChange = async (value: string | null) => {
     },
   })
 }
+
+const isDropdownOpen = ref(false)
 </script>
 
 <template>
-  <div class="checklist-item-wrapper">
+  <div class="checklist-item-wrapper " :class="{ 'dropdown-open': isDropdownOpen }">
     <label v-if="!isEditing" :for="checklist.id" class="checklist-item">
       <!-- TODO: while item is being checked, show loading icon and disable input -->
       <div class="checklist-checkbox">
@@ -150,7 +152,8 @@ const handleCategoryChange = async (value: string | null) => {
     </div>
 
     <div class="dropdown-container">
-      <VDropdown :distance="-6" placement="top-end">
+      <VDropdown @apply-show="isDropdownOpen = true" @apply-hide="isDropdownOpen = false" :distance="-6"
+        placement="top-end">
         <button class="dropdown-trigger">
           <EllipsisVerticalIcon :size="20" color="#64748b" />
         </button>
@@ -190,7 +193,7 @@ const handleCategoryChange = async (value: string | null) => {
 }
 
 .v-select-category .vs__actions {
-  margin-right:0.5rem;
+  margin-right: 0.5rem;
 }
 
 .v-select-category .vs__dropdown-menu {
@@ -220,6 +223,14 @@ const handleCategoryChange = async (value: string | null) => {
   display: flex;
   gap: 0.5rem;
   position: relative;
+
+  &.dropdown-open {
+
+    .checklist-title {
+      border: 1px solid #2c79eb;
+      background-color: #cbddfa;
+    }
+  }
 }
 
 .checklist-item {
@@ -320,13 +331,13 @@ const handleCategoryChange = async (value: string | null) => {
       --vs-line-height: 1.5;
       --vs-controls-size: 0.8;
       --vs-dropdown-min-width: 160px;
-     
 
 
-      
+
+
 
       .vs__selected {
-        
+
         padding: 0 1rem;
         border: none;
         background: none;
