@@ -32,8 +32,8 @@ const handleSubmit = async () => {
     return
   }
 
-  const invitedUserId = await inviteUser({ email: email.value })
-  router.push(LINKS.organizationMemberAccess(organizationId, invitedUserId))
+  const invitedUser = await inviteUser({ email: email.value })
+  router.push(LINKS.organizationMemberAccess(organizationId, invitedUser.id))
   email.value = ''
 }
 

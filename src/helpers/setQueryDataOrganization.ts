@@ -1,24 +1,29 @@
 import { queryClient } from '@/configs/react-query'
 import { QEURY_KEY } from '@/query/QueryKey'
+import type { UserType } from '@/types/User'
 
 export function addUserToOrganizationQueryData(
-  userId: string,
+  user: UserType,
 ) {
   queryClient.setQueryData(
     QEURY_KEY.organizationMembers(),
-    (oldData: string[]) => {
-      return [...oldData, userId]
+    (oldData: UserType[] | undefined) => {
+      if (!oldData) return
+
+      return [...oldData, user]
     },
   )
 }
 
 export function removeUserFromOrganizationQueryData(
-  userId: string,
+  user: UserType,
 ) {
   queryClient.setQueryData(
     QEURY_KEY.organizationMembers(),
-    (oldData: string[]) => {
-      return oldData.filter((id) => id !== userId)
+    (oldData: UserType[] | undefined) => {
+      if (!oldData) return
+
+      return oldData.filter((id) => id.id !== user.id)
     },
   )
 }

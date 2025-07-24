@@ -31,6 +31,8 @@ app.component('v-select', VueSelect)
 
 app.use(VueEllipseProgress)
 app.use(FloatingVue)
-app.use(Vue3Toastify)
+app.use(Vue3Toastify, {
+  clearOnUrlChange: false,
+})
 app.use(LoggerPlugin)
 app.mount('#app')

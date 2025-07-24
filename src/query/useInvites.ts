@@ -55,12 +55,12 @@ export const useInviteUser = (organizationId: string) => {
 
       await updateDoc(organizationRef, { memberIds })
 
-      return user.id
+      return user
     },
-    onSuccess: (userId: string) => {
+    onSuccess: (user: UserType) => {
       inviteLogger.inviteUserToOrganizationSuccess()
-      addUserToOrganizationQueryData(userId)
-      toast.success('Invitation sent successfully!')
+      addUserToOrganizationQueryData(user)
+      toast.success('User has been added to the organization!')
       // TODO:
       // queryClient.invalidateQueries({ queryKey: ['invites', organizationId] })
     },

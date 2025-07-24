@@ -49,7 +49,7 @@ async function updateAccess(programId: string, checked: boolean) {
             Back to Organization
           </RouterLink>
           <h1>Manage Program Access</h1>
-          <p>What programs do you want "{{ member?.name }}" to have access to?</p>
+          <p>What programs do you want <b>{{ member?.name }}</b> to have access to?</p>
         </div>
 
         <div v-if="programsForOrganization?.length === 0" class="no-programs">
