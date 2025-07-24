@@ -79,10 +79,10 @@ async function deleteCategory(categoryId: string, categoryName: string) {
     message="Error loading categories for this program."
   />
 
-  <p class="categories-description">
-    Categories allow you to group related checklists in a program. Note that deleting a category
-    will move all associated checklists to "uncategorized".
-  </p>
+  <!-- <p class="categories-description">
+    Categories allow you to group related checklists in a program.
+    Note that deleting a category will move all associated checklists to "uncategorized".
+  </p> -->
 
   <div class="categories-list">
     <form @submit.prevent="createCategory" class="category-add-form">

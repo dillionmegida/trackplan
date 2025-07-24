@@ -117,10 +117,6 @@ const allRequiredFieldsFilled = computed(() => {
               {{ isPending ? 'Saving...' : 'Save Changes' }}
             </button>
           </form>
-
-          <div class="form-card container">
-            <CategoriesSection />
-          </div>
         </div>
       </div>
     </div>

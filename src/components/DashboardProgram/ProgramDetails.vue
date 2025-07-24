@@ -20,6 +20,7 @@ import type { OrganizationType } from '@/types/Organization'
 import { useUser } from '@/query/useUsers'
 import InfoBlock from '@/components/InfoBlock.vue'
 import { useProgramCategories } from '@/query/useProgramCategories'
+import CategoriesSection from './CategoriesSection.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -135,8 +136,11 @@ const userHasAccess = computed(() => {
           <p v-if="program.description" class="program-description">{{ program.description }}</p>
         </div>
       </div>
-
+      
       <div class="container">
+        <div class="categories-section">
+          <CategoriesSection />
+        </div>
         <div class="checklist-form">
           <ChecklistsForm />
         </div>
@@ -163,6 +167,10 @@ const userHasAccess = computed(() => {
 
 <style lang="scss" scoped>
 .program-details {}
+
+.categories-section {
+  margin-bottom: 2rem;
+}
 
 .checklist-form {
   margin-bottom: 2rem;

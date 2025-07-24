@@ -54,7 +54,7 @@ const addChecklist = async () => {
 
 <template>
   <form>
-    <input type="text" placeholder="Checklist title" v-model="title" />
+    <input type="text" placeholder="Add an item here" v-model="title" />
     <v-select placeholder="Select category" :options="categoryOptions" v-model="selectedCategory"></v-select>
     <button :disabled="!title" @click.prevent="addChecklist" type="submit">Add</button>
   </form>
