@@ -23,6 +23,7 @@ import { organizationLogger } from '@/services/logger/organizationLogger'
 import type { ProgramType } from '@/types/Program'
 import { checkIfDocExists } from '@/helpers/firebase'
 import { QEURY_KEY } from './QueryKey'
+import { removeUserFromOrganizationQueryData } from '@/helpers/setQueryDataOrganization'
 
 export const useCreateOrganization = () => {
   return useMutation({
@@ -33,7 +34,6 @@ export const useCreateOrganization = () => {
       return { id: data.id }
     },
     onSuccess: ({ id }) => {
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.organization(id) })
       queryClient.invalidateQueries({ queryKey: QEURY_KEY.organizationsForUser(id) })
     },
     onError: (error: any) => {
@@ -131,7 +131,7 @@ export const useUpdateOrganizationName = (organizationId: string) => {
 
 export const useMembersInOrganization = (organizationId: string) => {
   return useQuery({
-    queryKey: QEURY_KEY.membersInOrganization(organizationId),
+    queryKey: QEURY_KEY.organizationMembers(),
     queryFn: async () => {
       const organizationRef = doc(db, 'organizations', organizationId)
 
@@ -140,11 +140,11 @@ export const useMembersInOrganization = (organizationId: string) => {
         errorMsg: 'Organization not found',
       })
 
-      const organizationData = (await getDoc(organizationRef)).data() as OrganizationType;
+      const organizationData = (await getDoc(organizationRef)).data() as OrganizationType
 
       // get all members from organization memberIds
       const usersRef = collection(db, 'users')
-      const q = query(usersRef, where("id", 'in', organizationData.memberIds))
+      const q = query(usersRef, where('id', 'in', organizationData.memberIds))
       const usersSnapshot = await getDocs(q)
 
       const users = usersSnapshot.docs.map((doc) => ({
@@ -179,7 +179,7 @@ export const useRemoveMemberFromOrganization = (organizationId: string) => {
 
       const userRef = doc(db, 'users', userId)
 
-      const userData = await checkIfDocExists<UserType>({
+      await checkIfDocExists<UserType>({
         docRef: userRef,
         errorMsg: 'The member you are trying to remove is not found',
       })
@@ -187,12 +187,16 @@ export const useRemoveMemberFromOrganization = (organizationId: string) => {
       const batch = writeBatch(db)
 
       const programsRef = collection(db, 'programs')
-      const programsQ = query(programsRef, where('memberIds', 'array-contains', userId))
-      const programsSnapshot = await getDocs(programsQ)
+
+      const allProgramsInOrgQ = query(programsRef, where('memberIds', 'array-contains', authId))
+
+      const programsSnapshot = await getDocs(allProgramsInOrgQ)
 
       programsSnapshot.forEach((programDoc) => {
         const programData = programDoc.data() as ProgramType
         if (!programData.memberIds) return
+
+        if (!programData.memberIds.includes(userId)) return
 
         batch.update(programDoc.ref, { memberIds: arrayRemove(userId) })
       })
@@ -200,12 +204,14 @@ export const useRemoveMemberFromOrganization = (organizationId: string) => {
       batch.update(organizationRef, { memberIds: arrayRemove(userId) })
 
       await batch.commit()
+
+      return { userId }
     },
-    onSuccess: () => {
+    onSuccess: ({ userId }) => {
       toast.success(
         'Member removed from organization successfully. Please refresh the page to see the changes.',
       )
-      queryClient.invalidateQueries({ queryKey: QEURY_KEY.membersInOrganization(organizationId) })
+      removeUserFromOrganizationQueryData(userId)
     },
     onError: (error: any) => {
       toast.error(error.message ?? 'Failed to remove member from organization. Please try again.')

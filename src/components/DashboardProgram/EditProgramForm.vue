@@ -46,6 +46,7 @@ const submit = async () => {
     color: form.value.color,
     trashDate: null,
     meta: program.value.meta,
+    memberIds: program.value.memberIds,
   }
 
   await updateProgram({ data: programData, userId: authStore.user.uid })

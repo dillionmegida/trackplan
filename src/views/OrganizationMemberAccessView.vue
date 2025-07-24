@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useProgramsUserHasAccessTo } from '@/query/useOrganizationMemberAccess'
 import { useUpdateOrganizationMemberAccess } from '@/query/useOrganizationMemberAccess'
 import { useMembersInOrganization } from '@/query/useOrganizations'
 import { useProgramsForOrganization } from '@/query/usePrograms'
@@ -18,7 +17,7 @@ const memberId = route.params.memberId as string
 
 const { data: programsForOrganization, isLoading: programsForOrganizationLoading } = useProgramsForOrganization(organizationId, auth.user?.uid as string)
 const { mutateAsync: updateMemberAccess, isPending: updateMemberAccessPending } = useUpdateOrganizationMemberAccess()
-const { data: members } = useMembersInOrganization(organizationId)
+const { data: members, isLoading: membersLoading } = useMembersInOrganization(organizationId)
 
 const member = computed(() => {
   if (!members.value) return null
@@ -41,7 +40,7 @@ async function updateAccess(programId: string, checked: boolean) {
 <template>
   <Layout>
     <div class="organization-member-access container">
-      <div v-if="programsForOrganizationLoading">Loading...</div>
+      <div v-if="programsForOrganizationLoading || membersLoading">Loading...</div>
       <div v-else-if="!member">Member not found</div>
       <div v-else>
         <div class="header">
