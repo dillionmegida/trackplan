@@ -127,7 +127,7 @@ const userHasAccess = computed(() => {
             <div class="progress">
               <ve-progress :size="80" :progress="(howManyChecked / (checklists?.length || 1)) * 100"
                 :color="getIntensity(program.color) > 230 ? '#333' : program.color"
-                :empty-color="getIntensity(program.color) < 20 ? '#000' : '#fff'">
+                :empty-color="getIntensity(program.color) > 230 ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255)'">
                 {{ howManyChecked }} / {{ checklists?.length }}
               </ve-progress>
             </div>
