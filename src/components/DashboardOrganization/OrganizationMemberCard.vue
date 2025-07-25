@@ -4,7 +4,6 @@ import type { UserType } from '@/types/User'
 import { useAuthStore } from '@/stores/auth'
 import { RouterLink } from 'vue-router';
 import { LINKS } from '@/constants/links';
-import { collection, query, where } from 'firebase/firestore';
 
 const authStore = useAuthStore()
 
@@ -32,9 +31,6 @@ const isAdmin = props.organizationId === authStore.user?.uid
 
 <template>
   <div class="member-card">
-    <div class="member-avatar">
-      {{ member.name?.charAt(0)?.toUpperCase() || 'U' }}
-    </div>
     <div class="member-info">
       <div class="member-name">{{ member.name }}</div>
       <div class="member-email">{{ member.email }}</div>
@@ -70,20 +66,6 @@ const isAdmin = props.organizationId === authStore.user?.uid
     justify-content: flex-start;
     gap: 0.5rem;
   }
-}
-
-.member-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #e2e8f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: #475569;
-  margin-right: 1rem;
-  flex-shrink: 0;
 }
 
 .member-info {

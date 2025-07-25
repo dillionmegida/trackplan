@@ -1,4 +1,4 @@
-export const DEMO_PROGRAMS = [
+export const DEMO_PROGRAMS: any[] = [
   {
     "id": "1Rcf54HMYnEla7yjWpWE",
     "title": "House Moving",

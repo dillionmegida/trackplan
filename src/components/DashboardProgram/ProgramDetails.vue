@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, inject, ref, watch } from 'vue'
+import { computed, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import { format } from 'date-fns'
 import { useAddProgramToTrash } from '@/query/usePrograms'
@@ -15,7 +15,7 @@ import { toast } from 'vue3-toastify'
 import { useRouter } from 'vue-router'
 import { getIntensity, getWhiteMixAmount } from '@/utils/color'
 import type { ProgramType } from '@/types/Program'
-import { Ref } from 'vue'
+import type { Ref } from 'vue'
 import type { OrganizationType } from '@/types/Organization'
 import { useUser } from '@/query/useUsers'
 import InfoBlock from '@/components/InfoBlock.vue'
@@ -122,7 +122,7 @@ const userHasAccess = computed(() => {
                 </button>
               </div>
               <p class="program-date">{{ formatDate(program.date) }}</p>
-              <p class="creaed-by">created by {{ user.name }}</p>
+              <p class="creaed-by">created by {{ user?.name }}</p>
             </div>
             <div class="progress">
               <ve-progress :size="80" :progress="(howManyChecked / (checklists?.length || 1)) * 100"
@@ -151,6 +151,10 @@ const userHasAccess = computed(() => {
 
         <div v-else-if="checklistsLoading || categoriesLoading">
           Loading checklists...
+        </div>
+
+        <div v-else-if="!checklists || !categories">
+          <InfoBlock variant="error" message="Something went wrong while loading the checklists." />
         </div>
 
         <div v-else-if="checklists">

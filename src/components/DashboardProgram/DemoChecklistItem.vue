@@ -55,7 +55,9 @@ const onBlur = async () => {
   isEditing.value = false
 }
 
-const showModal = ref(true)
+const emitChecked = (event: Event) => {
+  emit('update', (event.target as HTMLInputElement).checked)
+}
 </script>
 
 <template>
@@ -65,7 +67,7 @@ const showModal = ref(true)
       <div class="checklist-checkbox">
         <input
           :id="checklist.id"
-          @change="$emit('update', $event.target.checked)"
+          @change="emitChecked"
           type="checkbox"
           :checked="checklist.isCompleted"
           class="checklist-checkbox-input"

@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import { NOT_FOUND, useUser } from '@/query/useUsers'
-import { useAuthStore } from '@/stores/auth'
-import { computed, ref, watch, onMounted } from 'vue'
-import { useQueryClient } from '@tanstack/vue-query'
-import { onBeforeRouteLeave, onBeforeRouteUpdate, useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
-import { useDemoPrograms } from '@/query/usePrograms'
 import { LINKS } from '@/constants/links'
 import { format } from 'date-fns'
 import { getIntensity, getWhiteMixAmount } from '@/utils/color'

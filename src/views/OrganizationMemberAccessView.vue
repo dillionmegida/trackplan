@@ -35,6 +35,11 @@ async function updateAccess(programId: string, checked: boolean) {
     shouldHaveAccess: checked,
   })
 }
+
+const emitUpdateAccessChecked = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  updateAccess(target.value, target.checked)
+}
 </script>
 
 <template>
@@ -66,7 +71,7 @@ async function updateAccess(programId: string, checked: boolean) {
               <label class="theme-switch">
                 <input :disabled="updateMemberAccessPending" type="checkbox"
                   :checked="program.memberIds?.includes(memberId) || false"
-                  @change="updateAccess(program.id, $event.target.checked)" />
+                  @change="emitUpdateAccessChecked($event)" />
                 <span class="slider">
                   <span class="knob"></span>
                 </span>

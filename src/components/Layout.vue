@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { signOut } from 'firebase/auth'
+import { signOut, type User } from 'firebase/auth'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { auth } from '@/configs/firebase'
@@ -53,7 +53,7 @@ const handleLogout = async () => {
         </RouterLink>
         <div class="user-menu">
           <RouterLink :to="LINKS.my_account" class="user-info">
-            <img :src="authUser.photoURL" :alt="authUser.displayName" class="user-avatar" />
+            <img v-if="authUser?.photoURL && authUser?.displayName" :src="authUser.photoURL" :alt="authUser.displayName" class="user-avatar" />
           </RouterLink>
           <button @click="handleLogout" class="logout-button">
             <LogoutIcon :size="20" :color="'currentColor'" />

@@ -41,16 +41,6 @@ const sortedOrganizations = computed(() => {
   })
 })
 
-const userInitials = computed(() => {
-  if (!user.value?.displayName) return 'U'
-  return user.value.displayName
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .substring(0, 2)
-})
-
 const formatDate = (date: any) => {
   if (!date) return ''
   const timestamp = date.toDate ? date.toDate() : new Date(date)
@@ -113,14 +103,11 @@ const deleteUser = async () => {
           <div class="user-header">
             <div class="user-avatar">
               <img
-                v-if="authStore.user?.photoURL"
+                v-if="authStore.user?.photoURL && authStore.user?.displayName"
                 :src="authStore.user.photoURL"
                 :alt="authStore.user.displayName"
                 class="avatar"
               />
-              <div v-else class="avatar-placeholder">
-                {{ userInitials }}
-              </div>
             </div>
             <div class="user-info">
               <h1>{{ user?.name }}</h1>

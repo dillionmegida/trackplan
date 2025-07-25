@@ -14,7 +14,6 @@ import { computed, nextTick, ref, watch } from 'vue'
 import EditIcon from '@/components/icons/EditIcon.vue'
 import LoaderIcon from '@/components/icons/LoaderIcon.vue'
 import CheckIcon from '@/components/icons/CheckIcon.vue'
-import type { UserType } from '@/types/User'
 import OrganizationMembers from '@/components/DashboardOrganization/OrganizationMembers.vue'
 
 const route = useRoute()
@@ -145,11 +144,10 @@ const onBlur = async () => {
           </div>
         </div>
 
-        <!-- TODO: Add organization content -->
-        <div class="organization-content">
-          <p>Created since {{ format(organization?.createdAt?.toDate(), 'MMMM dd, yyyy') }}</p>
+        <div v-if="organization" class="organization-content">
+          <p>Created since {{ format(organization.createdAt.toDate(), 'MMMM dd, yyyy') }}</p>
 
-          <div v-if="members && organization">
+          <div v-if="members">
             <OrganizationMembers
               v-if="members.length"
               :members="members"

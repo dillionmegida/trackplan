@@ -121,6 +121,10 @@ const handleCategoryChange = async (value: string | null) => {
   })
 }
 
+const emitChecked = (event: Event) => {
+  emit('update', (event.target as HTMLInputElement).checked)
+}
+
 const isDropdownOpen = ref(false)
 </script>
 
@@ -129,7 +133,7 @@ const isDropdownOpen = ref(false)
     <label v-if="!isEditing" :for="checklist.id" class="checklist-item">
       <!-- TODO: while item is being checked, show loading icon and disable input -->
       <div class="checklist-checkbox">
-        <input :id="checklist.id" @change="$emit('update', $event.target.checked)" type="checkbox"
+        <input :id="checklist.id" @change="emitChecked" type="checkbox"
           :checked="checklist.isCompleted" class="checklist-checkbox-input" />
         <span class="checklist-checkbox-custom">
           <CheckIcon color="#23934e" :size="16" />

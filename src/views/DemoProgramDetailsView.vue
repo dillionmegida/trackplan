@@ -7,11 +7,7 @@ import BackIcon from '@/components/icons/BackIcon.vue'
 import ChecklistsForm from '@/components/DashboardProgram/ChecklistsForm.vue'
 import ChecklistsSection from '@/components/DashboardProgram/ChecklistsSection.vue'
 import TrashIcon from '@/components/icons/TrashIcon.vue'
-import { useAuthStore } from '@/stores/auth'
-import { toast } from 'vue3-toastify'
-import { useRouter } from 'vue-router'
 import { getIntensity, getWhiteMixAmount } from '@/utils/color'
-import type { ProgramType } from '@/types/Program'
 import InfoBlock from '@/components/InfoBlock.vue'
 import DemoLayout from '@/components/DemoLayout.vue'
 import { demoUser } from '@/constants/demoUser'
@@ -22,12 +18,11 @@ import ClockIcon from '@/components/icons/ClockIcon.vue'
 import { DEMO_PROGRAMS } from '@/constants/demoData'
 import type { Timestamp } from 'firebase/firestore'
 
-const router = useRouter()
 const route = useRoute()
 const programId = route.params.id as string
 
 const program = DEMO_PROGRAMS.find((program) => program.id === programId)
-const checklistsCopy = ref(program?.checklists)
+const checklistsCopy = ref(program?.checklists || [])
 
 const howManyChecked = computed(() => {
   if (!checklistsCopy.value) {
@@ -47,10 +42,6 @@ const updateChecklist = (checklistId: string, isCompleted: boolean) => {
 }
 
 const deleteChecklist = (checklistId: string) => {
-  const itemInArrayIndex = checklistsCopy.value.findIndex(
-    (checklist) => checklist.id === checklistId
-  )
-
   const checklistsFiltered = checklistsCopy.value.filter(
     (checklist) => checklist.id !== checklistId
   )
@@ -63,13 +54,13 @@ const addChecklist = (c: ProgramChecklistItemType) => {
     checklistsCopy.value = []
   }
 
-  checklistsCopy.value = [...checklistsCopy.value, c]
+  checklistsCopy.value.push(c)
 }
 </script>
 
 <template>
   <DemoLayout>
-    <div class="program-details">
+    <div v-if="program" class="program-details">
       <div>
         <div
           :style="{

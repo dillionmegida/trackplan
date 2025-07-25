@@ -1,7 +1,7 @@
 import type { UserType } from "@/types/User";
 import { serverTimestamp, Timestamp } from "firebase/firestore";
 
-export const demoUser: UserType = {
+export const demoUser: UserType & { photoURL: string } = {
   id: 'demo',
   name: 'Demo User',
   email: 'demo@trackplan.com',

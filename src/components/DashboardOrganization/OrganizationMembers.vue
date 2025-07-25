@@ -33,9 +33,6 @@ props.members.forEach((member) => {
     <div class="members-category">
       <h3>Admins</h3>
       <div v-for="admin in membersObj.admins" :key="admin.id" class="member-card">
-        <div class="member-avatar">
-          {{ admin.displayName?.charAt(0)?.toUpperCase() || 'U' }}
-        </div>
         <div class="member-info">
           <div class="member-name">{{ admin.name }}</div>
           <div class="member-email">{{ admin.email }}</div>
@@ -95,20 +92,6 @@ props.members.forEach((member) => {
     transform: translateY(-1px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
-}
-
-.member-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #e2e8f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: #475569;
-  margin-right: 1rem;
-  flex-shrink: 0;
 }
 
 .member-info {

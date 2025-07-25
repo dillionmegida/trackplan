@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { toast } from 'vue3-toastify'
 import { Timestamp } from 'firebase/firestore'
-import { UserType } from '@/types/User';
+import type { UserType } from '@/types/User';
 import { useCreateOrganization } from '@/query/useOrganizations';
 import { getFirstName } from '@/utils/string';
 
@@ -28,6 +28,7 @@ const createOrg = async () => {
     updatedAt: Timestamp.fromDate(new Date()),
     createdBy: user.id,
     updatedBy: user.id,
+    memberIds: [user.id],
   }
 
   await createOrganization({
