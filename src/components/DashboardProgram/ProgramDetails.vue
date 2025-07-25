@@ -102,7 +102,7 @@ const userHasAccess = computed(() => {
       <div :style="{
         '--color': program.color,
         '--white-level': getWhiteMixAmount(program.color) + '%',
-        '--dark-color': getIntensity(program.color) > 20 ? program.color : '#333',
+        '--dark-color': getIntensity(program.color) < 200 ? program.color : '#333',
       }" class="program-content">
         <div class="container">
           <RouterLink class="back-link" :to="LINKS.home">
@@ -250,9 +250,9 @@ const userHasAccess = computed(() => {
     font-weight: 300;
     color: #64748b;
     padding: 0.2rem 0.4rem;
-    border: 1px solid var(--color);
+    border: 1px solid var(--dark-color);
     margin-bottom: 1rem;
-    color: var(--color);
+    color: var(--dark-color);
     border-radius: 6px;
   }
 
