@@ -17,6 +17,7 @@ import router from './router'
 import { useAuthStore } from './stores/auth'
 import { queryClient } from './configs/react-query'
 import { LoggerPlugin } from './services/logger/logger'
+import { createVfm } from 'vue-final-modal'
 
 const app = createApp(App)
 
@@ -34,5 +35,9 @@ app.use(FloatingVue)
 app.use(Vue3Toastify, {
   clearOnUrlChange: false,
 })
+
+const vfm = createVfm()
+app.use(vfm)
+
 app.use(LoggerPlugin)
 app.mount('#app')

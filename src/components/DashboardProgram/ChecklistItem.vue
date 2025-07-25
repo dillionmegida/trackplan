@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import CheckIcon from '@/components/icons/CheckIcon.vue'
-import { ref, defineEmits, nextTick, computed, defineComponent } from 'vue'
+import { ref, defineEmits, nextTick, computed, defineComponent, Teleport } from 'vue'
 import type { PropType } from 'vue'
 import type { ProgramChecklistCategoryType, ProgramChecklistItemType } from '@/types/ProgramChecklist'
 import EditIcon from '../icons/EditIcon.vue'
@@ -10,6 +10,8 @@ import EllipsisVerticalIcon from '../icons/EllipsisVerticalIcon.vue'
 import { getLinkTextAndUrlFromMarkdown, snakeToWordCase } from '@/utils/string'
 import vSelect from 'vue-select'
 import 'vue-select/dist/vue-select.css'
+import Modal from '@/components/Modal.vue'
+import type { VTooltip } from 'floating-vue'
 
 const props = defineProps({
   checklist: {
@@ -25,6 +27,8 @@ const props = defineProps({
     required: true
   }
 })
+
+const dropdownRef = ref<InstanceType<typeof VTooltip> | null>(null)
 
 const categories = computed(() => [
   { value: null, label: 'Uncategorized' },
@@ -91,10 +95,16 @@ const startEditing = () => {
   })
 }
 
+const showDeleteModal = ref(false)
+
 const onDelete = () => {
-  const decision = window.confirm('Are you sure you want to delete this checklist item?')
-  if (!decision) return
+  dropdownRef.value?.hide()
+  showDeleteModal.value = true
+}
+
+const onConfirmDelete = () => {
   emit('delete')
+  showDeleteModal.value = false
 }
 
 const onEnterPress = () => {
@@ -163,8 +173,8 @@ const openLink = (e: Event) => {
     </div>
 
     <div class="dropdown-container">
-      <VDropdown @apply-show="isDropdownOpen = true" @apply-hide="isDropdownOpen = false" :distance="-6"
-        placement="top-end">
+      <VDropdown ref="dropdownRef" @apply-show="isDropdownOpen = true" @apply-hide="isDropdownOpen = false"
+        :distance="-6" placement="top-end">
         <button class="dropdown-trigger">
           <EllipsisVerticalIcon :size="20" color="#64748b" />
         </button>
@@ -186,6 +196,15 @@ const openLink = (e: Event) => {
       </VDropdown>
     </div>
   </div>
+
+  <Teleport v-if="showDeleteModal" to="body">
+    <Modal v-model="showDeleteModal" title="Delete Checklist Item" @confirm="onConfirmDelete"
+      :deleting="deleteChecklistPending">
+      <span class="item-title-to-delete">{{ checklist.title }}</span>
+      Are you sure you want to delete this checklist item? This action cannot be
+      undone.
+    </Modal>
+  </Teleport>
 </template>
 
 <style>
@@ -193,6 +212,7 @@ const openLink = (e: Event) => {
   padding: 0.1rem 1rem !important;
   font-size: 0.9rem;
 }
+
 
 .v-select-category .vs__dropdown-toggle {
   border: none !important;
@@ -242,6 +262,12 @@ const openLink = (e: Event) => {
       background-color: #cbddfa;
     }
   }
+}
+
+.item-title-to-delete {
+  color: red;
+  font-size: 0.9rem;
+  display: block;
 }
 
 .checklist-item {
