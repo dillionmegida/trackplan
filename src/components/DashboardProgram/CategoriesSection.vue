@@ -12,6 +12,7 @@ import { toast } from 'vue3-toastify'
 import InfoBlock from '@/components/InfoBlock.vue'
 import CloseIcon from '@/components/icons/CloseIcon.vue'
 import PlusIcon from '@/components/icons/PlusIcon.vue'
+import Modal from '@/components/Modal.vue'
 
 const route = useRoute()
 const programId = route.params.id as string
@@ -48,21 +49,35 @@ async function createCategory() {
   newCategoryName.value = ''
 }
 
-async function deleteCategory(categoryId: string, categoryName: string) {
-  const decision = window.confirm(
-    `Are you sure you want to delete category '${snakeToWordCase(
-      categoryName
-    )}'? Checklists in this category will be moved to 'uncategorized'.`
-  )
+const showDeleteModal = ref(false)
+const categoryToDelete = ref({
+  id: '',
+  name: '',
+})
 
-  if (!decision) {
-    return
+function setCategoryToDelete(categoryId: string, categoryName: string) {
+  showDeleteModal.value = true
+  categoryToDelete.value = {
+    id: categoryId,
+    name: categoryName,
   }
+}
 
-  try {
-    await deleteCategoryMutation({ programId, categoryId })
-  } catch (error) {
-    toast.error('Failed to delete category. Please try again.')
+function cancelDeleteCategory() {
+  showDeleteModal.value = false
+  categoryToDelete.value = {
+    id: '',
+    name: '',
+  }
+}
+
+async function confirmDeleteCategory(categoryId: string) {
+  await deleteCategoryMutation({ programId, categoryId })
+
+  showDeleteModal.value = false
+  categoryToDelete.value = {
+    id: '',
+    name: '',
   }
 }
 
@@ -70,19 +85,11 @@ async function deleteCategory(categoryId: string, categoryName: string) {
 </script>
 
 <template>
-  <!-- TODO: Add loading state -->
-  <!-- <div v-if="categoriesLoading" class="loading">Loading categories...</div> -->
-
   <InfoBlock
     v-if="categoriesError"
     variant="error"
     message="Error loading categories for this program."
   />
-
-  <!-- <p class="categories-description">
-    Categories allow you to group related checklists in a program.
-    Note that deleting a category will move all associated checklists to "uncategorized".
-  </p> -->
 
   <div class="categories-list">
     <form @submit.prevent="createCategory" class="category-add-form">
@@ -95,7 +102,7 @@ async function deleteCategory(categoryId: string, categoryName: string) {
     <div v-for="category in categories" :key="category.id" class="category-item">
       <div class="category-title">{{ snakeToWordCase(category.name) }}</div>
       <button
-        @click="deleteCategory(category.id, category.name)"
+        @click="setCategoryToDelete(category.id, category.name)"
         type="button"
         :disabled="deleteCategoryPending"
         class="delete-button"
@@ -104,6 +111,20 @@ async function deleteCategory(categoryId: string, categoryName: string) {
       </button>
     </div>
   </div>
+
+  <Teleport v-if="categoryToDelete.id" to="body">
+    <Modal
+      v-model="showDeleteModal"
+      title="Delete Category"
+      @confirm="confirmDeleteCategory(categoryToDelete.id)"
+      @cancel="cancelDeleteCategory"
+      :deleting="deleteCategoryPending"
+    >
+      Are you sure you want to delete category
+      <span class="item-title-to-delete">{{ snakeToWordCase(categoryToDelete.name) }}</span
+      >? Checklists under this category will be moved to 'uncategorized'.
+    </Modal>
+  </Teleport>
 </template>
 
 <style lang="scss" scoped>
@@ -111,6 +132,10 @@ async function deleteCategory(categoryId: string, categoryName: string) {
   color: #64748b;
   margin-bottom: 1rem;
   line-height: 1.4;
+}
+
+.item-title-to-delete {
+  color: red;
 }
 
 .categories-list {
@@ -121,19 +146,6 @@ async function deleteCategory(categoryId: string, categoryName: string) {
   border-radius: 0.5rem;
   border: 1px solid #d1d5db;
   position: relative;
-
-  /* .categories-description {
-    font-size: 0.8rem;
-    background: #f8fafc;
-    padding: 0.25rem 0.5rem;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    position: absolute;
-    top: -1rem;
-    left: 1rem;
-    color: #64748b;
-    margin-bottom: 1rem;
-  } */
 
   .category-item,
   .category-add-form {
