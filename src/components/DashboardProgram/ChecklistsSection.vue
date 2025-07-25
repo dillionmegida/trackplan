@@ -49,7 +49,7 @@ const groupedChecklists = computed(() => {
   const categoryMap = new Map(categories.value.map((category) => [category.id, category.name]))
 
   // Initialize with uncategorized
-  group['uncategorized'] = { unchecked: [], checked: [], id: '' }
+  group['uncategorized'] = { unchecked: [], checked: [], id: 'uncategorized' }
 
   // Initialize all categories from the categories list to maintain order
   categories.value
@@ -168,7 +168,11 @@ async function drop(category: string, event: DragEvent) {
     throw new Error('Checklist item not found')
   }
 
-  if (targetChecklist.categoryId ?? '' === categoryId) return
+  const currentCategoryId = [null, 'uncategorized'].includes(targetChecklist.categoryId)
+    ? 'uncategorized'
+    : targetChecklist.categoryId
+
+  if (currentCategoryId === categoryId) return
 
   const checklistItemObj = {
     ...targetChecklist,
@@ -295,7 +299,7 @@ async function drop(category: string, event: DragEvent) {
 
     .progress-container {
       width: 100%;
-      height: 6px;
+      height: 3px;
       background: #edf0f5;
       border-radius: 6px;
       overflow: hidden;
