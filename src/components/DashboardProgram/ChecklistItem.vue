@@ -7,7 +7,7 @@ import EditIcon from '../icons/EditIcon.vue'
 import { useUpdateProgramChecklistItem } from '@/query/useProgramChecklists'
 import LoaderIcon from '../icons/LoaderIcon.vue'
 import EllipsisVerticalIcon from '../icons/EllipsisVerticalIcon.vue'
-import { snakeToWordCase } from '@/utils/string'
+import { getLinkTextAndUrlFromMarkdown, snakeToWordCase } from '@/utils/string'
 import vSelect from 'vue-select'
 import 'vue-select/dist/vue-select.css'
 
@@ -126,6 +126,12 @@ const emitChecked = (event: Event) => {
 }
 
 const isDropdownOpen = ref(false)
+
+const openLink = (e: Event) => {
+  if ((e.target as HTMLAnchorElement).href) {
+    e.stopPropagation()
+  }
+}
 </script>
 
 <template>
@@ -133,8 +139,8 @@ const isDropdownOpen = ref(false)
     <label v-if="!isEditing" :for="checklist.id" class="checklist-item">
       <!-- TODO: while item is being checked, show loading icon and disable input -->
       <div class="checklist-checkbox">
-        <input :id="checklist.id" @change="emitChecked" type="checkbox"
-          :checked="checklist.isCompleted" class="checklist-checkbox-input" />
+        <input :id="checklist.id" @change="emitChecked" type="checkbox" :checked="checklist.isCompleted"
+          class="checklist-checkbox-input" />
         <span class="checklist-checkbox-custom">
           <CheckIcon color="#23934e" :size="16" />
         </span>
@@ -149,7 +155,8 @@ const isDropdownOpen = ref(false)
     <div class="checklist-title-wrapper">
       <div v-if="!isEditing" class="checklist-title block" :class="{ checked: checklist.isCompleted }"
         @click="startEditing">
-        {{ checklist.title }}
+        <span class="checklist-title-text" @click="openLink"
+          v-html="getLinkTextAndUrlFromMarkdown(checklist.title)"></span>
       </div>
       <textarea :disabled="updateProgramChecklistItemPending" v-else ref="inputRef" class="checklist-title input"
         v-model="checklist.title" @blur="onBlur" @keydown.enter.exact.prevent="onEnterPress"></textarea>
@@ -278,6 +285,12 @@ const isDropdownOpen = ref(false)
   width: 100%;
 }
 
+
+:deep(.checklist-title-text a) {
+  color: orange;
+  text-decoration: underline;
+}
+
 .checklist-title {
   border: 1px solid #d1d5db;
   font-size: 0.9rem;
@@ -286,6 +299,7 @@ const isDropdownOpen = ref(false)
   border-radius: 6px;
   transition: all 0.2s ease;
   position: relative;
+
 
   &.block:hover {
     background-color: #d5dee7;

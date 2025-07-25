@@ -23,3 +23,9 @@ export const addPlural = (count: number, word: string) => {
 export const genId = () => {
   return uuidv4()
 }
+
+export const getLinkTextAndUrlFromMarkdown = (str: string) => {
+  // markdown format: [linkText](linkUrl)
+  const regex = /\[([^\]]+)\]\(([^)]+)\)/g
+  return str.replace(regex, '<a href="$2">$1</a>')
+} 
