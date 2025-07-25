@@ -42,19 +42,20 @@ const groupedChecklists = computed(() => {
     {
       unchecked: ProgramChecklistItemType[]
       checked: ProgramChecklistItemType[]
+      id: string
     }
   > = {}
 
   const categoryMap = new Map(categories.value.map((category) => [category.id, category.name]))
 
   // Initialize with uncategorized
-  group['uncategorized'] = { unchecked: [], checked: [] }
+  group['uncategorized'] = { unchecked: [], checked: [], id: '' }
 
   // Initialize all categories from the categories list to maintain order
   categories.value
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach((category) => {
-      group[category.name] = { unchecked: [], checked: [] }
+      group[category.name] = { unchecked: [], checked: [], id: category.id }
     })
 
   // Group checklists into their categories
@@ -65,7 +66,7 @@ const groupedChecklists = computed(() => {
       : 'uncategorized'
 
     if (!group[categoryName]) {
-      group[categoryName] = { unchecked: [], checked: [] }
+      group[categoryName] = { unchecked: [], checked: [], id: categoryName }
     }
 
     if (checklist.isCompleted) {
@@ -120,6 +121,62 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
 
   await updateChecklistMutation({ programId, checklistId, checklistItemObj })
 }
+
+const dragging = ref(false)
+const dragOverCategory = ref<string | null>(null)
+
+function dragStart(event: DragEvent) {
+  dragging.value = true
+  const target = event.target as HTMLElement
+
+  if (!target.id || !event.dataTransfer) return
+
+  event.dataTransfer.setData('text/plain', target.id.replace('wrapper-', ''))
+  event.dataTransfer.effectAllowed = 'move'
+}
+
+function dragOver(event: DragEvent) {
+  event.preventDefault()
+  const target = event.target as HTMLElement
+
+  if (!target.id || !event.dataTransfer) return
+
+  dragOverCategory.value = target.id
+
+  event.dataTransfer.dropEffect = 'move'
+}
+
+function dragend(event: DragEvent) {
+  dragging.value = false
+  dragOverCategory.value = null
+}
+
+async function drop(category: string, event: DragEvent) {
+  if (!event.dataTransfer) return
+
+  const categoryId = groupedChecklists.value[category].id
+
+  const checklistId = event.dataTransfer.getData('text/plain')
+
+  const targetChecklist = checklists.value?.find((checklist) => checklist.id === checklistId)
+
+  if (!auth.user) {
+    throw new Error('You are not logged in')
+  }
+
+  if (!targetChecklist) {
+    throw new Error('Checklist item not found')
+  }
+
+  if (targetChecklist.categoryId ?? '' === categoryId) return
+
+  const checklistItemObj = {
+    ...targetChecklist,
+    categoryId: !!categoryId ? categoryId : null,
+  }
+
+  await updateChecklistMutation({ programId, checklistId, checklistItemObj })
+}
 </script>
 
 
@@ -128,9 +185,13 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
     <div
       v-for="(checklists, category) in groupedChecklists"
       :key="category"
+      :id="category"
+      @dragover="dragOver"
+      @drop="drop(category, $event)"
       :class="
         'checklist-category' +
-        (checklists.checked.length > 0 || checklists.unchecked.length > 0 ? '' : ' hidden')
+        (checklists.checked.length > 0 || checklists.unchecked.length > 0 ? '' : ' hidden') +
+        (dragOverCategory === category ? ' drag-over' : '')
       "
     >
       <!-- v-if here is so that the category header is not displayed if there are no checklists in that category -->
@@ -159,9 +220,13 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
       <ChecklistItem
         :categories="categories"
         v-for="checklist in checklists.unchecked"
+        :id="'wrapper-' + checklist.id"
         :key="checklist.id"
         :programId="programId"
         :checklist="checklist"
+        @dragstart="dragStart"
+        @dragend="dragend"
+        draggable="true"
         @delete="deleteChecklist(checklist.id)"
         @update="(newValue) => updateChecklist(checklist.id, newValue)"
       />
@@ -181,9 +246,13 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
         <ChecklistItem
           :categories="categories"
           v-for="checklist in checklists.checked"
+          :id="'wrapper-' + checklist.id"
           :key="checklist.id"
           :programId="programId"
           :checklist="checklist"
+          @dragstart="dragStart"
+          @dragend="dragend"
+          draggable="true"
           @delete="deleteChecklist(checklist.id)"
           @update="(newValue) => updateChecklist(checklist.id, newValue)"
         />
@@ -197,6 +266,11 @@ async function updateChecklist(checklistId: string, isCompleted: boolean) {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+
+.checklist-category.drag-over {
+  outline: 2px solid #333;
+  outline-offset: 10px;
 }
 
 .completed-checklists {
