@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import CheckIcon from '@/components/icons/CheckIcon.vue'
-import { ref, defineEmits, nextTick, computed, defineComponent, Teleport } from 'vue'
+import { ref, defineEmits, nextTick, computed, defineComponent, Teleport, useAttrs } from 'vue'
 import type { PropType } from 'vue'
 import type { ProgramChecklistCategoryType, ProgramChecklistItemType } from '@/types/ProgramChecklist'
 import EditIcon from '../icons/EditIcon.vue'
@@ -48,7 +48,8 @@ const selectedCategory = computed({
     return category
   }
 })
-const emit = defineEmits(['delete', 'update'])
+const emit = defineEmits(['delete', 'update', 'dragstart', 'dragend'])
+const attrs = useAttrs()
 
 const {
   mutateAsync: updateProgramChecklistItemMutation,
@@ -145,7 +146,12 @@ const openLink = (e: Event) => {
 </script>
 
 <template>
-  <div class="checklist-item-wrapper " :class="{ 'dropdown-open': isDropdownOpen }">
+  <div 
+    class="checklist-item-wrapper" 
+    :class="{ 'dropdown-open': isDropdownOpen }"
+    v-bind="attrs"
+    @dragstart="(e) => emit('dragstart', e)"
+    @dragend="(e) => emit('dragend', e)">
     <label v-if="!isEditing" :for="checklist.id" class="checklist-item">
       <!-- TODO: while item is being checked, show loading icon and disable input -->
       <div class="checklist-checkbox">
