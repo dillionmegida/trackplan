@@ -158,7 +158,7 @@ const confirmDeleteUser = async (userId: string) => {
         </div>
         <div class="action-links">
           <RouterLink class="trashed-link" :to="LINKS.trash">View Trashed Programs</RouterLink>
-          <RouterLink class="archived-link" :to="LINKS.archived">View Archived Programs</RouterLink>
+          <!-- <RouterLink class="archived-link" :to="LINKS.archived">View Archived Programs</RouterLink> -->
         </div>
 
         <div class="line"></div>
