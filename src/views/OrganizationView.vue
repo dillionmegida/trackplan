@@ -249,7 +249,7 @@ const onBlur = async () => {
 .organization-content {
   background-color: #f8fafc;
   border-radius: 8px;
-  padding: 1.5rem 0;
+  padding: 0.5rem 0 1.5rem;
 }
 
 .organization-info {

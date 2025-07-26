@@ -2,8 +2,11 @@
 import { useRemoveMemberFromOrganization } from '@/query/useOrganizations'
 import type { UserType } from '@/types/User'
 import { useAuthStore } from '@/stores/auth'
-import { RouterLink } from 'vue-router';
-import { LINKS } from '@/constants/links';
+import { RouterLink } from 'vue-router'
+import { LINKS } from '@/constants/links'
+import { ref } from 'vue'
+import Modal from '@/components/Modal.vue'
+import { Teleport } from 'vue'
 
 const authStore = useAuthStore()
 
@@ -14,11 +17,14 @@ const {
   isPending: removeMemberFromOrganizationPending,
 } = useRemoveMemberFromOrganization(props.organizationId)
 
-const removeMember = async (id: string) => {
-  if (!authStore.user?.uid) return
+const showDeleteModal = ref(false)
 
-  const decision = window.confirm('Are you sure you want to remove this member? This will also remove them from all programs they are a member of.')
-  if (!decision) return
+const removeMember = async (id: string) => {
+  showDeleteModal.value = true
+}
+
+const confirmRemoveMember = async (id: string) => {
+  if (!authStore.user?.uid) return
 
   await removeMemberFromOrganization({
     authId: authStore.user.uid,
@@ -36,13 +42,33 @@ const isAdmin = props.organizationId === authStore.user?.uid
       <div class="member-email">{{ member.email }}</div>
     </div>
     <div v-if="isAdmin" class="member-actions">
-      <RouterLink class="manage-access" :to="LINKS.organizationMemberAccess(props.organizationId, props.member.id)">Manage Access</RouterLink>
-      <button :disabled="removeMemberFromOrganizationPending"  class="remove-btn"
-        @click="removeMember(props.member.id)">
+      <RouterLink
+        class="manage-access"
+        :to="LINKS.organizationMemberAccess(props.organizationId, props.member.id)"
+        >Manage Access</RouterLink
+      >
+      <button
+        :disabled="removeMemberFromOrganizationPending"
+        class="remove-btn"
+        @click="removeMember(props.member.id)"
+      >
         Remove
       </button>
     </div>
   </div>
+
+  <Teleport v-if="showDeleteModal" to="body">
+    <Modal
+      v-model="showDeleteModal"
+      title="Remove Member"
+      @confirm="confirmRemoveMember(props.member.id)"
+      :deleting="removeMemberFromOrganizationPending"
+    >
+      Are you sure you want to remove
+      <span class="item-title-to-delete">{{ member.name }}</span> from this organization? This will
+      also remove them from all the programs you gave them access to.
+    </Modal>
+  </Teleport>
 </template>
 
 <style lang="scss" scoped>
@@ -66,6 +92,10 @@ const isAdmin = props.organizationId === authStore.user?.uid
     justify-content: flex-start;
     gap: 0.5rem;
   }
+}
+
+.item-title-to-delete {
+  color: red;
 }
 
 .member-info {
@@ -93,11 +123,14 @@ const isAdmin = props.organizationId === authStore.user?.uid
   display: flex;
   gap: 0.5rem;
 
-  button, a {
+  button,
+  a {
     padding: 0.25rem 0.5rem;
     border-radius: 3px;
     font-size: 0.9rem;
     transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
 
     @media (max-width: 768px) {
       padding: 0.25rem 0.5rem;

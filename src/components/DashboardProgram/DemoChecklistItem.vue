@@ -4,8 +4,9 @@ import CheckIcon from '@/components/icons/CheckIcon.vue'
 import { ref, defineEmits, nextTick } from 'vue'
 import type { ProgramChecklistItemType } from '@/types/ProgramChecklist'
 import EditIcon from '../icons/EditIcon.vue'
-import LoaderIcon from '../icons/LoaderIcon.vue'
 import EllipsisVerticalIcon from '../icons/EllipsisVerticalIcon.vue'
+import Modal from '@/components/Modal.vue'
+import { Teleport } from 'vue'
 
 const props = defineProps<{ checklist: ProgramChecklistItemType; programId: string }>()
 
@@ -39,10 +40,17 @@ const startEditing = () => {
   })
 }
 
+const showDeleteModal = ref(false)
+const dropdownRef = ref<InstanceType<typeof VTooltip> | null>(null)
+
 const onDelete = () => {
-  const decision = window.confirm('Are you sure you want to delete this checklist item?')
-  if (!decision) return
+  dropdownRef.value?.hide()
+  showDeleteModal.value = true
+}
+
+const onConfirmDelete = () => {
   emit('delete')
+  showDeleteModal.value = false
 }
 
 const onEnterPress = () => {
@@ -101,7 +109,7 @@ const emitChecked = (event: Event) => {
       ></textarea>
     </div>
 
-    <VDropdown :distance="-6" placement="top-end">
+    <VDropdown ref="dropdownRef" :distance="-6" placement="top-end">
       <button class="dropdown-trigger">
         <EllipsisVerticalIcon :size="20" color="#64748b" />
       </button>
@@ -119,6 +127,14 @@ const emitChecked = (event: Event) => {
       </template>
     </VDropdown>
   </div>
+
+  <Teleport v-if="showDeleteModal" to="body">
+    <Modal v-model="showDeleteModal" title="Delete Checklist Item" @confirm="onConfirmDelete"
+      :deleting="deleteChecklistPending">
+      <span class="item-title-to-delete">{{ checklist.title }}</span>
+      Are you sure you want to delete this checklist item? This action cannot be undone.
+    </Modal>
+  </Teleport>
 </template>
 
 <style lang="scss" scoped>
@@ -126,6 +142,11 @@ const emitChecked = (event: Event) => {
   display: flex;
   gap: 0.5rem;
   position: relative;
+}
+
+.item-title-to-delete {
+  color: red;
+  display: block;
 }
 
 .checklist-item {
