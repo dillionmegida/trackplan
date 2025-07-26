@@ -21,6 +21,7 @@ import { useUser } from '@/query/useUsers'
 import InfoBlock from '@/components/InfoBlock.vue'
 import { useProgramCategories } from '@/query/useProgramCategories'
 import CategoriesSection from './CategoriesSection.vue'
+import ClockIcon from '@/components/icons/ClockIcon.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -121,8 +122,8 @@ const userHasAccess = computed(() => {
                   <TrashIcon :size="24" />
                 </button>
               </div>
-              <p class="program-date">{{ formatDate(program.date) }}</p>
-              <p class="creaed-by">created by {{ user?.name }}</p>
+              <p class="program-date"><ClockIcon :size="20" /> {{ formatDate(program.date) }}</p>
+              <p class="created-by">created by {{ user?.name }}</p>
             </div>
             <div class="progress">
               <ve-progress :size="80" :progress="(howManyChecked / (checklists?.length || 1)) * 100"
@@ -222,7 +223,8 @@ const userHasAccess = computed(() => {
     gap: 1rem;
 
     h1 {
-      font-size: 2rem;
+      font-size: clamp(1.4rem, 2vw, 2rem);
+      line-height: 1;
       color: #1e293b;
     }
 
@@ -241,10 +243,13 @@ const userHasAccess = computed(() => {
     font-size: 1rem;
     font-weight: 300;
     color: #64748b;
-    margin-bottom: 1rem;
+    margin: 0.5rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
   }
 
-  .creaed-by {
+  .created-by {
     font-size: 0.8rem;
     display: inline-block;
     font-weight: 300;
@@ -268,7 +273,9 @@ const userHasAccess = computed(() => {
   row-gap: 0.5rem;
   flex-wrap: wrap;
 
-  .progress {}
+  .progress {
+    margin-bottom: 1rem;
+  }
 }
 
 .info-item {
