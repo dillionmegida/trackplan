@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useDeleteUser, useUser } from '@/query/useUsers'
 import { useOrganizationsForUser } from '@/query/useOrganizations'
@@ -15,7 +15,8 @@ import { authLogger } from '@/services/logger/authLogger'
 import { CustomError } from '@/utils/error'
 import { signOut } from 'firebase/auth'
 import { auth } from '@/configs/firebase'
-
+import Modal from '@/components/Modal.vue'
+import { Teleport } from 'vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -60,12 +61,14 @@ const selectOrganization = async (orgId: string) => {
 
 const { mutateAsync: deleteUserMutation, isPending: isDeletingUser } = useDeleteUser()
 
+const showDeleteModal = ref(false)
+
 const deleteUser = async () => {
+  showDeleteModal.value = true
+}
+
+const confirmDeleteUser = async (userId: string) => {
   if (!userId) return
-
-  const decision = window.confirm('Are you sure you want to delete your account?')
-
-  if (!decision) return
 
   await deleteUserMutation(userId)
 
@@ -74,7 +77,6 @@ const deleteUser = async () => {
     usersLogger.userDeleteSuccess()
     authLogger.userSignedOutSuccess()
     router.push(LINKS.landing)
-
   } catch (error: any) {
     console.error('Error signing out:', error)
     const customError = new CustomError(error.message, error.statusCode ?? 500)
@@ -89,9 +91,7 @@ const deleteUser = async () => {
   <Layout>
     <div class="user-view container">
       <div v-if="userLoading || organizationsLoading" class="loading">Loading user...</div>
-      <div v-else-if="userError" class="error">
-        Error loading user: {{ userError?.message }}
-      </div>
+      <div v-else-if="userError" class="error">Error loading user: {{ userError?.message }}</div>
       <div v-else-if="organizationsError" class="error">
         Error loading organizations: {{ organizationsError?.message }}
       </div>
@@ -184,12 +184,26 @@ const deleteUser = async () => {
         </div>
       </div>
     </div>
+    <Teleport v-if="showDeleteModal && userId" to="body">
+      <Modal
+        v-model="showDeleteModal"
+        title="Delete Account"
+        @confirm="confirmDeleteUser(userId)"
+        :deleting="isDeletingUser"
+      >
+        Are you sure you want to delete your account? This action cannot be undone.
+      </Modal>
+    </Teleport>
   </Layout>
 </template>
 
 
 
 <style lang="scss" scoped>
+.user-view {
+  padding-bottom: 10rem;
+}
+
 .user-section {
   background: white;
   border-radius: 12px;
