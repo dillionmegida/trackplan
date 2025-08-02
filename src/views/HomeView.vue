@@ -16,12 +16,12 @@ import InfoBlock from '@/components/InfoBlock.vue'
 import ClockIcon from '@/components/icons/ClockIcon.vue'
 import { QEURY_KEY } from '@/query/QueryKey'
 import { getThemeColor } from '@/helpers/themeColor'
+import ProgramsSection from '@/components/Dashboard/ProgramsSection.vue'
+import NoActiveOrganization from '@/components/Dashboard/NoActiveOrganization.vue'
 
 const router = useRouter()
 const userId = useAuthStore().user?.uid
 const newAccount = router.currentRoute.value.query.new === 'true'
-
-const organizationBeenSelected = ref('')
 
 if (newAccount) {
   toast('Your trackplan account has been created successfully')
@@ -40,7 +40,9 @@ const organizationId = computed(() => {
   if (user.value.name === NOT_FOUND) return ''
   if (!organizations.value) return
 
-  const activeOrganization = organizations.value.find((org) => org.id === user.value.activeOrganizationId)
+  const activeOrganization = organizations.value.find(
+    (org) => org.id === user.value.activeOrganizationId
+  )
 
   if (!activeOrganization) return ''
 
@@ -51,7 +53,9 @@ const isUserPartOfActiveOrganization = computed(() => {
   if (!user.value) return false
   if (!organizations.value) return false
 
-  const activeOrganization = organizations.value.find((org) => org.id === user.value.activeOrganizationId)
+  const activeOrganization = organizations.value.find(
+    (org) => org.id === user.value.activeOrganizationId
+  )
 
   return !!activeOrganization
 })
@@ -62,36 +66,16 @@ const {
   error: programsError,
 } = useProgramsUserHasAccessTo({ organizationId, authUserId: userId ?? '' })
 
-const {
-  mutateAsync: selectActiveOrganization,
-  isPending: selectActiveOrganizationPending,
-  error: selectActiveOrganizationError,
-} = useSelectActiveOrganization(userId ?? '')
-
-const selectOrganization = async (organizationId: string) => {
-  if (!userId) {
-    toast('You must be logged in to select an organization.')
-    return
-  }
-
-  organizationBeenSelected.value = organizationId
-
-  await selectActiveOrganization({ organizationId })
-
-  const toastMsg =
-    organizationBeenSelected.value === userId
-      ? 'Your personal organization is selected.'
-      : 'Organization selected successfully'
-  toast.success(toastMsg)
-  organizationBeenSelected.value = ''
-}
-
-watch(user, () => {
-  if (user.value && user.value?.name === NOT_FOUND) {
-    console.log('User not found')
-    router.push({ name: 'onboarding' })
-  }
-}, { immediate: true })
+watch(
+  user,
+  () => {
+    if (user.value && user.value?.name === NOT_FOUND) {
+      console.log('User not found')
+      router.push({ name: 'onboarding' })
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 
@@ -108,24 +92,12 @@ watch(user, () => {
       <p v-else-if="user?.name === NOT_FOUND">Redirecting to onboarding...</p>
       <p v-else-if="!user">Unable to load user</p>
       <NoOrganizationsYet v-else-if="organizations?.length === 0" :user="user" />
-      <div v-else-if="!user?.activeOrganizationId" class="organizations">
-        <div class="organization">
-          <h1>Select organization to begin</h1>
-          <div class="organizations-list">
-            <button
-              @click="selectOrganization(organization.id)"
-              v-for="organization in organizations"
-              :key="organization.id"
-              class="organization-item"
-              :disabled="selectActiveOrganizationPending"
-            >
-              <span class="organization-name">{{ organization.name }}</span>
-              <span v-if="organizationBeenSelected === organization.id" class="loading-icon">
-                <LoaderIcon :size="20" />
-              </span>
-            </button>
-          </div>
-        </div>
+      <div v-else-if="!user?.activeOrganizationId">
+        <NoActiveOrganization
+          v-if="organizations"
+          :organizations="organizations"
+        />
+
       </div>
       <div v-else>
         <div class="top-header">
@@ -138,56 +110,12 @@ watch(user, () => {
             Create
           </RouterLink>
         </div>
-        <section class="programs-section">
-          <p v-if="programsLoading">Loading programs...</p>
-          <p v-else-if="programsError">{{ programsError }}</p>
-          <div v-else-if="programs?.length === 0" class="no-programs">
-            <span v-if="user?.activeOrganizationId === user?.id"
-              >Create a program to get started</span
-            >
-            <span v-else
-              >You do not have access to any programs in this organization you were added to. Ask
-              the organization owner to add you to programs.</span
-            >
-          </div>
-          <div v-else class="programs-list">
-            <RouterLink
-              v-for="program in programs"
-              :key="program.id"
-              :to="LINKS.program(program.id)"
-              :style="{
-                '--color': program.color,
-                '--dark-color': getThemeColor(program.color).darkColor,
-                '--white-level': getThemeColor(program.color).whiteMixAmount + '%',
-              }"
-              class="program-item"
-            >
-              <div>
-                <span class="program-title">{{ program.title }}</span>
-                <span class="program-date">
-                  <ClockIcon :size="16" /> {{ format(program.date.toDate(), 'PP') }}</span
-                >
-              </div>
-              <div v-if="program.meta" class="progress">
-                <ve-progress
-                  :size="40"
-                  :progress="
-                    (program.meta.totalCompletedItems / (program.meta?.totalItems || 1)) * 100
-                  "
-                  :color="getThemeColor(program.color).darkColor"
-                  :empty-color="getThemeColor(program.color).emptyColor"
-                  :thickness="2"
-                >
-                  {{
-                    Math.round(
-                      (program.meta.totalCompletedItems / (program.meta.totalItems || 1)) * 100
-                    )
-                  }}%
-                </ve-progress>
-              </div>
-            </RouterLink>
-          </div>
-        </section>
+        <ProgramsSection
+          :programs="programs"
+          :loading="programsLoading"
+          :error="programsError"
+          :user="user"
+        />
       </div>
     </main>
   </Layout>
@@ -225,130 +153,5 @@ watch(user, () => {
   .create-link:active {
     background-color: #1d4ed8;
   }
-}
-
-.organizations {
-  padding: 1rem 2rem;
-
-  h1 {
-    text-transform: uppercase;
-    font-weight: 300;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .organizations-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-
-    .organization-item {
-      padding: 1rem;
-      font-size: 1rem;
-      font-weight: 500;
-      color: #1e293b;
-      background-color: #f8fafc;
-      border: 1px solid #d3d9e2;
-      border-radius: 6px;
-      transition: background-color 0.2s;
-      position: relative;
-
-      &:hover {
-        background-color: #e5e7eb;
-      }
-
-      &:active {
-        background-color: #d1d5db;
-      }
-
-      &:disabled .organization-name {
-        opacity: 0.1;
-      }
-
-      &:disabled .loading-icon {
-        display: block;
-      }
-
-      .loading-icon {
-        display: none;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 1;
-      }
-    }
-  }
-}
-
-.no-programs {
-  padding: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 8px;
-  background-color: #f8fafc;
-  border: 1px solid #d3d9e2;
-  margin: 2rem 0;
-}
-
-.programs-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-  margin: 1rem 0;
-  align-items: start;
-}
-
-.program-item {
-  padding: 12px 24px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #1e293b;
-  background-color: #f8fafc;
-  border: 1px solid color-mix(in srgb, var(--dark-color), white 60%);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  background-color: color-mix(in srgb, var(--color), white var(--white-level));
-  display: flex;
-  justify-content: space-between;
-
-  .progress {
-    position: relative;
-    font-size: 0.6rem;
-
-    .ep-legend--value {
-      height: unset;
-    }
-
-    .ve-progress__circle {
-      stroke-width: 6px !important;
-    }
-  }
-}
-
-.program-item:hover {
-  background-color: #e5e7eb;
-}
-
-.program-item:active {
-  background-color: #d1d5db;
-}
-
-.program-title {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #1e293b;
-}
-
-.program-date {
-  margin-top: 5px;
-  font-size: 0.8rem;
-  color: #64748b;
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-  font-weight: 300;
 }
 </style>
