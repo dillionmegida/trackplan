@@ -21,6 +21,7 @@ export const calculateProgramMeta = async (programId: string) => {
         totalItems,
         totalCompletedItems,
       },
+      updatedAt: new Date(),
     })
   } catch (error) {
     console.error('Error calculating program meta:', error)
