@@ -1,4 +1,4 @@
-function hexToRgb(hex) {
+function hexToRgb(hex: string) {
   hex = hex.replace(/^#/, '')
   if (hex.length === 3) {
     hex = hex

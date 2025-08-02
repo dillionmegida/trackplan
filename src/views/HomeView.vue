@@ -15,6 +15,7 @@ import { getIntensity, getWhiteMixAmount } from '@/utils/color'
 import InfoBlock from '@/components/InfoBlock.vue'
 import ClockIcon from '@/components/icons/ClockIcon.vue'
 import { QEURY_KEY } from '@/query/QueryKey'
+import { getThemeColor } from '@/helpers/themeColor'
 
 const router = useRouter()
 const userId = useAuthStore().user?.uid
@@ -156,8 +157,8 @@ watch(user, () => {
               :to="LINKS.program(program.id)"
               :style="{
                 '--color': program.color,
-                '--dark-color': getWhiteMixAmount(program.color) < 20 ? '#333' : program.color,
-                '--white-level': getWhiteMixAmount(program.color) + '%',
+                '--dark-color': getThemeColor(program.color).darkColor,
+                '--white-level': getThemeColor(program.color).whiteMixAmount + '%',
               }"
               class="program-item"
             >
@@ -173,8 +174,8 @@ watch(user, () => {
                   :progress="
                     (program.meta.totalCompletedItems / (program.meta?.totalItems || 1)) * 100
                   "
-                  :color="getIntensity(program.color) > 230 ? '#333' : program.color"
-                  :empty-color="getIntensity(program.color) < 20 ? '#000' : '#fff'"
+                  :color="getThemeColor(program.color).darkColor"
+                  :empty-color="getThemeColor(program.color).emptyColor"
                   :thickness="2"
                 >
                   {{

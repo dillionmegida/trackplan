@@ -7,6 +7,7 @@ import ClockIcon from '@/components/icons/ClockIcon.vue'
 import DemoLayout from '@/components/DemoLayout.vue'
 
 import { DEMO_PROGRAMS } from '@/constants/demoData'
+import { getThemeColor } from '@/helpers/themeColor'
 </script>
 
 
@@ -25,8 +26,8 @@ import { DEMO_PROGRAMS } from '@/constants/demoData'
               :to="LINKS.demo_program_details(program.id)"
               :style="{
                 '--color': program.color,
-                '--dark-color': program.color ? getWhiteMixAmount(program.color) < 20 ? '#333' : program.color : '#333',
-                '--white-level': program.color ? getWhiteMixAmount(program.color) + '%': '0%',
+                '--dark-color': getThemeColor(program.color).darkColor,
+                '--white-level': getThemeColor(program.color).whiteMixAmount + '%',
               }"
               class="program-item"
             >
@@ -42,8 +43,8 @@ import { DEMO_PROGRAMS } from '@/constants/demoData'
                   :progress="
                     (program.meta.totalCompletedItems / (program.meta?.totalItems || 1)) * 100
                   "
-                  :color="program.color ? getIntensity(program.color) > 230 ? '#333' : program.color : '#333'"
-                  :empty-color="program.color ? getIntensity(program.color) < 20 ? '#000' : '#fff' : '#fff'"
+                  :color="getThemeColor(program.color).darkColor"
+                  :empty-color="getThemeColor(program.color).darkColor"
                   :thickness="2"
                 >
                   {{

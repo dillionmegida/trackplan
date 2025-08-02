@@ -17,6 +17,7 @@ import type { ProgramChecklistItemType } from '@/types/ProgramChecklist'
 import ClockIcon from '@/components/icons/ClockIcon.vue'
 import { DEMO_PROGRAMS } from '@/constants/demoData'
 import type { Timestamp } from 'firebase/firestore'
+import { getThemeColor } from '@/helpers/themeColor'
 
 const route = useRoute()
 const programId = route.params.id as string
@@ -56,6 +57,10 @@ const addChecklist = (c: ProgramChecklistItemType) => {
 
   checklistsCopy.value.push(c)
 }
+
+const themeColor = computed(() => {
+  return getThemeColor(program.value?.color)
+})
 </script>
 
 <template>
@@ -64,18 +69,13 @@ const addChecklist = (c: ProgramChecklistItemType) => {
       <div>
         <div
           :style="{
-            '--color': program.color,
-            '--white-level': program.color ? getWhiteMixAmount(program.color) + '%' : '0%',
-            '--dark-color': program.color
-              ? getIntensity(program.color) > 20
-                ? program.color
-                : '#333'
-              : '#333',
+            '--color': themeColor.theme,
+            '--white-level': themeColor.whiteMixAmount + '%',
+            '--dark-color': themeColor.darkColor,
           }"
           class="program-content"
         >
           <div class="container">
-            
             <RouterLink class="back-link" :to="LINKS.demo">
               <BackIcon /> Back to Programs
             </RouterLink>
@@ -84,7 +84,10 @@ const addChecklist = (c: ProgramChecklistItemType) => {
                 <div class="title-block">
                   <h1>{{ program.title }}</h1>
                 </div>
-                <p class="program-date"><ClockIcon :size="18" /> {{ format(new Date(program.date._seconds * 1000), 'PP') }}</p>
+                <p class="program-date">
+                  <ClockIcon :size="18" />
+                  {{ format(new Date(program.date._seconds * 1000), 'PP') }}
+                </p>
                 <p class="creaed-by">created by {{ demoUser.name }}</p>
               </div>
               <div class="progress">
@@ -122,10 +125,10 @@ const addChecklist = (c: ProgramChecklistItemType) => {
           </div>
 
           <DemoChecklistsSection
-            :themeColor="program.color ? getIntensity(program.color) > 20 ? program.color : '#000' : '#000'"
+            :themeColor="getThemeColor(program.color).theme"
             :checklists="checklistsCopy"
             :categories="program.categories"
-            @update="(id,newValue) => updateChecklist(id, newValue)"
+            @update="(id, newValue) => updateChecklist(id, newValue)"
             @delete="deleteChecklist"
           />
           <div v-if="checklistsCopy.length === 0" class="no-checklists">

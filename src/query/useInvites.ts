@@ -18,7 +18,7 @@ import { CustomError } from '@/utils/error'
 import { checkIfDocExists } from '@/helpers/firebase'
 import type { OrganizationType } from '@/types/Organization'
 import type { UserType } from '@/types/User'
-import { addUserToOrganizationQueryData } from '@/helpers/setQueryDataOrganization'
+import { addUserToOrganizationQueryData } from '@/helpers/setQueryData/setQueryDataOrganization'
 
 export type InviteUserArgs = {
   email: string

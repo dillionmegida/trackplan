@@ -10,7 +10,7 @@ import { addPlural, snakeToWordCase } from '@/utils/string'
 const emit = defineEmits(['update', 'delete'])
 
 const props = defineProps<{
-  themeColor: 'string'
+  themeColor: string
   checklists: ProgramChecklistItemType[]
   categories: ProgramChecklistCategoryType[]
 }>()

@@ -5,7 +5,7 @@ import { useMutation } from '@tanstack/vue-query'
 import { toast } from 'vue3-toastify'
 import type { ProgramChecklistCategoryType } from '@/types/ProgramChecklist'
 import { QEURY_KEY } from './QueryKey'
-import { addCategoryToProgramQueryData, removeCategoryFromProgramQueryData } from '@/helpers/setQueryDataCategories'
+import { addCategoryToProgramQueryData, removeCategoryFromProgramQueryData } from '@/helpers/setQueryData/setQueryDataCategories'
 
 export const useProgramCategories = (programId: string) => {
   return useQuery({

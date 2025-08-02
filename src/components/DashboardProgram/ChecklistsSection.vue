@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
 import { useDeleteProgramChecklistItem } from '@/query/useProgramChecklists'
-import { computed } from 'vue'
+import { computed, reactive } from 'vue'
 import type { ProgramChecklistItemType } from '@/types/ProgramChecklist'
 import { addPlural, snakeToWordCase } from '@/utils/string'
 import { useUpdateProgramChecklistItem } from '@/query/useProgramChecklists'
@@ -12,6 +12,9 @@ import { onBeforeRouteLeave } from 'vue-router'
 import { queryClient } from '@/configs/react-query'
 import { QEURY_KEY } from '@/query/QueryKey'
 import type { ProgramChecklistCategoryType } from '@/types/ProgramChecklist'
+import { groupChecklists, throwIfChecklistItemNotFound } from '@/helpers/checklists'
+import DraggableChecklist from '@/helpers/draggableChecklist'
+import { throwIfNotLoggedIn } from '@/helpers/auth'
 
 const props = defineProps<{
   themeColor: string
@@ -37,46 +40,7 @@ onBeforeRouteLeave(() => {
 })
 
 const groupedChecklists = computed(() => {
-  const group: Record<
-    string,
-    {
-      unchecked: ProgramChecklistItemType[]
-      checked: ProgramChecklistItemType[]
-      id: string
-    }
-  > = {}
-
-  const categoryMap = new Map(categories.value.map((category) => [category.id, category.name]))
-
-  // Initialize with uncategorized
-  group['uncategorized'] = { unchecked: [], checked: [], id: 'uncategorized' }
-
-  // Initialize all categories from the categories list to maintain order
-  categories.value
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .forEach((category) => {
-      group[category.name] = { unchecked: [], checked: [], id: category.id }
-    })
-
-  // Group checklists into their categories
-  checklists.value?.forEach((checklist) => {
-    const categoryId = checklist.categoryId as string
-    const categoryName = categoryId
-      ? (categoryMap.get(categoryId) as string) || 'uncategorized'
-      : 'uncategorized'
-
-    if (!group[categoryName]) {
-      group[categoryName] = { unchecked: [], checked: [], id: categoryName }
-    }
-
-    if (checklist.isCompleted) {
-      group[categoryName].checked.push(checklist)
-    } else {
-      group[categoryName].unchecked.push(checklist)
-    }
-  })
-
-  return group
+  return groupChecklists(checklists.value, categories.value)
 })
 
 const showCompletedCategories = ref<string[]>([])
@@ -103,70 +67,45 @@ const { mutateAsync: updateChecklistMutation, isPending: updateChecklistPending 
 
 async function updateChecklist(checklistId: string, isCompleted: boolean) {
   somethingChanged.value = true // this is so that the query is invalidated when the user leaves the page
-  const targetChecklist = checklists.value?.find((checklist) => checklist.id === checklistId)
 
-  if (!auth.user) {
-    throw new Error('You are not logged in')
-  }
+  const authUser = throwIfNotLoggedIn()
 
-  if (!targetChecklist) {
-    throw new Error('Checklist item not found')
-  }
+  const targetChecklist = throwIfChecklistItemNotFound(checklists.value, checklistId)
 
   const checklistItemObj = {
     ...targetChecklist,
     isCompleted,
-    completedBy: auth.user.uid,
+    completedBy: authUser.uid,
   }
 
   await updateChecklistMutation({ programId, checklistId, checklistItemObj })
 }
 
-const dragging = ref(false)
-const dragOverCategory = ref<string | null>(null)
+const draggableChecklist = new DraggableChecklist('wrapper-')
 
 function dragStart(event: DragEvent) {
-  dragging.value = true
-  const target = event.target as HTMLElement
-
-  if (!target.id || !event.dataTransfer) return
-
-  event.dataTransfer.setData('text/plain', target.id.replace('wrapper-', ''))
-  event.dataTransfer.effectAllowed = 'move'
+  draggableChecklist.start(event)
 }
 
 function dragOver(event: DragEvent) {
-  event.preventDefault()
-  const target = event.target as HTMLElement
-
-  if (!target.id || !event.dataTransfer) return
-
-  dragOverCategory.value = target.id
-
-  event.dataTransfer.dropEffect = 'move'
+  draggableChecklist.over(event)
 }
 
 function dragend(event: DragEvent) {
-  dragging.value = false
-  dragOverCategory.value = null
+  draggableChecklist.end()
 }
 
 async function drop(category: string, event: DragEvent) {
-  if (!event.dataTransfer) return
+  const result = draggableChecklist.drop(event)
+  if (!result) return
+
+  const { checklistId } = result
 
   const categoryId = groupedChecklists.value[category].id
 
-  const checklistId = event.dataTransfer.getData('text/plain')
+  throwIfNotLoggedIn()
 
-  const targetChecklist = checklists.value?.find((checklist) => checklist.id === checklistId)
-
-  if (!auth.user) {
-    throw new Error('You are not logged in')
-  }
-
-  if (!targetChecklist) {
-    throw new Error('Checklist item not found')
-  }
+  const targetChecklist = throwIfChecklistItemNotFound(checklists.value, checklistId)
 
   const currentCategoryId = [null, 'uncategorized'].includes(targetChecklist.categoryId)
     ? 'uncategorized'
@@ -195,7 +134,7 @@ async function drop(category: string, event: DragEvent) {
       :class="
         'checklist-category' +
         (checklists.checked.length > 0 || checklists.unchecked.length > 0 ? '' : ' hidden') +
-        (dragOverCategory === category ? ' drag-over' : '')
+        (draggableChecklist.getDragOverCategory() === category ? ' drag-over' : '')
       "
     >
       <!-- v-if here is so that the category header is not displayed if there are no checklists in that category -->

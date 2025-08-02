@@ -30,7 +30,7 @@ import {
   getDocsData,
 } from '@/helpers/firebase'
 import { QEURY_KEY } from './QueryKey'
-import { addProgramToOrganizationQueryData, addProgramToTrashQueryData, deleteProgramQueryData, restoreProgramFromTrashQueryData, updateProgramQueryData } from '@/helpers/setQueryDataPrograms'
+import { addProgramToOrganizationQueryData, addProgramToTrashQueryData, deleteProgramQueryData, restoreProgramFromTrashQueryData, updateProgramQueryData } from '@/helpers/setQueryData/setQueryDataPrograms'
 
 export const useProgramsUserHasAccessTo = ({
   organizationId,

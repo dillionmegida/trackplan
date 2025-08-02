@@ -7,7 +7,7 @@ import { queryClient } from '@/configs/react-query'
 import { calculateProgramMeta } from '@/utils/programMeta'
 import { checkIfDocExists } from '@/helpers/firebase'
 import { QEURY_KEY } from './QueryKey'
-import { addItemToChecklistsQueryData, removeItemFromChecklistsQueryData, updateItemInChecklistsQueryData } from '@/helpers/setQueryDataChecklistItems'
+import { addItemToChecklistsQueryData, removeItemFromChecklistsQueryData, updateItemInChecklistsQueryData } from '@/helpers/setQueryData/setQueryDataChecklistItems'
 
 export const useProgramChecklists = (programId: string) => {
   return useQuery({

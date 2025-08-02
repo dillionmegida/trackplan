@@ -23,7 +23,7 @@ import { organizationLogger } from '@/services/logger/organizationLogger'
 import type { ProgramType } from '@/types/Program'
 import { checkIfDocExists } from '@/helpers/firebase'
 import { QEURY_KEY } from './QueryKey'
-import { removeUserFromOrganizationQueryData, updateOrganizationQueryData } from '@/helpers/setQueryDataOrganization'
+import { removeUserFromOrganizationQueryData, updateOrganizationQueryData } from '@/helpers/setQueryData/setQueryDataOrganization'
 
 export const useCreateOrganization = () => {
   return useMutation({
